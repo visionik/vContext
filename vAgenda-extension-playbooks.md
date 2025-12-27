@@ -79,7 +79,7 @@ The playbooks extension schema is provided at `schemas/vagenda-extension-playboo
 
 This extension adds two core concepts:
 - `Playbook`: a container for entries and summary metrics.
-- `PlaybookEntry`: an **append-only** entry in the playbook log (a create/update/deprecate event).
+- `PlaybookItem`: an **append-only** entry in the playbook log (a create/update/deprecate event).
 
 ### New Types (reference)
 
@@ -88,11 +88,11 @@ Playbook {
   version: number           # Playbook version (monotonic; increments on update)
   created: datetime         # When playbook was created
   updated: datetime         # Last update time
-  entries: PlaybookEntry[]  # Append-only log of playbook entries
+  items: PlaybookItem[]  # Append-only log of playbook entries
   metrics?: PlaybookMetrics # Optional summary stats
 }
 
-PlaybookEntry {
+PlaybookItem {
   eventId: string           # Unique ID for this event (append-only)
   targetId: string          # Stable ID for the logical entry being evolved
   operation: enum           # "initial" | "append" | "update" | "deprecate"
@@ -169,9 +169,9 @@ A `Playbook` is the long-lived container. It holds the entry list (`entries`) pl
 }
 ```
 
-### PlaybookEntry
+### PlaybookItem
 
-A `PlaybookEntry` is an **append-only event** in the playbook log.
+A `PlaybookItem` is an **append-only event** in the playbook log.
 
 Guidance:
 - Keep it to “one idea per logical entry” (one `targetId`).
@@ -279,9 +279,9 @@ Guidance:
 }
 ```
 
-### PlaybookEntry operations (event log)
+### PlaybookItem operations (event log)
 
-Playbook updates are represented by appending new `PlaybookEntry` objects to `playbook.entries`.
+Playbook updates are represented by appending new `PlaybookItem` objects to `playbook.entries`.
 
 #### initial / append
 
@@ -352,8 +352,8 @@ Soft-deprecate an entry (retain history).
 
 ## Playbook invariants (normative)
 
-- Tools MUST update playbooks by **appending** new `PlaybookEntry` events to `playbook.entries`.
-- `PlaybookEntry.targetId` MUST be stable once created.
+- Tools MUST update playbooks by **appending** new `PlaybookItem` events to `playbook.entries`.
+- `PlaybookItem.targetId` MUST be stable once created.
 - For a given `targetId`, updates MUST form a per-entry linked list via `prevEventId`.
   - `operation: "append"|"initial"` events MUST NOT set `prevEventId`.
   - `operation: "update"|"deprecate"` events MUST set `prevEventId`.
@@ -380,7 +380,7 @@ Deprecation events SHOULD win over an `active` status unless explicitly reactiva
 
 ## Best practices
 
-- Prefer **append-only** updates (add a new `PlaybookEntry` event) over rewriting `playbook.entries` wholesale.
+- Prefer **append-only** updates (add a new `PlaybookItem` event) over rewriting `playbook.entries` wholesale.
 - Keep entries **atomic** (one idea per entry) to make merge/dedup easier.
 - Add **evidence** as soon as you have it (links to PRs, traces, changeLog entries, benchmark results).
 - When revising an entry substantially, create a successor entry and connect them via `supersedes/supersededBy` rather than silently editing history.
@@ -400,7 +400,7 @@ class Plan: id, title, status, narratives, playbook
 class Narrative: title, content
 class Playbook: version, created, updated, entries, metrics
 class PlaybookMetrics: totalEntries, averageConfidence, lastUpdated
-class PlaybookEntry:
+class PlaybookItem:
   eventId, targetId, operation, prevEventId,
   kind, title, text, tags, evidence, confidence,
   delta, feedbackType, createdAt,
@@ -423,7 +423,7 @@ plan: Plan(
     "2025-01-10T18:00:00Z",
     "2025-12-27T08:00:00Z",
     [
-      PlaybookEntry(
+      PlaybookItem(
         "evt-0001",
         "entry-task-first",
         "append",
@@ -444,7 +444,7 @@ plan: Plan(
         null,
         "Standardize workflow in this repo"
       ),
-      PlaybookEntry(
+      PlaybookItem(
         "evt-0002",
         "entry-task-first",
         "update",

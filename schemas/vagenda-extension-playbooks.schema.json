@@ -2,26 +2,26 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://vagenda.dev/schemas/vagenda-extension-playbooks.schema.json",
   "title": "vAgenda Extension Schema: Playbooks",
-  "description": "JSON Schema for vAgenda Playbooks extension types (v0.2 extension).",
+  "description": "JSON Schema for vAgenda Playbooks extension types (v0.3 extension).",
   "type": "object",
   "additionalProperties": true,
   "$defs": {
     "Playbook": {
       "type": "object",
-      "required": ["version", "created", "updated", "entries"],
+      "required": ["version", "created", "updated", "items"],
       "properties": {
         "version": {"type": "integer", "minimum": 0},
         "created": {"$ref": "./vagenda-core.schema.json#/$defs/dateTime"},
         "updated": {"$ref": "./vagenda-core.schema.json#/$defs/dateTime"},
-        "entries": {
+        "items": {
           "type": "array",
-          "items": {"$ref": "#/$defs/PlaybookEntry"}
+          "items": {"$ref": "#/$defs/PlaybookItem"}
         },
         "metrics": {"$ref": "#/$defs/PlaybookMetrics"}
       },
       "additionalProperties": true
     },
-    "PlaybookEntry": {
+    "PlaybookItem": {
       "type": "object",
       "required": ["eventId", "targetId", "operation", "createdAt"],
       "properties": {

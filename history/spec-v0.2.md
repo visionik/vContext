@@ -1,4 +1,4 @@
-# vAgenda Specification v0.3
+# vAgenda Specification v0.2
 
 > **DRAFT SPECIFICATION**: This document is a draft and subject to change. Feedback, suggestions, and contributions from the community are highly encouraged. Please submit input via GitHub issues or pull requests.
 
@@ -17,27 +17,11 @@ This enables both agentic systems and human-facing tools to share a common repre
 - The design is inspired by established standards such as vCard and vCalendar/iCalendar
 - While primarily intended for agentic coding, the spec is secondarily usable as an interop format for almost any todo, task, or project management software
 
-**Specification Version**: 0.3
+**Specification Version**: 0.2
 
-**Last Updated**: 2025-12-27T19:16:00Z
+**Last Updated**: 2025-12-27T02:38:00Z
 
 **Author**: Jonathan Taylor (visionik@pobox.com)
-
-## Changelog: v0.2 → v0.3
-
-**Breaking Changes**:
-- **Phase → PlanItem**: Renamed `Phase` to `PlanItem` to follow `<Container>Item` naming convention
-- **plan.phases → plan.items**: Plans now use `items` field (was `phases`) to contain PlanItem[]
-- **phase.subPhases → planItem.subItems**: Nested items use `subItems` field (was `subPhases`)
-- **PlaybookEntry → PlaybookItem**: Renamed `PlaybookEntry` to `PlaybookItem` for consistency
-- **playbook.entries → playbook.items**: Playbooks now use `items` field (was `entries`) to contain PlaybookItem[]
-
-**New Features**:
-- **Item abstract base**: Added `Item` as abstract base class for all contained entities (TodoItem, PlanItem, PlaybookItem)
-- **Tagged atomic**: Added universal `tags` field to Extension 3 - ALL entities (TodoList, TodoItem, Plan, PlanItem, Playbook, PlaybookItem) can now be tagged
-- **Unified container pattern**: All containers (TodoList, Plan, Playbook) now consistently use `.items` field
-
-**Migration**: See `history/spec-v0.2.md` for previous version. Migration tools provided in atomic-classes-proposal.md.
 
 ## Conformance and normative language
 
@@ -158,8 +142,7 @@ items: [
 │  └─────────────── ──────────────┘   │
 ├─────────────────────────────────────┤
 │   Core (MVA)                        │
-│   Item, TodoList, TodoItem,         │
-│   Plan, PlanItem                    │
+│   TodoList, TodoItem, Plan, Phase   │
 └─────────────────────────────────────┘
 ```
 
@@ -215,33 +198,6 @@ vAgendaInfo {
 }
 ```
 
-### Item (Core Abstract Base)
-
-**Purpose**: Abstract base class for all contained entities (TodoItem, PlanItem, PlaybookItem). Provides the fundamental pattern for discrete, actionable units within collections.
-
-```javascript
-Item {
-  title: string            # Brief summary (required)
-  status: enum             # Lifecycle status (required)
-}
-```
-
-**Rationale**: TodoItem, PlanItem (formerly Phase), and PlaybookItem (formerly PlaybookEntry) share a common "contained item" pattern:
-- They are discrete, actionable or knowledge units
-- They exist within parent containers (TodoList, Plan, Playbook)
-- They ALL have `title` and `status` (core requirements)
-- They can be independently referenced when Identifiable (Extension 2)
-
-**Naming convention**: Concrete types follow `<Container>Item` pattern:
-- TodoList → contains → **TodoItem**
-- Plan → contains → **PlanItem** (renamed from Phase)
-- Playbook → contains → **PlaybookItem** (renamed from PlaybookEntry)
-
-**Status enums by type**:
-- TodoItem/PlanItem: `"pending" | "inProgress" | "completed" | "blocked" | "cancelled"`
-- Plan: `"draft" | "proposed" | "approved" | "inProgress" | "completed" | "cancelled"`
-- PlaybookItem: `"active" | "deprecated" | "quarantined"`
-
 ### TodoList (Core)
 
 **Purpose**: A collection of actionable work items for **short-term memory**. Used by agents and humans to track immediate tasks, subtasks, and tactical execution.
@@ -277,18 +233,16 @@ Plan {
 }
 ```
 
-### PlanItem (Core)
+### Phase (Core)
 
-**Purpose**: A stage of work within a plan (formerly called Phase). PlanItems organize execution into ordered steps and can be nested hierarchically (with extensions). Each item can have its own status and todo list. Execution order is determined by array position.
+**Purpose**: A stage of work within a plan. Phases organize execution into ordered steps and can be nested hierarchically (with extensions). Each phase can have its own status and todo list. Execution order is determined by array position.
 
 ```javascript
-PlanItem {
-  title: string           # Item name
+Phase {
+  title: string           # Phase name
   status: enum            # "pending" | "inProgress" | "completed" | "blocked" | "cancelled"
 }
 ```
-
-**Note**: PlanItem extends the abstract `Item` base class (title + status required).
 
 ### Narrative (Core)
 
@@ -344,8 +298,8 @@ todoList: TodoList([
 **TRON:**
 ```tron
 class vAgendaInfo: version
-class Plan: title, status, narratives, items
-class PlanItem: title, status
+class Plan: title, status, narratives, phases
+class Phase: title, status
 class Narrative: title, content
 
 vAgendaInfo: vAgendaInfo("0.2")
@@ -359,8 +313,8 @@ plan: Plan(
     )
   },
   [
-    PlanItem("Database schema", "completed"),
-    PlanItem("JWT implementation", "pending")
+    Phase("Database schema", "completed"),
+    Phase("JWT implementation", "pending")
   ]
 )
 ```
@@ -380,7 +334,7 @@ plan: Plan(
         "content": "Implement JWT-based authentication with refresh tokens"
       }
     },
-    "items": [
+    "phases": [
       {
         "title": "Database schema",
         "status": "completed"
@@ -521,9 +475,9 @@ Plan {
 }
 ```
 
-### PlanItem Extensions
+### Phase Extensions
 ```javascript
-PlanItem {
+Phase {
   // Core fields...
   id: string              # Unique identifier within plan
 }
@@ -577,15 +531,12 @@ todoList: TodoList(
 
 Adds descriptive and organizational fields.
 
-**Key atomic: Tagged** - The `tags` field can be added to ALL vAgenda entities (TodoList, TodoItem, Plan, PlanItem, Playbook, PlaybookItem, ProblemModel) for categorization and filtering. Tags enable flexible organization without rigid taxonomies.
-
 ### TodoList Extensions
 ```javascript
 TodoList {
   // Core fields...
   title?: string           # Optional list title
   description?: string     # Detailed description
-  tags?: string[]          # Categorical labels
   metadata?: object        # Custom fields
 }
 ```
@@ -608,7 +559,6 @@ Plan {
   author?: string          # Creator
   reviewers?: string[]     # Approvers
   description?: string     # Plan overview
-  tags?: string[]          # Categorical labels
   narratives: {
     proposal: Narrative,
     problem?: Narrative,     # Problem statement
@@ -623,12 +573,11 @@ Plan {
 }
 ```
 
-### PlanItem Extensions
+### Phase Extensions
 ```javascript
-PlanItem {
+Phase {
   // Core fields...
-  description?: string     # Item description
-  tags?: string[]          # Categorical labels
+  description?: string     # Phase description
   metadata?: object        # Custom fields
 }
 ```
@@ -684,16 +633,16 @@ TodoItem {
 ```javascript
 Plan {
   // Core + Rich Metadata fields...
-  items?: PlanItem[]         # Implementation phases
+  phases?: Phase[]         # Implementation phases
 }
 ```
 
-### PlanItem Extensions
+### Phase Extensions
 ```javascript
-PlanItem {
+Phase {
   // Core + Rich Metadata fields...
   dependencies?: string[] # IDs of phases that must complete first
-  subItems?: PlanItem[]     # Child phases (nested hierarchy)
+  subPhases?: Phase[]     # Child phases (nested hierarchy)
   todoList?: TodoList     # Associated todo list
 }
 ```
@@ -705,7 +654,7 @@ PlanItem {
 class vAgendaInfo: version
 class TodoItem: id, title, status, dependencies
 class Plan: id, title, status, narratives, phases
-class PlanItem: id, title, status, dependencies
+class Phase: id, title, status, dependencies
 class Narrative: title, content
 
 vAgendaInfo: vAgendaInfo("0.2")
@@ -720,9 +669,9 @@ plan: Plan(
     )
   },
   [
-    PlanItem("phase-1", "Database setup", "completed", []),
-    PlanItem("phase-2", "JWT implementation", "inProgress", ["phase-1"]),
-    PlanItem("phase-3", "OAuth integration", "pending", ["phase-2"])
+    Phase("phase-1", "Database setup", "completed", []),
+    Phase("phase-2", "JWT implementation", "inProgress", ["phase-1"]),
+    Phase("phase-3", "OAuth integration", "pending", ["phase-2"])
   ]
 )
 ```
@@ -783,9 +732,9 @@ TodoItem {
 }
 ```
 
-### PlanItem Extensions
+### Phase Extensions
 ```javascript
-PlanItem {
+Phase {
   // Prior extensions...
   startDate?: datetime    # Planned or actual start
   endDate?: datetime      # Planned or actual end
@@ -850,9 +799,9 @@ TodoItem {
 }
 ```
 
-### PlanItem Extensions
+### Phase Extensions
 ```javascript
-PlanItem {
+Phase {
   // Prior extensions...
   participants?: Participant[] # People involved with roles
 }
@@ -953,9 +902,9 @@ TodoItem {
 }
 ```
 
-### PlanItem Extensions
+### Phase Extensions
 ```javascript
-PlanItem {
+Phase {
   // Prior extensions...
   location?: Location     # Physical location for work
   uris?: URI[]            # Associated URIs
@@ -1046,9 +995,9 @@ TodoItem {
 }
 ```
 
-### PlanItem Extensions
+### Phase Extensions
 ```javascript
-PlanItem {
+Phase {
   // Prior extensions...
   reminders?: Reminder[]  # Notifications for phase milestones
 }
@@ -1116,9 +1065,9 @@ TodoItem {
 }
 ```
 
-### PlanItem Extensions
+### Phase Extensions
 ```javascript
-PlanItem {
+Phase {
   // Prior extensions...
   classification?: enum   # "public" | "private" | "confidential"
 }
@@ -1214,9 +1163,9 @@ Plan {
 }
 ```
 
-### PlanItem Extensions
+### Phase Extensions
 ```javascript
-PlanItem {
+Phase {
   // Prior extensions...
   uid?: string            # Globally unique identifier
   sequence?: number       # Revision counter
@@ -1380,9 +1329,9 @@ Plan {
 }
 ```
 
-### PlanItem Extensions
+### Phase Extensions
 ```javascript
-PlanItem {
+Phase {
   // Prior extensions...
   lockedBy?: Lock         # If claimed by an agent
 }
@@ -1481,7 +1430,7 @@ class TodoItem: title, status
 class Plan: title, status, narratives
 
 # Phase (Core)
-class PlanItem: title, status
+class Phase: title, status
 
 # Narrative (Core)
 class Narrative: title, content
