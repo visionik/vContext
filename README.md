@@ -1606,6 +1606,68 @@ Implementations define only the classes for extensions they support.
 7. **Metadata Escape Hatch**: Use `metadata` for one-off custom fields
 8. **Version Field**: Include schema version to track core + extension compatibility
 
+## File naming conventions
+
+- TodoLists: `todo-<identifier>.<format>` or `<name>-todo.<format>`
+  - Examples: `todo-001.json`, `auth-feature-todo.tron`
+- Plans: `plan-<identifier>.<format>` or `<name>-plan.<format>`
+  - Examples: `plan-001.json`, `microservices-plan.tron`
+- Prefer hyphens (not underscores) in filenames.
+
+## Status transitions
+
+These are the intended lifecycles; tools should avoid inventing additional statuses.
+
+### TodoItem status flow
+
+```
+pending → inProgress → completed
+    ↓          ↓            ↓
+  blocked → cancelled    (terminal)
+    ↓
+  pending (after unblock)
+```
+
+### Plan status flow
+
+```
+draft → proposed → approved → inProgress → completed
+   ↓        ↓          ↓           ↓            ↓
+        cancelled (any stage)                (terminal)
+```
+
+## Versioning & migrations
+
+When the spec changes:
+- Increment **major** version for breaking changes.
+- Increment **minor** version for backward-compatible additions.
+
+Implementation guidance:
+- Tools should handle unknown fields gracefully.
+- Tools should preserve unknown fields during updates (don’t drop extension data).
+- Provide migration utilities for version upgrades where possible.
+
+## Tooling integration
+
+### For agentic development environments
+
+Tools should:
+- Read and write both JSON and TRON formats.
+- Validate against `vAgendaInfo.version`.
+- Preserve unknown fields during updates.
+- Generate unique IDs (UUIDs or similar) when using identifiers.
+- Update timestamps automatically when timestamp fields are present.
+- Support partial updates (patching) where possible.
+
+### For human workflows
+
+Editors should:
+- Syntax highlight both formats.
+- Validate on save.
+- Provide templates/snippets for new documents.
+- Support format conversion (JSON ↔ TRON).
+- Show warnings for missing required fields.
+
 ## Extension-Specific Best Practices
 
 ### Rich Metadata
