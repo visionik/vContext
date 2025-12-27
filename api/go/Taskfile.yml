@@ -80,9 +80,13 @@ tasks:
 
   run:example:
     desc: Run the basic example
-    dir: examples/basic
     cmds:
-      - go run main.go
+      - go run examples/basic/main.go
+
+  run:mutations:
+    desc: Run the mutations example
+    cmds:
+      - go run examples/mutations/main.go
 
   clean:
     desc: Clean build artifacts and coverage files

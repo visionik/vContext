@@ -49,6 +49,11 @@ func NewValidator() Validator {
 	return &validator{}
 }
 
+// New is an alias for NewValidator for convenience.
+func New() Validator {
+	return NewValidator()
+}
+
 // Validate checks if a document is valid.
 func (v *validator) Validate(doc *core.Document) error {
 	var errors ValidationErrors

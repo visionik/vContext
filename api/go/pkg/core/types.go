@@ -1,6 +1,20 @@
 // Package core provides the core types and interfaces for vAgenda documents.
 package core
 
+import "errors"
+
+// Common errors for document operations.
+var (
+	// ErrInvalidIndex is returned when an index is out of bounds.
+	ErrInvalidIndex = errors.New("invalid index")
+	// ErrNarrativeNotFound is returned when a narrative key is not found.
+	ErrNarrativeNotFound = errors.New("narrative not found")
+	// ErrNoPlan is returned when attempting a Plan operation on a document without a Plan.
+	ErrNoPlan = errors.New("document does not contain a plan")
+	// ErrNoTodoList is returned when attempting a TodoList operation on a document without a TodoList.
+	ErrNoTodoList = errors.New("document does not contain a todoList")
+)
+
 // Document represents the root vAgenda document.
 // A document contains metadata and either a TodoList or a Plan (but not both).
 type Document struct {
@@ -128,4 +142,88 @@ func (s PhaseStatus) IsValid() bool {
 type Narrative struct {
 	Title   string `json:"title" tron:"title"`
 	Content string `json:"content" tron:"content"`
+}
+
+// TodoList mutation methods
+
+// AddItem adds an item to the TodoList.
+func (tl *TodoList) AddItem(item TodoItem) {
+	tl.Items = append(tl.Items, item)
+}
+
+// RemoveItem removes an item at the specified index.
+func (tl *TodoList) RemoveItem(index int) error {
+	if index < 0 || index >= len(tl.Items) {
+		return ErrInvalidIndex
+	}
+	tl.Items = append(tl.Items[:index], tl.Items[index+1:]...)
+	return nil
+}
+
+// UpdateItem applies updates to an item at the specified index.
+func (tl *TodoList) UpdateItem(index int, updates func(*TodoItem)) error {
+	if index < 0 || index >= len(tl.Items) {
+		return ErrInvalidIndex
+	}
+	updates(&tl.Items[index])
+	return nil
+}
+
+// FindItem returns the first item matching the predicate.
+func (tl *TodoList) FindItem(predicate func(*TodoItem) bool) *TodoItem {
+	for i := range tl.Items {
+		if predicate(&tl.Items[i]) {
+			return &tl.Items[i]
+		}
+	}
+	return nil
+}
+
+// Plan mutation methods
+
+// AddNarrative adds or updates a narrative in the Plan.
+func (p *Plan) AddNarrative(key string, narrative Narrative) {
+	if p.Narratives == nil {
+		p.Narratives = make(map[string]Narrative)
+	}
+	p.Narratives[key] = narrative
+}
+
+// RemoveNarrative removes a narrative from the Plan.
+func (p *Plan) RemoveNarrative(key string) {
+	delete(p.Narratives, key)
+}
+
+// UpdateNarrative applies updates to a narrative.
+func (p *Plan) UpdateNarrative(key string, updates func(*Narrative)) error {
+	narrative, exists := p.Narratives[key]
+	if !exists {
+		return ErrNarrativeNotFound
+	}
+	updates(&narrative)
+	p.Narratives[key] = narrative
+	return nil
+}
+
+// AddPhase adds a phase to the Plan.
+func (p *Plan) AddPhase(phase Phase) {
+	p.Phases = append(p.Phases, phase)
+}
+
+// RemovePhase removes a phase at the specified index.
+func (p *Plan) RemovePhase(index int) error {
+	if index < 0 || index >= len(p.Phases) {
+		return ErrInvalidIndex
+	}
+	p.Phases = append(p.Phases[:index], p.Phases[index+1:]...)
+	return nil
+}
+
+// UpdatePhase applies updates to a phase at the specified index.
+func (p *Plan) UpdatePhase(index int, updates func(*Phase)) error {
+	if index < 0 || index >= len(p.Phases) {
+		return ErrInvalidIndex
+	}
+	updates(&p.Phases[index])
+	return nil
 }

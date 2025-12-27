@@ -109,6 +109,7 @@ github.com/visionik/vAgenda/api/go/
 │   ├── builder/        # Fluent builders
 │   ├── validator/      # Schema validation
 │   ├── query/          # Query/filter interfaces
+│   ├── updater/        # Validated mutations
 │   └── convert/        # Format conversion
 ├── examples/           # Usage examples
 └── cmd/va/            # CLI tool (coming soon)
@@ -204,16 +205,68 @@ validator.NewValidator() Validator
   .ValidateCore(doc *core.Document) error
 ```
 
+### Mutation API
+
+The library provides two approaches for modifying documents:
+
+#### 1. Direct Mutations
+
+Methods directly on `TodoList` and `Plan` types:
+
+```go
+// TodoList mutations
+todoList.AddItem(item TodoItem)
+todoList.RemoveItem(index int) error
+todoList.UpdateItem(index int, updates func(*TodoItem)) error
+todoList.FindItem(predicate func(*TodoItem) bool) *TodoItem
+
+// Plan mutations
+plan.AddNarrative(key string, narrative Narrative)
+plan.RemoveNarrative(key string)
+plan.UpdateNarrative(key string, updates func(*Narrative)) error
+plan.AddPhase(phase Phase)
+plan.RemovePhase(index int) error
+plan.UpdatePhase(index int, updates func(*Phase)) error
+```
+
+#### 2. Validated Mutations (Updater)
+
+The `updater` package provides validated mutations that ensure the document remains valid:
+
+```go
+import "github.com/visionik/vAgenda/api/go/pkg/updater"
+
+// Create updater
+upd := updater.New(nil) // Uses default validator
+
+// TodoList operations
+err := upd.AddTodoItem(doc, core.TodoItem{...})
+err := upd.RemoveTodoItem(doc, index)
+err := upd.UpdateTodoItem(doc, index, func(item *core.TodoItem) {...})
+
+// Plan operations
+err := upd.AddPlanNarrative(doc, key, narrative)
+err := upd.RemovePlanNarrative(doc, key)
+err := upd.UpdatePlanNarrative(doc, key, func(n *core.Narrative) {...})
+err := upd.AddPlanPhase(doc, phase)
+err := upd.RemovePlanPhase(doc, index)
+err := upd.UpdatePlanPhase(doc, index, func(p *core.Phase) {...})
+```
+
 ## Examples
 
 See the [examples](./examples) directory for complete working examples:
 
 - `examples/basic/` - Basic usage demonstrating all features
+- `examples/mutations/` - Document mutation operations
 
 To run the examples:
 
 ```bash
 cd examples/basic
+go run main.go
+
+cd examples/mutations
 go run main.go
 ```
 
