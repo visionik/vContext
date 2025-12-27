@@ -1,10 +1,10 @@
 # vAgenda Extension: Experimental Workflows
 
-> **DRAFT EXTENSION**: This document is a draft and subject to change.
-
 **Extension Name**: Experimental Workflows
 
-**Extension Version**: 0.1
+**Version**: 0.2
+
+**Status**: Draft
 
 **Last Updated**: 2025-12-27
 
@@ -58,7 +58,14 @@ Experiment {
   methodology: string      # How we'll test it
   expectedOutcome: string  # Predicted result
   actualOutcome?: string   # What actually happened
-  measurements?: Measurement[]  # Quantitative results
+  measurements?: {         # Quantitative results (inline)
+    metric: string         # What was measured (e.g., "latency", "accuracy")
+    value: number          # Measured value
+    unit?: string          # Unit of measurement
+    baseline?: number      # Comparison baseline
+    timestamp?: datetime   # When measured
+    context?: string       # Conditions during measurement
+  }[]
   confidence?: number      # 0-100: confidence in conclusions
   conclusion?: string      # Interpretation and next steps
   status: enum             # "planned" | "running" | "completed" | "failed" | "invalidated"
@@ -67,31 +74,20 @@ Experiment {
   metadata?: object        # Extension fields
 }
 
-Measurement {
-  metric: string           # What was measured (e.g., "latency", "accuracy", "throughput")
-  value: number            # Measured value
-  unit?: string            # Unit of measurement
-  baseline?: number        # Comparison baseline
-  timestamp?: datetime     # When measured
-  context?: string         # Conditions during measurement
-}
-
 Critique {
   author?: string          # Who performed the critique
   timestamp?: datetime     # When critique was performed
   scope: enum              # "technical" | "security" | "performance" | "usability" | "completeness"
-  findings: Finding[]      # Identified issues or improvements
+  findings: {              # Identified issues or improvements (inline)
+    severity: enum         # "critical" | "major" | "minor" | "suggestion"
+    category: string       # Type of finding (e.g., "security", "performance")
+    description: string    # What was found
+    location?: string      # Where the issue exists (file, line, component)
+    recommendation?: string # How to address it
+    status?: enum          # "open" | "resolved" | "wont-fix" | "deferred"
+  }[]
   overallAssessment?: string  # Summary judgment
   recommendations?: string[]  # Suggested next steps
-}
-
-Finding {
-  severity: enum           # "critical" | "major" | "minor" | "suggestion"
-  category: string         # Type of finding (e.g., "security", "performance")
-  description: string      # What was found
-  location?: string        # Where the issue exists (file, line, component)
-  recommendation?: string  # How to address it
-  status?: enum            # "open" | "resolved" | "wont-fix" | "deferred"
 }
 ```
 
@@ -584,9 +580,26 @@ Experiment(
 )
 ```
 
+## Integration with Other Extensions
+
+### Agentic Patterns Extension
+- Experiments map to the **reflection** pattern (hypothesis → test → reflect → adapt)
+- Constraints guide the **planning** pattern
+- Critiques enable the **reflection** pattern's self-assessment
+
+### Model-First Reasoning Extension
+- Constraints can map to MFR's `Constraint` type in `problemModel`
+- Experiments validate problem model assumptions
+- Both extensions support hypothesis-driven work
+
+### Playbooks Extension
+- Experimental outcomes feed PlaybookItems as evidence
+- Successful constraint patterns become reusable strategies
+- Critique findings inform anti-patterns in playbooks
+
 ## Compatibility
 
-This extension is fully backward compatible with core vAgenda. Documents without experimental workflow fields remain valid.
+This extension is fully backward compatible with core vAgenda v0.3. Documents without experimental workflow fields remain valid.
 
 Tools that don't understand this extension should:
 - Ignore `constraints`, `experiments`, and `critique` fields
@@ -605,7 +618,32 @@ Potential future additions:
 
 ---
 
-**References:**
-- Based on insights from LLM prompting best practices regarding constraint stacks and iterative refinement
-- Complements vAgenda Extension: Playbooks for capturing experimental learnings
-- Integrates with Extension 7 (Resources & References) for linking to evidence
+## References
+
+- **vAgenda Core Specification v0.3**: README.md
+- **Extension 3 (Rich Metadata)**: README.md#extension-3-rich-metadata
+- **Extension 7 (Resources & References)**: README.md#extension-7-resources-references
+- **Extension 12 (Playbooks)**: vAgenda-extension-playbooks.md
+- **Agentic Patterns Extension**: vAgenda-extension-agentic-patterns.md
+- **Model-First Reasoning Extension**: vAgenda-extension-model-first-reasoning.md
+
+---
+
+## License
+
+This specification is released under CC BY 4.0.
+
+---
+
+## Changelog
+
+### Version 0.2 (2025-12-27)
+- Updated to vAgenda v0.3 terminology
+- Embedded `Measurement` as inline object in `Experiment` (not separate type)
+- Embedded `Finding` as inline object in `Critique` (not separate type)
+- Added integration section showing relationship to Agentic Patterns, MFR, and Playbooks
+- Minor clarifications to examples and best practices
+
+### Version 0.1 (2025-12-27)
+- Initial draft
+- Separate Measurement and Finding types
