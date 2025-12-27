@@ -42,7 +42,7 @@ This extension defines how vAgenda documents are exposed as MCP resources and ho
 - Extension 1 (Timestamps) - track when MCP operations occurred
 - Extension 10 (Version Control) - change tracking and conflict resolution
 - Extension 11 (Multi-Agent Forking) - concurrent modification handling
-- Extension 12 (ACE) - long-term memory access via MCP
+- Extension 12 (Playbooks) - long-term memory access via MCP
 
 ## MCP Resources
 
@@ -56,7 +56,7 @@ vagenda://todos/current              # Current TodoList
 vagenda://todos/{id}                 # Specific TodoList by ID
 vagenda://plans/current              # Current Plan
 vagenda://plans/{id}                 # Specific Plan by ID
-vagenda://playbook                   # Project ACE playbook
+vagenda://playbook                   # Project playbook
 vagenda://playbook/{category}        # Playbook section (strategies, decisions, etc.)
 
 // Collection resources
@@ -101,7 +101,7 @@ interface VAgendaResource {
     {
       "uri": "vagenda://playbook",
       "name": "Project Playbook",
-      "description": "Accumulated learnings (ACE)",
+      "description": "Accumulated learnings (playbook)",
       "mimeType": "text/x-tron"
     }
   ]
@@ -199,7 +199,7 @@ vagenda_update_phase({
   status?: PhaseStatus
 })
 
-// Add learning to ACE playbook
+// Add learning to playbook
 vagenda_add_learning({
   category: string,                # "strategies" | "decisions" | "patterns" | "gotchas"
   title: string,
@@ -1003,9 +1003,9 @@ When multiple agents access vAgenda via MCP:
 - MCP tools for creating/merging forks
 - Notification mechanism for fork events
 
-### Extension 12 (ACE - Accumulated Context Encoding)
+### Extension 12 (Playbooks)
 
-MCP makes ACE playbooks accessible:
+MCP makes playbooks accessible:
 - `vagenda://playbook` resource for reading learnings
 - `vagenda_add_learning` tool for accumulating knowledge
 - `vagenda_query_playbook` tool for semantic search
@@ -1153,7 +1153,7 @@ MCP makes ACE playbooks accessible:
 ```json
 {
   "name": "vagenda_add_learning",
-  "description": "Add a learning to the ACE playbook (requires Extension 12)",
+  "description": "Add a learning to the playbook (requires Extension 12)",
   "inputSchema": {
     "type": "object",
     "properties": {
@@ -1190,7 +1190,7 @@ MCP makes ACE playbooks accessible:
 ```json
 {
   "name": "vagenda_query_playbook",
-  "description": "Search the ACE playbook for relevant learnings (requires Extension 12)",
+  "description": "Search the playbook for relevant learnings (requires Extension 12)",
   "inputSchema": {
     "type": "object",
     "properties": {

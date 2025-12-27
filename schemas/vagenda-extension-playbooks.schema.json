@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://vagenda.dev/schemas/vagenda-extension-ace.schema.json",
-  "title": "vAgenda Extension Schema: ACE",
-  "description": "JSON Schema for vAgenda ACE extension types (v0.2 extension).",
+  "$id": "https://vagenda.dev/schemas/vagenda-extension-playbooks.schema.json",
+  "title": "vAgenda Extension Schema: Playbooks",
+  "description": "JSON Schema for vAgenda Playbooks extension types (v0.2 extension).",
   "type": "object",
   "additionalProperties": true,
   "$defs": {

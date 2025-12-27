@@ -112,7 +112,7 @@ tools: [
   },
   {
     name: "vagenda_add_learning",
-    description: "Add learning to ACE playbook",
+    description: "Add learning to playbook",
     inputSchema: { /* JSON schema */ }
   }
 ]

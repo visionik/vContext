@@ -26,7 +26,7 @@ This extension enables bidirectional interoperability between vAgenda and Beads.
 **vAgenda strengths**:
 - Standardized format for cross-system interop
 - Rich narratives for plans (the "why" and "how")
-- Long-term memory via ACE playbooks
+- Long-term memory via playbooks
 - Token-efficient TRON encoding
 - Separation of short/medium/long-term memory
 
@@ -40,7 +40,7 @@ This extension enables bidirectional interoperability between vAgenda and Beads.
 
 **Recommended**:
 - Extension 10 (Version Control & Sync) - for change tracking
-- Extension 12 (ACE) - for accumulating learnings
+- Extension 12 (Playbooks) - for accumulating learnings
 
 ## New Fields
 
@@ -113,7 +113,7 @@ cancelled         →  closed (with note)
 Plans don't map directly to Beads but provide **context**:
 - Plan narratives become AGENTS.md instructions
 - Plan phases become milestone-tagged beads
-- Plan learnings feed ACE playbooks
+- Plan learnings feed playbooks
 
 ## Usage Patterns
 
@@ -151,16 +151,16 @@ bd export --format=vagenda --closed-since=7d > week-retro.tron
 # This becomes a Plan with:
 # - Narrative documenting what was accomplished
 # - Reflections on what worked/didn't
-# - Feeds into ACE playbook for future projects
+# - Feeds into playbooks for future projects
 ```
 
 ### Pattern 3: Multi-Project Learning
 
-**ACE playbook accumulation**:
+**Playbook accumulation**:
 ```
-Project A (beads) → vAgenda Plan + ACE
-Project B (beads) → vAgenda Plan + ACE
-Project C (beads) → vAgenda Plan + ACE
+Project A (beads) → vAgenda Plan + Playbooks
+Project B (beads) → vAgenda Plan + Playbooks
+Project C (beads) → vAgenda Plan + Playbooks
                           ↓
             Accumulated strategies/learnings
             persist across all projects
@@ -218,10 +218,10 @@ if (item.beadsId) {
 - Beads Interop tracks sync with Beads execution state
 - They complement: Beads tracks task execution, Ext 10 tracks plan evolution
 
-**vs Extension 12 (ACE)**:
-- ACE captures long-term learnings
-- Beads provides execution data that feeds ACE
-- Workflow: Beads execution → vAgenda reflection → ACE accumulation
+**vs Extension 12 (Playbooks)**:
+- Playbooks capture long-term learnings
+- Beads provides execution data that feeds playbooks
+- Workflow: Beads execution → vAgenda reflection → playbook accumulation
 
 ## Open Questions
 

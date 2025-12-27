@@ -33,7 +33,7 @@ TodoList {
   agent?: Agent            # Agent/user who owns this fork
   lastModifiedBy?: Agent   # Last agent to modify this document
   changeLog?: Change[]     # History of modifications
-  playbook?: Playbook      # Evolving strategies and learnings (ACE-inspired)
+  playbook?: Playbook      # Evolving strategies and learnings
   metadata?: object        # Extensible metadata
   items: TodoItem[]        # Array of todo items
 }
@@ -102,7 +102,7 @@ Plan {
   }
   
   phases?: Phase[]         # Implementation phases
-  playbook?: Playbook      # Evolving strategies and learnings (ACE-inspired)
+  playbook?: Playbook      # Evolving strategies and learnings
   references?: Reference[] # Files, lines, URLs, issues
   attachments?: Attachment[] # Diagrams, configs, etc.
 }
@@ -641,7 +641,7 @@ class Conflict: path, baseValue, oursValue, theirsValue, resolution, status, met
 # Lock schema
 class Lock: agent, acquiredAt, expiresAt, type, metadata
 
-# Playbook schema (ACE-inspired)
+# Playbook schema
 class Playbook: version, created, updated, strategies, learnings, reflections, metrics, metadata
 
 # Strategy schema
@@ -1179,9 +1179,9 @@ changes.forEach(c => {
 // Seq 8: Stakeholder requested addition of security audit phase...
 ```
 
-### Agentic Context Engineering (ACE) - Evolving Playbooks
+### Evolving Playbooks
 
-vAgenda supports the ACE paradigm where plans and todo lists become "evolving playbooks" that accumulate, refine, and organize strategies through execution feedback.
+vAgenda supports evolving playbooks where plans and todo lists accumulate, refine, and organize strategies through execution feedback.
 
 #### Playbook Structure
 
@@ -1319,7 +1319,7 @@ A playbook contains:
 
 #### Preventing Context Collapse
 
-ACE principles prevent information loss:
+Playbook principles prevent information loss:
 
 1. **Structured Updates**: Strategies are added/refined, not replaced
 2. **Confidence Tracking**: Low-confidence strategies retained for learning
@@ -1389,7 +1389,7 @@ Strategies can be transferred between plans:
 26. **Version Snapshots**: Optionally store complete document snapshots at key sequences via `snapshotUri`
 27. **Related Changes**: Link related modifications using `relatedChanges` array of sequence numbers
 
-### Agentic Context Engineering (ACE) - Playbooks
+### Playbooks
 
 28. **Strategy Accumulation**: Add new strategies rather than replacing existing ones to prevent context collapse
 29. **Confidence Tracking**: Track confidence (0.0-1.0) for all strategies and learnings; refine confidence over time

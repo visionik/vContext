@@ -42,7 +42,7 @@ Additionally, this extension addresses privacy compliance requirements (GDPR, CC
 **Recommended**:
 - Extension 6 (Participants) - for user identity and roles
 - Extension 10 (Version Control) - for tracking modifications
-- Extension 12 (ACE) - for redacted learnings in playbooks
+- Extension 12 (Playbooks) - for redacted learnings in playbooks
 
 ## Security Modes
 
@@ -116,7 +116,7 @@ vAgenda document wrapped in JSON Web Encryption (JWE) [RFC 7516].
 - Sensitive business plans
 - Security incident response plans
 - Healthcare-related tasks
-- Proprietary strategies in ACE playbooks
+- Proprietary strategies in playbooks
 - Regulated data (PII, PHI, financial)
 - Zero-knowledge storage (server can't read contents)
 
@@ -270,9 +270,9 @@ Narrative {
 }
 ```
 
-## ACE Playbook Extensions
+## Playbook extensions
 
-For Extension 12 (ACE - Accumulated Context Encoding):
+For Extension 12 (Playbooks):
 
 ```javascript
 Learning {
@@ -1059,7 +1059,7 @@ Security in forked scenarios:
 - Signature chains track provenance
 - Encrypted forks may use different keys
 
-### Extension 12 (ACE)
+### Extension 12 (Playbooks)
 
 Playbook security:
 - Learnings can be classified
@@ -1187,7 +1187,7 @@ Please provide feedback via:
 - **Extension 2 (Identifiers)**: README.md#extension-2-identifiers
 - **Extension 6 (Participants)**: README.md#extension-6-participants--collaboration
 - **Extension 10 (Version Control)**: README.md#extension-10-version-control--sync
-- **Extension 12 (ACE)**: README.md#extension-12-ace-accumulated-context-encoding
+- **Extension 12 (Playbooks)**: README.md#extension-12-playbooks
 
 ### Libraries
 - **jose** (JavaScript): https://github.com/panva/jose

@@ -54,7 +54,7 @@ When Extension 2 (Identifiers) and/or Extension 10 (Version Control & Sync) are 
 
 This spec includes JSON Schema files intended for validation and tooling:
 - Core schema: `schemas/vagenda-core.schema.json`
-- ACE extension schema: `schemas/vagenda-extension-ace.schema.json`
+- Playbooks extension schema: `schemas/vagenda-extension-playbooks.schema.json`
 
 ## Design Philosophy
 
@@ -132,7 +132,7 @@ items: [
 ┌─────────────────────────────────────┐
 │   Extensions (Optional Modules)     │
 │  ┌─────────────── ──────────────┐   │
-│  │  Collaboration, ACE, etc.    │   │
+│  │  Collaboration, Playbooks, etc. │   │
 │  └────────────── ───────────────┘   │
 │  ┌────────────── ───────────────┐   │
 │  │   Workflow & Scheduling      │   │
@@ -358,7 +358,7 @@ Extensions add optional fields to core types. Implementations can support any co
 
 Some extensions have dedicated spec documents:
 
-- `vAgenda-extension-ACE.md` — ACE (Agentic Context Engineering)
+- `vAgenda-extension-playbooks.md` — Playbooks (long-term, evolving context)
 - `vAgenda-extension-MCP.md` — Model Context Protocol (MCP) integration
 - `vAgenda-extension-beads.md` — Beads integration
 - `vAgenda-extension-claude.md` — Claude integration
@@ -1391,14 +1391,14 @@ plan: Plan(
 }
 ```
 
-## Extension 12: ACE (Agentic Context Engineering)
+## Extension 12: Playbooks
 
-The ACE extension spec has been moved to `vAgenda-extension-ACE.md` (see that document for the full schema, invariants, merge semantics, and examples).
+The Playbooks extension spec is in `vAgenda-extension-playbooks.md` (see that document for the full schema, invariants, merge semantics, and examples).
 
 - **Requires**: Extension 2 (Identifiers)
 - **Recommended**: Extension 10 (Version Control & Sync)
 
-ACE adds long-term memory via `playbook.entries` and supports incremental updates via `PlaybookPatch` (see the extension document for full details).
+Playbooks add long-term memory via `playbook.entries` and support incremental updates via `PlaybookPatch` (see the extension document for full details).
 
 ---
 
@@ -1457,7 +1457,7 @@ Implementations define only the classes for extensions they support.
 | 9. Security | Core | None |
 | 10. Version Control | Identifiers | None |
 | 11. Forking | Version Control | None |
-|| 12. ACE (`vAgenda-extension-ACE.md`) | Identifiers, Version Control | None |
+|| 12. Playbooks (`vAgenda-extension-playbooks.md`) | Identifiers, Version Control | None |
 
 ---
 
@@ -1572,8 +1572,8 @@ Editors should:
 - Check if parentSequence < parent.sequence before merging
 - Use three-way merge for conflict detection
 
-### ACE
-See `vAgenda-extension-ACE.md` for ACE-specific best practices (e.g. grow-and-refine, evidence linking, dedup, and PlaybookPatch update guidance).
+### Playbooks
+See `vAgenda-extension-playbooks.md` for playbooks best practices (e.g. grow-and-refine, evidence linking, dedup, and PlaybookPatch update guidance).
 
 ---
 
@@ -1662,7 +1662,7 @@ See `vAgenda-extension-ACE.md` for ACE-specific best practices (e.g. grow-and-re
         "workflow",
         "participants",
         "version-control",
-        "ace"
+        "playbooks"
       ],
       "customField": "custom value"
     }
@@ -1677,7 +1677,7 @@ This example uses:
 - **Workflow**: dates, percentComplete
 - **Participants**: team assignment
 - **Version Control**: uid, sequence
-- **ACE**: playbook with strategies
+- **Playbooks**: playbook with entries
 
 ---
 

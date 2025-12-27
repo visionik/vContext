@@ -25,10 +25,10 @@ This extension enables Claude to natively read, write, and reason about vAgenda 
 
 **vAgenda benefits for Claude**:
 - **Token efficiency**: TRON format reduces context consumption by 35-40%
-- **Structured memory**: TodoLists, Plans, and ACE playbooks provide clear memory hierarchy
+- **Structured memory**: TodoLists, Plans, and playbooks provide clear memory hierarchy
 - **Cross-session continuity**: vAgenda documents persist Claude's reasoning across conversations
 - **Multi-agent coordination**: When multiple Claude instances work together, vAgenda provides shared state
-- **Knowledge accumulation**: ACE playbooks let Claude build institutional knowledge over time
+- **Knowledge accumulation**: Playbooks let Claude build institutional knowledge over time
 
 **Integration goal**: Make vAgenda Claude's native memory format, enabling seamless persistence and retrieval of work state, plans, and accumulated learnings.
 
@@ -41,7 +41,7 @@ This extension enables Claude to natively read, write, and reason about vAgenda 
 **Recommended**:
 - Extension 1 (Timestamps) - session tracking
 - Extension 4 (Hierarchical) - task dependencies
-- Extension 12 (ACE) - learning accumulation
+- Extension 12 (Playbooks) - learning accumulation
 
 ## New Fields
 
@@ -191,11 +191,11 @@ plan: Plan(
 )
 ```
 
-### Pattern 3: Multi-Session Learning (ACE)
+### Pattern 3: Multi-Session Learning (Playbooks)
 
 **Problem**: Claude forgets strategies and learnings between projects.
 
-**Solution**: Accumulate Claude's insights into ACE playbooks, reference them in future work.
+**Solution**: Accumulate Claude's insights into playbooks, reference them in future work.
 
 **End of project**:
 ```markdown
@@ -437,8 +437,8 @@ todoList: TodoList([
 - `claudeContext.conversationId` links changes to specific Claude sessions
 - Enables "what did Claude change in this session?" queries
 
-**Extension 12 (ACE)**:
-- Claude's reflections populate ACE playbooks
+**Extension 12 (Playbooks)**:
+- Claude's reflections populate playbooks
 - `discoveredBy.model` tracks which Claude version learned each strategy
 - Playbooks accumulate across multiple Claude conversations/projects
 
@@ -492,7 +492,7 @@ See Usage Patterns section for detailed examples.
 **Phase 4**: Multi-agent orchestration
 - Multiple Claude instances coordinate via shared vAgenda
 - Automatic conflict resolution
-- Distributed ACE playbook learning
+- Distributed playbook learning
 
 ## Community Feedback
 

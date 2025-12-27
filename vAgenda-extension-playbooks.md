@@ -1,8 +1,8 @@
-# vAgenda Extension: ACE (Agentic Context Engineering)
+# vAgenda Extension: Playbooks
 
 > **DRAFT EXTENSION**: This document is a draft and subject to change.
 
-**Extension Name**: ACE (Agentic Context Engineering)
+**Extension Name**: Playbooks
 
 **Extension Version**: 0.1
 
@@ -10,28 +10,30 @@
 
 ## Overview
 
-ACE (Agentic Context Engineering) is a way to make an agent’s “working context” improve over time **without** changing model weights.
+Playbooks are a way to make an agent’s “working context” improve over time **without** changing model weights.
 
-If these concepts feel difficult to understand, it’s partly because they are, and partly because this spec still has room to improve. ACE playbooks are a very new and evolving concept, and initial implementations are only just starting to be attempted and tested.
+If these concepts feel difficult to understand, it’s partly because they are, and partly because this spec still has room to improve. Playbooks are a very new and evolving concept, and initial implementations are only just starting to be attempted and tested.
+
+The playbook concept in this extension is based on the paper "Agentic Context Engineering: Evolving Contexts for Self-Improving Language Models" (arXiv:2510.04618): https://arxiv.org/abs/2510.04618
 
 In vAgenda terms:
 - TodoLists cover **short-term memory** (what to do next).
 - Plans cover **medium-term memory** (what/why/how for a piece of work).
-- ACE playbooks cover **long-term memory**: reusable strategies, rules-of-thumb, and warnings that persist across runs.
+- Playbooks cover **long-term memory**: reusable strategies, rules-of-thumb, and warnings that persist across runs.
 
-### What ACE does
+### What playbooks do
 
-ACE playbooks capture long-term **lessons learned**.
+Playbooks capture long-term **lessons learned**.
 
-Where TodoLists and Plans primarily record **what** was (or will be) done and **why**, ACE playbooks record higher-level guidance such as:
+Where TodoLists and Plans primarily record **what** was (or will be) done and **why**, playbooks record higher-level guidance such as:
 - what tends to work,
 - what tends to fail,
 - what to try next,
 - and what to avoid.
 
-Importantly, ACE is designed to be **log-like and reversible**: old guidance is not silently overwritten. Instead, entries are refined, superseded, deduplicated, or quarantined so that tools (and humans) can see how the playbook evolved over time.
+Importantly, playbooks are designed to be **log-like and reversible**: old guidance is not silently overwritten. Instead, entries are refined, superseded, deduplicated, or quarantined so that tools (and humans) can see how the playbook evolved over time.
 
-ACE treats long-term context as a curated set of **entries** that can be:
+Playbooks treat long-term context as a curated set of **entries** that can be:
 - appended (growth),
 - refined (revision),
 - deduplicated,
@@ -41,9 +43,9 @@ This prevents two common failure modes in iterative prompt editing:
 - **Context collapse**: repeated rewriting erodes details over time.
 - **Brevity bias**: summaries drop “unimportant” details that later turn out to matter.
 
-### How ACE works (conceptually)
+### How playbooks work (conceptually)
 
-A typical ACE loop:
+A typical loop:
 
 1. **Execution**
    - Run a task (coding session, workflow, incident response).
@@ -58,7 +60,6 @@ vAgenda supports this by:
 - representing long-term knowledge as `playbook.entries` (stable IDs, atomic entries), and
 - supporting incremental updates via `PlaybookPatch` rather than whole-playbook rewrites.
 
-This extension is inspired by the ACE paradigm described in "Agentic Context Engineering" (arXiv:2510.04618).
 
 ## Dependencies
 
@@ -66,11 +67,11 @@ This extension is inspired by the ACE paradigm described in "Agentic Context Eng
 - **Recommended**: Extension 10 (Version Control & Sync)
 
 Notes:
-- If Extension 10 is present, ACE patching can use `baseDocumentSequence` (document `sequence`) for optimistic concurrency.
+- If Extension 10 is present, playbook patching can use `baseDocumentSequence` (document `sequence`) for optimistic concurrency.
 
 ## Machine-verifiable schema (JSON)
 
-The ACE extension schema is provided at `schemas/vagenda-extension-ace.schema.json`.
+The playbooks extension schema is provided at `schemas/vagenda-extension-playbooks.schema.json`.
 
 ## Data model
 
@@ -87,7 +88,7 @@ Playbook {
   version: number           # Playbook version (monotonic; increments on update)
   created: datetime         # When playbook was created
   updated: datetime         # Last update time
-  entries: PlaybookEntry[]  # Itemized entries (ACE-aligned)
+  entries: PlaybookEntry[]  # Itemized entries (playbook-aligned)
   metrics?: PlaybookMetrics # Optional summary stats
 }
 
@@ -144,7 +145,7 @@ PlaybookPatchOp {
 
 ### Attaching a playbook to documents
 
-ACE can be attached to either a todo list or a plan:
+Playbooks can be attached to either a todo list or a plan:
 
 ```javascript
 TodoList {
@@ -372,7 +373,7 @@ Guidance:
 }
 ```
 
-## ACE invariants (normative)
+## Playbook invariants (normative)
 
 - Tools SHOULD update playbooks via **localized operations** (PlaybookPatch) rather than rewriting `entries` wholesale.
 - `PlaybookEntry.id` MUST be stable once created.
@@ -631,4 +632,4 @@ plan: Plan(
 
 ## References
 
-- arXiv:2510.04618: https://arxiv.org/abs/2510.04618
+- https://arxiv.org/abs/2510.04618
