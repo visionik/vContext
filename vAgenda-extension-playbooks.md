@@ -10,16 +10,17 @@
 
 ## Overview
 
-Playbooks are a way to make an agent’s “working context” improve over time **without** changing model weights.
-
-If these concepts feel difficult to understand, it’s partly because they are, and partly because this spec still has room to improve. Playbooks are a very new and evolving concept, and initial implementations are only just starting to be attempted and tested.
-
-The playbook concept in this extension is based on the paper "Agentic Context Engineering: Evolving Contexts for Self-Improving Language Models" (arXiv:2510.04618): https://arxiv.org/abs/2510.04618
-
 In vAgenda terms:
 - TodoLists cover **short-term memory** (what to do next).
 - Plans cover **medium-term memory** (what/why/how for a piece of work).
 - Playbooks cover **long-term memory**: reusable strategies, rules-of-thumb, and warnings that persist across runs.
+
+Playbooks are a way to make an agent’s “working context” improve over time.
+
+The playbook concept in this extension is based on the paper "Agentic Context Engineering: Evolving Contexts for Self-Improving Language Models" (arXiv:2510.04618): https://arxiv.org/abs/2510.04618
+
+If you find these concepts feel difficult to understand, it’s partly because they are, and partly because this spec still has room to improve. Playbooks are a very new and evolving concept, and initial implementations are only just starting to be attempted and tested.
+
 
 ### What playbooks do
 
