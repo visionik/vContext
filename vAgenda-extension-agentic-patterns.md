@@ -2,7 +2,7 @@
 
 **Extension Name**: Agentic Patterns
 
-**Version**: 0.1
+**Version**: 0.2
 
 **Status**: Draft
 
@@ -90,50 +90,37 @@ This extension captures data at each stage:
 
 ---
 
+## Design Principle: Plans ARE Workflows
+
+This extension recognizes that **vAgenda Plans are natural workflow containers**. Rather than introducing separate workflow types, we extend Plans to capture agentic pattern metadata:
+
+- **Plan** = Workflow container (already has title, status, narratives, timing)
+- **PlanItems** = Workflow steps (already ordered, have status, can nest via `subItems`)
+- **Narratives** = Reasoning and context (already capture the "why")
+- **Existing Extensions** provide Agent tracking, timestamps, participants, etc.
+
+This keeps vAgenda simple while enabling full pattern capture.
+
+---
+
 ## Data Model Extensions
 
 ### New Types
 
-#### AgenticWorkflow
+#### StepType
 
-Represents a complete agentic workflow execution, typically attached to a Plan or TodoList.
-
-```javascript
-AgenticWorkflow {
-  id: string                      // Unique workflow identifier
-  pattern: enum                   // Primary pattern: "promptChaining" | "routing" | "parallelization" | "reflection" | "toolUse" | "planning" | "multiAgent" | "memoryManagement" | "learningAdaptation" | "mcp" | "goalMonitoring" | "exceptionHandling" | "humanInLoop" | "rag" | "a2a" | "resourceOptimization" | "hybrid"
-  subPatterns?: string[]          // Additional patterns used (e.g., ["reflection", "toolUse"])
-  status: enum                    // "pending" | "running" | "paused" | "completed" | "failed" | "cancelled"
-  steps: WorkflowStep[]           // Ordered execution steps
-  checkpoint?: string             // Resume point for long-running workflows
-  startedAt?: datetime            // Workflow start time
-  completedAt?: datetime          // Workflow completion time
-  totalDuration?: number          // Duration in seconds
-  agent?: Agent                   // Primary agent executing workflow
-  metadata?: object               // Custom workflow metadata
-}
-```
-
-#### WorkflowStep
-
-Represents a single step in an agentic workflow.
+Maps PlanItems to the five-step agent loop.
 
 ```javascript
-WorkflowStep {
-  id: string                      // Unique step identifier
-  order: number                   // Execution sequence (1-indexed)
-  type: enum                      // "perceive" | "plan" | "act" | "reflect" | "adapt" | "delegate" | "synthesize" | "validate"
-  agent?: Agent                   // Agent executing this step
-  status: enum                    // "pending" | "running" | "completed" | "failed" | "skipped"
-  input?: Reference               // Link to input (plan/todo/playbook item)
-  output?: Reference              // Link to output
-  reasoning?: string              // Agent's reasoning for this step
-  toolsUsed?: Tool[]              // Tools invoked during this step
-  startedAt?: datetime            // Step start time
-  completedAt?: datetime          // Step completion time
-  duration?: number               // Duration in seconds
-  retries?: number                // Number of retry attempts
-  error?: ErrorDetail             // Error information if failed
+enum StepType {
+  "perceive"    // Gather information, understand context
+  "plan"        // Determine approach, break down task  
+  "act"         // Execute actions, use tools
+  "reflect"     // Review results, identify issues
+  "adapt"       // Learn from experience, adjust approach
+  "delegate"    // Route to specialized agent (routing pattern)
+  "synthesize"  // Combine results from multiple sources
+  "validate"    // Check correctness, run tests
 }
 ```
 
@@ -258,7 +245,9 @@ ErrorDetail {
 ```javascript
 TodoList {
   // Core + existing extensions...
-  workflow?: AgenticWorkflow      // Workflow orchestrating this todo list
+  primaryPattern?: string         // Primary pattern: "routing" | "parallelization" | etc.
+  subPatterns?: string[]          // Additional patterns used
+  patternRationale?: string       // Why this pattern was chosen
   routingRules?: RoutingRule[]    // Rules for routing items to agents
 }
 ```
@@ -280,27 +269,79 @@ TodoItem {
 
 ### Plan Extensions
 
+**Plans serve as workflow containers**. Existing Plan structure provides:
+- `title` - Workflow name
+- `status` - Workflow state (draft → proposed → approved → inProgress → completed | cancelled)
+- `narratives` - Approach, reasoning, context (the "why")
+- `items` - Workflow steps (PlanItems array, already ordered)
+- Extension 1: `created`, `updated` - Timing
+- Extension 2: `id` - Unique identifier
+- Extension 10: `agent`, `changeLog` - Agent tracking and history
+
+This extension adds pattern metadata:
+
 ```javascript
 Plan {
   // Core + existing extensions...
-  workflow?: AgenticWorkflow      // Workflow for executing this plan
-  primaryPattern?: string         // Primary agentic pattern for this plan
-  patternRationale?: string       // Why this pattern was chosen
+  
+  // Pattern identification
+  primaryPattern?: string         // Main pattern: "promptChaining" | "multiAgent" | "planning" | etc.
+  subPatterns?: string[]          // Additional patterns (e.g., ["reflection", "toolUse"])
+  patternRationale?: string       // Why this pattern combination was chosen
+  
+  // Workflow resumability  
+  checkpoint?: string             // Resume point (e.g., "phase-3-completed", PlanItem.id)
+  
+  // Metrics (supplement Extension 1 timestamps)
+  totalDuration?: number          // Total execution time in seconds
+  routingRules?: RoutingRule[]    // For routing pattern: rules to delegate phases
 }
 ```
 
+**Mapping Plan.status to workflow states**:
+- `draft` = Workflow being designed
+- `proposed` = Awaiting approval
+- `approved` = Ready to execute
+- `inProgress` = Currently executing
+- `completed` = Successfully finished
+- `cancelled` = Terminated
+
 ### PlanItem Extensions
+
+**PlanItems serve as workflow steps**. Existing PlanItem structure provides:
+- `title` - Step name
+- `status` - Step state (pending → inProgress → completed | blocked | cancelled)
+- Array index - Execution order
+- Extension 2: `id` - Unique step identifier
+- Extension 4: `subItems` - Nested sub-steps
+- Extension 4: `dependencies` - Execution prerequisites  
+- Extension 5: `startDate`, `endDate`, `percentComplete` - Progress
+- Extension 6: `participants` - Assigned agents
+
+This extension adds step metadata:
 
 ```javascript
 PlanItem {
   // Core + existing extensions...
-  patternUsage?: PatternUsage[]   // Patterns used in this phase
-  toolsRequired?: Tool[]          // Tools needed for this phase
-  toolResults?: ToolResult[]      // Results from tool invocations
-  workflowStep?: string           // Link to WorkflowStep.id
-  delegation?: {                  // If delegated to specialized agent
-    targetAgent: Agent
-    reason: string
+  
+  // Step type (five-step agent loop)
+  stepType?: StepType             // "perceive" | "plan" | "act" | "reflect" | "adapt" | etc.
+  
+  // Pattern tracking
+  patternUsage?: PatternUsage[]   // Patterns employed in this step
+  
+  // Tool usage  
+  toolsRequired?: Tool[]          // Tools needed
+  toolResults?: ToolResult[]      // Tool invocation results
+  
+  // Execution details
+  reasoning?: string              // Agent's reasoning (complements Extension 10 changeLog)
+  retries?: number                // Number of retry attempts
+  
+  // Delegation (for routing pattern)
+  delegation?: {                  // If step delegated to specialist
+    targetAgent: Agent            // Which agent received the work
+    reason: string                // Why this agent was chosen
     status: enum                  // "pending" | "active" | "completed"
   }
 }
@@ -331,91 +372,50 @@ PlaybookItem {
 
 ### Example 1: Prompt Chaining Workflow
 
-A multi-step research task using prompt chaining.
+A multi-step research task using prompt chaining. **The Plan itself is the workflow.**
 
 **JSON**:
 ```json
 {
   "vAgendaInfo": {
-    "version": "0.3"
+    "version": "0.3",
+    "created": "2025-12-27T10:00:00Z",
+    "updated": "2025-12-27T10:04:00Z"
   },
   "plan": {
     "id": "research-plan-001",
     "title": "Research competitor AI features",
     "status": "completed",
+    
+    "primaryPattern": "promptChaining",
+    "subPatterns": ["toolUse"],
+    "patternRationale": "Sequential steps with dependencies: each phase builds on previous results",
+    
+    "agent": {
+      "id": "research-agent-1",
+      "type": "aiAgent",
+      "name": "Research Assistant",
+      "model": "claude-3.5-sonnet"
+    },
+    
+    "totalDuration": 240,
+    
     "narratives": {
       "proposal": {
         "title": "Research Approach",
-        "content": "Use prompt chaining to break research into: 1) Identify competitors, 2) Gather feature data, 3) Analyze trends, 4) Synthesize report"
+        "content": "Use prompt chaining to break research into sequential steps: 1) Identify competitors, 2) Gather feature data, 3) Analyze trends, 4) Synthesize report. Each step feeds into the next."
       }
     },
-    "workflow": {
-      "id": "workflow-001",
-      "pattern": "promptChaining",
-      "status": "completed",
-      "agent": {
-        "id": "research-agent-1",
-        "type": "aiAgent",
-        "name": "Research Assistant",
-        "model": "claude-3.5-sonnet"
-      },
-      "steps": [
-        {
-          "id": "step-1",
-          "order": 1,
-          "type": "perceive",
-          "agent": {"id": "research-agent-1", "type": "aiAgent"},
-          "status": "completed",
-          "reasoning": "Identified 5 key competitors in the AI space",
-          "output": {"type": "text", "value": "competitors: [OpenAI, Anthropic, Google, Meta, Cohere]"},
-          "duration": 15
-        },
-        {
-          "id": "step-2",
-          "order": 2,
-          "type": "act",
-          "agent": {"id": "research-agent-1", "type": "aiAgent"},
-          "status": "completed",
-          "reasoning": "Gathered public feature documentation for each competitor",
-          "toolsUsed": [
-            {
-              "id": "web-search-1",
-              "name": "web_search",
-              "type": "web",
-              "description": "Search the web for information"
-            }
-          ],
-          "duration": 120
-        },
-        {
-          "id": "step-3",
-          "order": 3,
-          "type": "reflect",
-          "agent": {"id": "research-agent-1", "type": "aiAgent"},
-          "status": "completed",
-          "reasoning": "Analyzed feature patterns across competitors",
-          "duration": 45
-        },
-        {
-          "id": "step-4",
-          "order": 4,
-          "type": "synthesize",
-          "agent": {"id": "research-agent-1", "type": "aiAgent"},
-          "status": "completed",
-          "reasoning": "Created comprehensive comparison report",
-          "output": {"type": "document", "uri": "file://./competitor-analysis.md"},
-          "duration": 60
-        }
-      ],
-      "startedAt": "2025-12-27T10:00:00Z",
-      "completedAt": "2025-12-27T10:04:00Z",
-      "totalDuration": 240
-    },
+    
     "items": [
       {
         "id": "phase-1",
-        "title": "Competitor identification",
+        "title": "Identify competitors",
         "status": "completed",
+        "stepType": "perceive",
+        "reasoning": "Identified 5 key competitors in the AI space",
+        "startDate": "2025-12-27T10:00:00Z",
+        "endDate": "2025-12-27T10:00:15Z",
         "patternUsage": [
           {
             "pattern": "promptChaining",
@@ -426,14 +426,67 @@ A multi-step research task using prompt chaining.
             },
             "effectiveness": 0.95,
             "confidence": 0.9,
-            "reasoning": "Chaining allowed structured breakdown of complex research task",
+            "reasoning": "First link in chain - clear objective with well-defined output",
             "appliedAt": "2025-12-27T10:00:00Z",
             "outcome": "successful",
             "metrics": {
               "executionTime": 15,
-              "iterations": 1,
               "tokenUsage": 2500
             }
+          }
+        ]
+      },
+      {
+        "id": "phase-2",
+        "title": "Gather feature data",
+        "status": "completed",
+        "stepType": "act",
+        "dependencies": ["phase-1"],
+        "reasoning": "Collected public documentation for each competitor",
+        "startDate": "2025-12-27T10:00:15Z",
+        "endDate": "2025-12-27T10:02:15Z",
+        "toolsRequired": [
+          {
+            "id": "web-search-1",
+            "name": "web_search",
+            "type": "web",
+            "description": "Search the web for information"
+          }
+        ],
+        "toolResults": [
+          {
+            "toolId": "web-search-1",
+            "invokedAt": "2025-12-27T10:00:20Z",
+            "duration": 110,
+            "status": "success",
+            "output": "Retrieved feature pages for 5 competitors"
+          }
+        ]
+      },
+      {
+        "id": "phase-3",
+        "title": "Analyze trends",
+        "status": "completed",
+        "stepType": "reflect",
+        "dependencies": ["phase-2"],
+        "reasoning": "Analyzed feature patterns and identified 3 key trends",
+        "startDate": "2025-12-27T10:02:15Z",
+        "endDate": "2025-12-27T10:03:00Z"
+      },
+      {
+        "id": "phase-4",
+        "title": "Synthesize report",
+        "status": "completed",
+        "stepType": "synthesize",
+        "dependencies": ["phase-3"],
+        "reasoning": "Created comprehensive comparison report",
+        "startDate": "2025-12-27T10:03:00Z",
+        "endDate": "2025-12-27T10:04:00Z",
+        "uris": [
+          {
+            "uri": "file://./competitor-analysis.md",
+            "type": "text/markdown",
+            "description": "Final research report"
           }
         ]
       }
@@ -444,7 +497,7 @@ A multi-step research task using prompt chaining.
 
 ### Example 2: Multi-Agent Collaboration with Routing
 
-A development task routed to specialized agents.
+A development task routed to specialized agents using TodoList.
 
 **JSON**:
 ```json
@@ -455,12 +508,11 @@ A development task routed to specialized agents.
   "todoList": {
     "id": "dev-tasks-001",
     "title": "Build authentication system",
-    "workflow": {
-      "id": "workflow-002",
-      "pattern": "multiAgent",
-      "subPatterns": ["routing", "toolUse"],
-      "status": "inProgress"
-    },
+    
+    "primaryPattern": "multiAgent",
+    "subPatterns": ["routing", "toolUse"],
+    "patternRationale": "Different specialized skills needed: backend logic and frontend UI",
+    
     "routingRules": [
       {
         "id": "route-backend",
@@ -972,9 +1024,15 @@ This specification is released under CC BY 4.0.
 
 ## Changelog
 
+### Version 0.2 (2025-12-27)
+- **Breaking change**: Removed AgenticWorkflow and WorkflowStep types
+- **Design principle**: Plans ARE workflows, PlanItems ARE steps
+- Simplified to only essential new types: StepType, PatternUsage, PatternContext, Tool, ToolResult, RoutingRule, ErrorDetail
+- Plans naturally serve as workflow containers using existing structure
+- PlanItems map to five-step agent loop via `stepType` field
+- Updated all examples to use simplified structure
+
 ### Version 0.1 (2025-12-27)
 - Initial draft
 - 21 pattern taxonomy integration
-- Core types: AgenticWorkflow, WorkflowStep, PatternUsage, PatternContext
-- Examples for prompt chaining, multi-agent, reflection
-- Integration with Extensions 10 and 12
+- Separate AgenticWorkflow/WorkflowStep types (removed in v0.2)
