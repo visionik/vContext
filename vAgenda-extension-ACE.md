@@ -10,7 +10,41 @@
 
 ## Overview
 
-ACE adds evolving playbooks for **long-term memory** (potentially very long-term). While TodoLists provide short-term memory (hours to days) and Plans provide medium-term memory (days to weeks/months), ACE playbooks accumulate durable entries that persist across projects, sessions, and iterations.
+ACE (Agentic Context Engineering) is a way to make an agent’s “working context” improve over time **without** changing model weights.
+
+In vAgenda terms:
+- TodoLists cover **short-term memory** (what to do next).
+- Plans cover **medium-term memory** (what/why/how for a piece of work).
+- ACE playbooks cover **long-term memory**: reusable strategies, rules-of-thumb, and warnings that persist across runs.
+
+### What ACE does
+
+ACE treats long-term context as a curated set of **itemized entries** (bullets) that can be:
+- appended (growth),
+- refined (revision),
+- deduplicated,
+- and soft-deprecated/quarantined.
+
+This prevents two common failure modes in iterative prompt editing:
+- **Context collapse**: repeated rewriting erodes details over time.
+- **Brevity bias**: summaries drop “unimportant” details that later turn out to matter.
+
+### How ACE works (conceptually)
+
+A typical ACE loop:
+
+1. **Execution**
+   - Run a task (coding session, workflow, incident response).
+2. **Reflection**
+   - Record what helped or hurt (increment counters; attach evidence).
+3. **Curation**
+   - Add new entries, refine existing ones, deduplicate, and quarantine bad advice.
+4. **Reuse**
+   - Retrieve a relevant subset of entries for the next run.
+
+vAgenda supports this by:
+- representing long-term knowledge as `playbook.entries` (stable IDs, atomic bullets), and
+- supporting incremental updates via `AcePatch` rather than whole-playbook rewrites.
 
 This extension is inspired by the ACE paradigm described in "Agentic Context Engineering" (arXiv:2510.04618).
 
@@ -20,7 +54,7 @@ This extension is inspired by the ACE paradigm described in "Agentic Context Eng
 - **Recommended**: Extension 10 (Version Control & Sync)
 
 Notes:
-- If Extension 10 is present, ACE patching can use `baseDocumentSequence` for optimistic concurrency.
+- If Extension 10 is present, ACE patching can use `baseDocumentSequence` (document `sequence`) for optimistic concurrency.
 
 ## Machine-verifiable schema (JSON)
 
@@ -28,7 +62,13 @@ The ACE extension schema is provided at `schemas/vagenda-extension-ace.schema.js
 
 ## Data model
 
-### New Types
+This extension adds four core concepts:
+- `Playbook`: a container for entries and summary metrics.
+- `PlaybookEntry`: a single reusable bullet (strategy/rule/warning/etc.).
+- `AcePatch`: an incremental update envelope.
+- `AcePatchOp`: a single operation inside a patch.
+
+### New Types (reference)
 
 ```javascript
 Playbook {
@@ -75,10 +115,10 @@ AcePatch {
   baseDocumentSequence?: number  # Optional guard for optimistic concurrency.
                                 # When Extension 10 is in use, this MUST refer to the target document's `sequence` value
                                 # (e.g., `plan.sequence` or `todoList.sequence`) at the time the patch was generated.
-  operations: AceOp[]
+  operations: AcePatchOp[]
 }
 
-AceOp {
+AcePatchOp {
   op: enum                  # "appendEntry" | "updateEntry" | "incrementCounter" | "deprecateEntry"
   entryId?: string          # Target entry id (when applicable)
   entry?: PlaybookEntry     # Full entry for append/update
@@ -90,21 +130,233 @@ AceOp {
 }
 ```
 
-### TodoList Extensions
+### Attaching a playbook to documents
+
+ACE can be attached to either a todo list or a plan:
 
 ```javascript
 TodoList {
   // Prior extensions...
-  playbook?: Playbook      # Evolving ACE playbook
+  playbook?: Playbook
+}
+
+Plan {
+  // Prior extensions...
+  playbook?: Playbook
 }
 ```
 
-### Plan Extensions
+## Type guide (with examples)
 
-```javascript
-Plan {
-  // Prior extensions...
-  playbook?: Playbook      # Evolving ACE playbook
+### Playbook
+
+A `Playbook` is the long-lived container. It holds the bullet list (`entries`) plus optional summary metrics.
+
+**JSON example:**
+
+```json
+{
+  "version": 4,
+  "created": "2025-01-10T18:00:00Z",
+  "updated": "2025-12-27T08:00:00Z",
+  "entries": [],
+  "metrics": {
+    "totalEntries": 0,
+    "lastUpdated": "2025-12-27T08:00:00Z"
+  }
+}
+```
+
+### PlaybookEntry
+
+A `PlaybookEntry` is an **atomic** unit of reusable knowledge.
+
+Guidance:
+- Keep it to “one idea per entry”.
+- Prefer actionable language.
+- Add evidence whenever possible.
+
+#### Example: kind = strategy
+
+```json
+{
+  "id": "entry-test-first",
+  "kind": "strategy",
+  "title": "Write a failing test first",
+  "text": "Before changing code, write a failing test that reproduces the bug; then implement the minimal fix.",
+  "tags": ["testing", "debugging"],
+  "confidence": 0.95,
+  "helpfulCount": 14,
+  "harmfulCount": 0,
+  "feedbackType": "executionOutcome",
+  "status": "active",
+  "evidence": ["pr:42", "ci:green-run-2025-12-26"]
+}
+```
+
+#### Example: kind = rule
+
+```json
+{
+  "id": "entry-task-first",
+  "kind": "rule",
+  "text": "For repeatable workflows, add a Task target instead of documenting raw shell commands.",
+  "tags": ["workflow", "taskfile"],
+  "confidence": 0.9,
+  "helpfulCount": 7,
+  "harmfulCount": 0,
+  "status": "active"
+}
+```
+
+#### Example: kind = warning
+
+```json
+{
+  "id": "entry-avoid-blanket-refactors",
+  "kind": "warning",
+  "text": "Avoid large refactors without a characterization test suite; changes are hard to review and regressions are likely.",
+  "tags": ["refactor", "risk"],
+  "confidence": 0.85,
+  "helpfulCount": 5,
+  "harmfulCount": 1,
+  "status": "active",
+  "evidence": ["incident:2025-09-14-regression"]
+}
+```
+
+#### Example: kind = learning
+
+```json
+{
+  "id": "entry-timezone-bugs",
+  "kind": "learning",
+  "text": "Timezone-related bugs usually come from mixing naive timestamps and offset timestamps; require RFC3339 with offsets everywhere.",
+  "tags": ["time", "data-integrity"],
+  "confidence": 0.8,
+  "helpfulCount": 3,
+  "harmfulCount": 0,
+  "status": "active"
+}
+```
+
+#### Example: kind = note
+
+```json
+{
+  "id": "entry-context",
+  "kind": "note",
+  "text": "In this repo, the authoritative spec is README.md; extension docs live in vAgenda-extension-*.md.",
+  "tags": ["docs"],
+  "status": "active"
+}
+```
+
+#### Example: refinement and dedup
+
+```json
+{
+  "id": "entry-tests-before-fix-v2",
+  "kind": "strategy",
+  "text": "Write a failing test first; then implement the minimal change that makes it pass; finally refactor with tests green.",
+  "supersedes": ["entry-test-first"],
+  "confidence": 0.96,
+  "status": "active"
+}
+```
+
+```json
+{
+  "id": "entry-test-first-duplicate",
+  "kind": "strategy",
+  "text": "Always start with a failing test.",
+  "duplicateOf": "entry-test-first",
+  "status": "deprecated",
+  "deprecatedReason": "Duplicate entry; keep canonical entry-test-first"
+}
+```
+
+### PlaybookMetrics
+
+`PlaybookMetrics` are optional summary fields for UI/tooling.
+
+```json
+{
+  "totalEntries": 27,
+  "averageConfidence": 0.86,
+  "lastUpdated": "2025-12-27T08:00:00Z"
+}
+```
+
+### AcePatch
+
+`AcePatch` is an envelope for incremental updates.
+
+- If Extension 10 is in use, `baseDocumentSequence` SHOULD be set to the current document `sequence`.
+
+```json
+{
+  "baseDocumentSequence": 12,
+  "operations": []
+}
+```
+
+### AcePatchOp
+
+`AcePatchOp` is a single update operation.
+
+#### appendEntry
+
+```json
+{
+  "op": "appendEntry",
+  "entry": {
+    "id": "entry-new",
+    "kind": "learning",
+    "text": "CI flakes were caused by test ordering; randomize tests locally to reproduce.",
+    "status": "active",
+    "feedbackType": "executionOutcome",
+    "helpfulCount": 1,
+    "harmfulCount": 0
+  },
+  "reason": "Repeated flakes found in nightly runs"
+}
+```
+
+#### updateEntry
+
+```json
+{
+  "op": "updateEntry",
+  "entryId": "entry-avoid-blanket-refactors",
+  "entry": {
+    "id": "entry-avoid-blanket-refactors",
+    "kind": "warning",
+    "text": "Avoid large refactors without a characterization test suite and a rollback plan.",
+    "status": "active"
+  },
+  "reason": "Clarify mitigation steps"
+}
+```
+
+#### incrementCounter
+
+```json
+{
+  "op": "incrementCounter",
+  "entryId": "entry-task-first",
+  "delta": {"helpfulCount": 1},
+  "reason": "Task target reduced setup time"
+}
+```
+
+#### deprecateEntry
+
+```json
+{
+  "op": "deprecateEntry",
+  "entryId": "entry-test-first-duplicate",
+  "reason": "Canonicalized into entry-test-first"
 }
 ```
 
@@ -143,82 +395,225 @@ When merging concurrent updates:
 - Use `status: quarantined` for potentially bad advice instead of deleting; record `deprecatedReason`/notes.
 - Treat low-signal feedback (e.g. `feedbackType: selfReport`) as weaker; avoid inflating `confidence` without corroboration.
 
-## Examples
+## Real-world playbook examples
 
-### TRON
+These examples show how a playbook might look in practice for an agentic software repo.
+
+### TRON: playbook embedded in a Plan
 
 ```tron
 class vAgendaInfo: version
 class Plan: id, title, status, narratives, playbook
 class Narrative: title, content
-class Playbook: version, created, updated, entries
-class PlaybookEntry: id, kind, title, text, confidence, helpfulCount, harmfulCount, status
+class Playbook: version, created, updated, entries, metrics
+class PlaybookMetrics: totalEntries, averageConfidence, lastUpdated
+class PlaybookEntry:
+  id, kind, title, text, tags, evidence, confidence,
+  helpfulCount, harmfulCount, feedbackType,
+  status, deprecatedReason, supersedes, supersededBy, duplicateOf
 
 vAgendaInfo: vAgendaInfo("0.2")
 plan: Plan(
-  "plan-003",
-  "API development patterns",
-  "completed",
-  {"proposal": Narrative("Overview", "Document learned patterns")},
+  "plan-ace-realworld-001",
+  "Agent workflow rules",
+  "inProgress",
+  {
+    "proposal": Narrative(
+      "Overview",
+      "Curate reusable agent workflow strategies and warnings; update via AcePatch."
+    )
+  },
   Playbook(
-    1,
-    "2024-12-27T09:00:00Z",
-    "2024-12-27T15:00:00Z",
+    7,
+    "2025-01-10T18:00:00Z",
+    "2025-12-27T08:00:00Z",
     [
       PlaybookEntry(
-        "entry-1",
-        "strategy",
-        "Test-first development",
-        "Write tests before implementation for better coverage",
-        0.95,
-        12,
+        "entry-task-first",
+        "rule",
+        "Task-first workflow",
+        "For repeatable workflows, add a Task target instead of documenting raw shell commands.",
+        ["workflow", "taskfile"],
+        ["docs:warp.md"],
+        0.9,
+        7,
         0,
-        "active"
+        "humanReview",
+        "active",
+        null,
+        null,
+        null,
+        null
       ),
       PlaybookEntry(
-        "entry-2",
+        "entry-test-first",
+        "strategy",
+        "Failing test first",
+        "Before changing code, write a failing test that reproduces the bug; then implement the minimal fix.",
+        ["testing", "debugging"],
+        ["pr:42", "ci:green-run-2025-12-26"],
+        0.95,
+        14,
+        0,
+        "executionOutcome",
+        "active",
+        null,
+        null,
+        "entry-tests-before-fix-v2",
+        null
+      ),
+      PlaybookEntry(
+        "entry-tests-before-fix-v2",
+        "strategy",
+        "Refined test-first",
+        "Write a failing test first; then implement the minimal change that makes it pass; finally refactor with tests green.",
+        ["testing"],
+        ["pr:57"],
+        0.96,
+        3,
+        0,
+        "executionOutcome",
+        "active",
+        null,
+        ["entry-test-first"],
+        null,
+        null
+      ),
+      PlaybookEntry(
+        "entry-avoid-blanket-refactors",
+        "warning",
+        null,
+        "Avoid large refactors without a characterization test suite and a rollback plan.",
+        ["refactor", "risk"],
+        ["incident:2025-09-14-regression"],
+        0.85,
+        5,
+        1,
+        "executionOutcome",
+        "active",
+        null,
+        null,
+        null,
+        null
+      ),
+      PlaybookEntry(
+        "entry-timezone-bugs",
         "learning",
         null,
-        "Early validation prevents late-stage refactoring",
-        0.9,
-        5,
+        "Timezone-related bugs usually come from mixing naive timestamps and offset timestamps; require RFC3339 with offsets everywhere.",
+        ["time", "data-integrity"],
+        ["issue:113"],
+        0.8,
+        3,
         0,
-        "active"
+        "executionOutcome",
+        "active",
+        null,
+        null,
+        null,
+        null
       )
-    ]
+    ],
+    PlaybookMetrics(5, 0.89, "2025-12-27T08:00:00Z")
   )
 )
 ```
 
-### JSON (AcePatch update example)
+### JSON: playbook embedded in a Plan
 
 ```json
 {
-  "baseDocumentSequence": 12,
-  "operations": [
-    {
-      "op": "incrementCounter",
-      "entryId": "entry-1",
-      "delta": {"helpfulCount": 1},
-      "reason": "Strategy applied successfully on login flow implementation"
+  "vAgendaInfo": {
+    "version": "0.2"
+  },
+  "plan": {
+    "id": "plan-ace-realworld-001",
+    "title": "Agent workflow rules",
+    "status": "inProgress",
+    "narratives": {
+      "proposal": {
+        "title": "Overview",
+        "content": "Curate reusable agent workflow strategies and warnings; update via AcePatch."
+      }
     },
-    {
-      "op": "appendEntry",
-      "entry": {
-        "id": "entry-3",
-        "kind": "warning",
-        "text": "Avoid rewriting the entire playbook; prefer incremental entry updates to prevent context collapse.",
-        "confidence": 0.8,
-        "helpfulCount": 1,
-        "harmfulCount": 0,
-        "status": "active",
-        "feedbackType": "executionOutcome",
-        "createdAt": "2025-12-27T00:00:00Z",
-        "updatedAt": "2025-12-27T00:00:00Z"
-      },
-      "reason": "Observed repeated loss of details after summary rewrites"
+    "playbook": {
+      "version": 7,
+      "created": "2025-01-10T18:00:00Z",
+      "updated": "2025-12-27T08:00:00Z",
+      "entries": [
+        {
+          "id": "entry-task-first",
+          "kind": "rule",
+          "title": "Task-first workflow",
+          "text": "For repeatable workflows, add a Task target instead of documenting raw shell commands.",
+          "tags": ["workflow", "taskfile"],
+          "evidence": ["docs:warp.md"],
+          "confidence": 0.9,
+          "helpfulCount": 7,
+          "harmfulCount": 0,
+          "feedbackType": "humanReview",
+          "status": "active"
+        },
+        {
+          "id": "entry-test-first",
+          "kind": "strategy",
+          "title": "Failing test first",
+          "text": "Before changing code, write a failing test that reproduces the bug; then implement the minimal fix.",
+          "tags": ["testing", "debugging"],
+          "evidence": ["pr:42", "ci:green-run-2025-12-26"],
+          "confidence": 0.95,
+          "helpfulCount": 14,
+          "harmfulCount": 0,
+          "feedbackType": "executionOutcome",
+          "status": "active",
+          "supersededBy": "entry-tests-before-fix-v2"
+        },
+        {
+          "id": "entry-tests-before-fix-v2",
+          "kind": "strategy",
+          "title": "Refined test-first",
+          "text": "Write a failing test first; then implement the minimal change that makes it pass; finally refactor with tests green.",
+          "tags": ["testing"],
+          "evidence": ["pr:57"],
+          "confidence": 0.96,
+          "helpfulCount": 3,
+          "harmfulCount": 0,
+          "feedbackType": "executionOutcome",
+          "status": "active",
+          "supersedes": ["entry-test-first"]
+        },
+        {
+          "id": "entry-avoid-blanket-refactors",
+          "kind": "warning",
+          "text": "Avoid large refactors without a characterization test suite and a rollback plan.",
+          "tags": ["refactor", "risk"],
+          "evidence": ["incident:2025-09-14-regression"],
+          "confidence": 0.85,
+          "helpfulCount": 5,
+          "harmfulCount": 1,
+          "feedbackType": "executionOutcome",
+          "status": "active"
+        },
+        {
+          "id": "entry-timezone-bugs",
+          "kind": "learning",
+          "text": "Timezone-related bugs usually come from mixing naive timestamps and offset timestamps; require RFC3339 with offsets everywhere.",
+          "tags": ["time", "data-integrity"],
+          "evidence": ["issue:113"],
+          "confidence": 0.8,
+          "helpfulCount": 3,
+          "harmfulCount": 0,
+          "feedbackType": "executionOutcome",
+          "status": "active"
+        }
+      ],
+      "metrics": {
+        "totalEntries": 5,
+        "averageConfidence": 0.89,
+        "lastUpdated": "2025-12-27T08:00:00Z"
+      }
     }
-  ]
+  }
 }
 ```
 

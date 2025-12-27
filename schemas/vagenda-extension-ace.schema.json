@@ -64,12 +64,12 @@
         "baseDocumentSequence": {"type": "integer", "minimum": 0},
         "operations": {
           "type": "array",
-          "items": {"$ref": "#/$defs/AceOp"}
+          "items": {"$ref": "#/$defs/AcePatchOp"}
         }
       },
       "additionalProperties": true
     },
-    "AceOp": {
+    "AcePatchOp": {
       "type": "object",
       "required": ["op"],
       "properties": {
