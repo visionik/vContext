@@ -85,6 +85,15 @@ vagenda-python/
 │       │   ├── __init__.py
 │       │   ├── todo_query.py
 │       │   └── plan_query.py
+│       ├── mutator/           # Direct mutation helpers
+│       │   ├── __init__.py
+│       │   ├── todo_mutator.py
+│       │   └── plan_mutator.py
+│       ├── updater/           # Immutable and validated updates
+│       │   ├── __init__.py
+│       │   ├── immutable.py
+│       │   ├── validated.py
+│       │   └── transaction.py
 │       └── integrations/      # Framework integrations
 │           ├── fastapi/
 │           ├── django/
@@ -567,6 +576,458 @@ def validate_or_raise(doc: Document):
         raise ValueError(f"Validation failed: {'; '.join(errors)}")
 ```
 
+### Mutation API
+
+The library supports document modification through Pythonic patterns: direct mutation (for simple cases), context managers (for transactional updates), and validated mutators (for safety-critical operations).
+
+#### Direct Mutation Helpers
+
+```python
+# vagenda/mutator/todo_mutator.py
+
+from typing import Callable, List, Optional
+from ..core.types import TodoList, TodoItem, ItemStatus
+
+
+class TodoListMutator:
+    """Helper for mutating TodoList."""
+    
+    def __init__(self, todo_list: TodoList):
+        self._list = todo_list
+    
+    def add_item(self, title: str, status: ItemStatus = ItemStatus.PENDING) -> TodoItem:
+        """Add an item to the list."""
+        item = TodoItem(title=title, status=status)
+        self._list.items.append(item)
+        return item
+    
+    def remove_item(self, index: int) -> TodoItem:
+        """Remove an item by index."""
+        if index < 0 or index >= len(self._list.items):
+            raise IndexError(f"Index out of range: {index}")
+        return self._list.items.pop(index)
+    
+    def update_item(self, index: int, **updates) -> TodoItem:
+        """Update an item by index."""
+        if index < 0 or index >= len(self._list.items):
+            raise IndexError(f"Index out of range: {index}")
+        
+        item = self._list.items[index]
+        for key, value in updates.items():
+            setattr(item, key, value)
+        return item
+    
+    def find_and_update(
+        self,
+        predicate: Callable[[TodoItem], bool],
+        **updates
+    ) -> int:
+        """Find and update items matching predicate."""
+        count = 0
+        for item in self._list.items:
+            if predicate(item):
+                for key, value in updates.items():
+                    setattr(item, key, value)
+                count += 1
+        return count
+    
+    def clear(self) -> None:
+        """Clear all items."""
+        self._list.items.clear()
+
+
+# vagenda/mutator/plan_mutator.py
+
+from typing import Optional
+from ..core.types import Plan, Narrative, PlanStatus
+
+
+class PlanMutator:
+    """Helper for mutating Plan."""
+    
+    def __init__(self, plan: Plan):
+        self._plan = plan
+    
+    def set_narrative(self, key: str, title: str, content: str) -> Narrative:
+        """Add or update a narrative."""
+        narrative = Narrative(title=title, content=content)
+        self._plan.narratives[key] = narrative
+        return narrative
+    
+    def remove_narrative(self, key: str) -> Optional[Narrative]:
+        """Remove a narrative."""
+        return self._plan.narratives.pop(key, None)
+    
+    def update_narrative(self, key: str, **updates) -> Narrative:
+        """Update narrative content."""
+        if key not in self._plan.narratives:
+            raise KeyError(f"Narrative not found: {key}")
+        
+        narrative = self._plan.narratives[key]
+        for k, v in updates.items():
+            setattr(narrative, k, v)
+        return narrative
+    
+    def set_status(self, status: PlanStatus) -> None:
+        """Set plan status."""
+        self._plan.status = status
+
+
+def mutate_todo_list(todo_list: TodoList) -> TodoListMutator:
+    """Create a mutator for a TodoList."""
+    return TodoListMutator(todo_list)
+
+
+def mutate_plan(plan: Plan) -> PlanMutator:
+    """Create a mutator for a Plan."""
+    return PlanMutator(plan)
+```
+
+#### Immutable Update Helpers
+
+```python
+# vagenda/updater/immutable.py
+
+from typing import Callable, Dict
+from copy import deepcopy
+from ..core.types import Document, TodoItem, Narrative, ItemStatus, PlanStatus
+
+
+class ImmutableUpdater:
+    """Immutable update helpers using deep copy."""
+    
+    @staticmethod
+    def add_item(
+        doc: Document,
+        title: str,
+        status: ItemStatus = ItemStatus.PENDING
+    ) -> Document:
+        """Add item to TodoList (immutable)."""
+        if not doc.todoList:
+            raise ValueError("Document has no TodoList")
+        
+        new_doc = deepcopy(doc)
+        new_doc.todoList.items.append(TodoItem(title=title, status=status))
+        return new_doc
+    
+    @staticmethod
+    def remove_item(doc: Document, index: int) -> Document:
+        """Remove item from TodoList (immutable)."""
+        if not doc.todoList:
+            raise ValueError("Document has no TodoList")
+        
+        new_doc = deepcopy(doc)
+        if index < 0 or index >= len(new_doc.todoList.items):
+            raise IndexError(f"Index out of range: {index}")
+        new_doc.todoList.items.pop(index)
+        return new_doc
+    
+    @staticmethod
+    def update_item(doc: Document, index: int, **updates) -> Document:
+        """Update item in TodoList (immutable)."""
+        if not doc.todoList:
+            raise ValueError("Document has no TodoList")
+        
+        new_doc = deepcopy(doc)
+        if index < 0 or index >= len(new_doc.todoList.items):
+            raise IndexError(f"Index out of range: {index}")
+        
+        item = new_doc.todoList.items[index]
+        for key, value in updates.items():
+            setattr(item, key, value)
+        return new_doc
+    
+    @staticmethod
+    def find_and_update(
+        doc: Document,
+        predicate: Callable[[TodoItem], bool],
+        **updates
+    ) -> Document:
+        """Find and update items (immutable)."""
+        if not doc.todoList:
+            raise ValueError("Document has no TodoList")
+        
+        new_doc = deepcopy(doc)
+        for item in new_doc.todoList.items:
+            if predicate(item):
+                for key, value in updates.items():
+                    setattr(item, key, value)
+        return new_doc
+    
+    @staticmethod
+    def set_narrative(
+        doc: Document,
+        key: str,
+        title: str,
+        content: str
+    ) -> Document:
+        """Set narrative in Plan (immutable)."""
+        if not doc.plan:
+            raise ValueError("Document has no Plan")
+        
+        new_doc = deepcopy(doc)
+        new_doc.plan.narratives[key] = Narrative(title=title, content=content)
+        return new_doc
+    
+    @staticmethod
+    def set_plan_status(doc: Document, status: PlanStatus) -> Document:
+        """Update plan status (immutable)."""
+        if not doc.plan:
+            raise ValueError("Document has no Plan")
+        
+        new_doc = deepcopy(doc)
+        new_doc.plan.status = status
+        return new_doc
+```
+
+#### Validated Updater
+
+```python
+# vagenda/updater/validated.py
+
+from typing import Callable, List, Optional, Any
+from dataclasses import dataclass
+from copy import deepcopy
+from ..core.types import Document, TodoItem, ItemStatus, PlanStatus
+from ..validator.schemas import validate_document
+
+
+@dataclass
+class UpdateResult:
+    """Result of an update operation."""
+    success: bool
+    document: Optional[Document] = None
+    errors: Optional[List[str]] = None
+
+
+class ValidatedUpdater:
+    """Validated updater with automatic validation and rollback."""
+    
+    def __init__(self, doc: Document, validate: bool = True):
+        self._doc = doc
+        self._validate = validate
+    
+    def get_document(self) -> Document:
+        """Get the current document."""
+        return self._doc
+    
+    def validate(self) -> List[str]:
+        """Validate current state."""
+        if not self._validate:
+            return []
+        return validate_document(self._doc)
+    
+    def add_item(
+        self,
+        title: str,
+        status: ItemStatus = ItemStatus.PENDING
+    ) -> UpdateResult:
+        """Add item with validation."""
+        if not self._doc.todoList:
+            return UpdateResult(
+                success=False,
+                errors=["Document has no TodoList"]
+            )
+        
+        item = TodoItem(title=title, status=status)
+        self._doc.todoList.items.append(item)
+        
+        errors = self.validate()
+        if errors:
+            # Rollback
+            self._doc.todoList.items.pop()
+            return UpdateResult(success=False, errors=errors)
+        
+        return UpdateResult(success=True, document=self._doc)
+    
+    def update_item(self, index: int, **updates) -> UpdateResult:
+        """Update item with validation."""
+        if not self._doc.todoList:
+            return UpdateResult(
+                success=False,
+                errors=["Document has no TodoList"]
+            )
+        
+        if index < 0 or index >= len(self._doc.todoList.items):
+            return UpdateResult(
+                success=False,
+                errors=[f"Index out of range: {index}"]
+            )
+        
+        # Save original for rollback
+        item = self._doc.todoList.items[index]
+        original = {key: getattr(item, key) for key in updates}
+        
+        # Apply updates
+        for key, value in updates.items():
+            setattr(item, key, value)
+        
+        errors = self.validate()
+        if errors:
+            # Rollback
+            for key, value in original.items():
+                setattr(item, key, value)
+            return UpdateResult(success=False, errors=errors)
+        
+        return UpdateResult(success=True, document=self._doc)
+    
+    def find_and_update(
+        self,
+        predicate: Callable[[TodoItem], bool],
+        **updates
+    ) -> UpdateResult:
+        """Find and update with validation."""
+        if not self._doc.todoList:
+            return UpdateResult(
+                success=False,
+                errors=["Document has no TodoList"]
+            )
+        
+        # Find matching items and save originals
+        matches = []
+        originals = {}
+        for i, item in enumerate(self._doc.todoList.items):
+            if predicate(item):
+                matches.append(i)
+                originals[i] = {key: getattr(item, key) for key in updates}
+        
+        if not matches:
+            return UpdateResult(
+                success=False,
+                errors=["No matching items found"]
+            )
+        
+        # Apply updates
+        for i in matches:
+            item = self._doc.todoList.items[i]
+            for key, value in updates.items():
+                setattr(item, key, value)
+        
+        errors = self.validate()
+        if errors:
+            # Rollback all changes
+            for i in matches:
+                item = self._doc.todoList.items[i]
+                for key, value in originals[i].items():
+                    setattr(item, key, value)
+            return UpdateResult(success=False, errors=errors)
+        
+        return UpdateResult(success=True, document=self._doc)
+    
+    def remove_item(self, index: int) -> UpdateResult:
+        """Remove item with validation."""
+        if not self._doc.todoList:
+            return UpdateResult(
+                success=False,
+                errors=["Document has no TodoList"]
+            )
+        
+        if index < 0 or index >= len(self._doc.todoList.items):
+            return UpdateResult(
+                success=False,
+                errors=[f"Index out of range: {index}"]
+            )
+        
+        removed = self._doc.todoList.items.pop(index)
+        
+        errors = self.validate()
+        if errors:
+            # Rollback
+            self._doc.todoList.items.insert(index, removed)
+            return UpdateResult(success=False, errors=errors)
+        
+        return UpdateResult(success=True, document=self._doc)
+    
+    def set_narrative(
+        self,
+        key: str,
+        title: str,
+        content: str
+    ) -> UpdateResult:
+        """Set plan narrative with validation."""
+        if not self._doc.plan:
+            return UpdateResult(
+                success=False,
+                errors=["Document has no Plan"]
+            )
+        
+        from ..core.types import Narrative
+        original = self._doc.plan.narratives.get(key)
+        self._doc.plan.narratives[key] = Narrative(title=title, content=content)
+        
+        errors = self.validate()
+        if errors:
+            # Rollback
+            if original:
+                self._doc.plan.narratives[key] = original
+            else:
+                del self._doc.plan.narratives[key]
+            return UpdateResult(success=False, errors=errors)
+        
+        return UpdateResult(success=True, document=self._doc)
+    
+    def transaction(self, func: Callable[["ValidatedUpdater"], UpdateResult]) -> UpdateResult:
+        """Execute multiple operations in a transaction."""
+        # Create snapshot for rollback
+        snapshot = deepcopy(self._doc)
+        
+        result = func(self)
+        
+        if not result.success:
+            # Rollback to snapshot
+            self._doc = snapshot
+        
+        return result
+
+
+def create_updater(doc: Document, validate: bool = True) -> ValidatedUpdater:
+    """Create a validated updater."""
+    return ValidatedUpdater(doc, validate)
+```
+
+#### Context Manager for Transactions
+
+```python
+# vagenda/updater/transaction.py
+
+from typing import Optional
+from contextlib import contextmanager
+from copy import deepcopy
+from ..core.types import Document
+from ..validator.schemas import validate_document
+
+
+@contextmanager
+def transaction(doc: Document, validate: bool = True):
+    """
+    Context manager for transactional document updates.
+    
+    Usage:
+        with transaction(doc) as txn:
+            txn.todoList.items.append(TodoItem(title="New", status=ItemStatus.PENDING))
+            txn.todoList.items[0].status = ItemStatus.COMPLETED
+    
+    If validation fails or an exception is raised, changes are rolled back.
+    """
+    snapshot = deepcopy(doc)
+    
+    try:
+        yield doc
+        
+        # Validate after all changes
+        if validate:
+            errors = validate_document(doc)
+            if errors:
+                # Rollback
+                doc.__dict__.update(snapshot.__dict__)
+                raise ValueError(f"Validation failed: {'; '.join(errors)}")
+    
+    except Exception:
+        # Rollback on any exception
+        doc.__dict__.update(snapshot.__dict__)
+        raise
+```
+
 ## Extension Support
 
 Extensions use Pydantic's model inheritance:
@@ -930,6 +1391,168 @@ class CreateTodoListView(APIView):
         )
         project.save()
         return Response({"id": project.id})
+```
+
+### Example 9: Direct Mutations
+
+```python
+from vagenda import VAgendaDocument, ItemStatus
+from vagenda.mutator import mutate_todo_list
+
+# Load existing document
+doc = VAgendaDocument.from_file("tasks.tron")
+
+# Use mutator for direct changes
+mutator = mutate_todo_list(doc.todo_list)
+
+# Add new item
+mutator.add_item("New urgent task", ItemStatus.PENDING)
+
+# Update first item
+mutator.update_item(0, status=ItemStatus.COMPLETED)
+
+# Find and update multiple items
+count = mutator.find_and_update(
+    lambda item: item.status == ItemStatus.PENDING,
+    status=ItemStatus.IN_PROGRESS
+)
+print(f"Updated {count} items")
+
+# Save back
+doc.to_file("tasks.tron")
+```
+
+### Example 10: Immutable Updates
+
+```python
+from vagenda import VAgendaDocument, ItemStatus
+from vagenda.updater import ImmutableUpdater
+
+# Load document
+doc = VAgendaDocument.from_file("tasks.tron")
+
+# Immutable updates (functional style)
+original_data = doc.data
+
+# Add item (returns new document)
+updated = ImmutableUpdater.add_item(
+    original_data,
+    "New task",
+    ItemStatus.PENDING
+)
+
+# Update first item (returns new document)
+updated = ImmutableUpdater.update_item(updated, 0, status=ItemStatus.COMPLETED)
+
+# Find and update (returns new document)
+updated = ImmutableUpdater.find_and_update(
+    updated,
+    lambda item: item.status == ItemStatus.PENDING,
+    status=ItemStatus.IN_PROGRESS
+)
+
+# Original is unchanged
+print(f"Original: {len(original_data.todoList.items)} items")
+print(f"Updated: {len(updated.todoList.items)} items")
+
+# Create new document from updated data
+new_doc = VAgendaDocument(updated)
+print(new_doc.to_json(indent=2))
+```
+
+### Example 11: Validated Updates
+
+```python
+from vagenda import VAgendaDocument, ItemStatus
+from vagenda.updater import create_updater
+
+# Load document
+doc = VAgendaDocument.from_file("tasks.tron")
+
+# Create validated updater
+updater = create_updater(doc.data)
+
+# Add item with validation
+result = updater.add_item("New task", ItemStatus.PENDING)
+if not result.success:
+    print(f"Validation failed: {result.errors}")
+
+# Find and update with validation
+result = updater.find_and_update(
+    lambda item: item.status == ItemStatus.PENDING,
+    status=ItemStatus.IN_PROGRESS
+)
+
+if result.success:
+    print("All updates validated successfully")
+    updated_doc = VAgendaDocument(updater.get_document())
+    updated_doc.to_file("tasks.tron")
+else:
+    print(f"Updates rolled back: {result.errors}")
+```
+
+### Example 12: Transactional Updates with Context Manager
+
+```python
+from vagenda import VAgendaDocument, ItemStatus
+from vagenda.updater import transaction
+from vagenda.core.types import TodoItem
+
+# Load document
+doc = VAgendaDocument.from_file("tasks.tron")
+
+# Use context manager for transactional updates
+try:
+    with transaction(doc.data) as txn:
+        # All these operations happen together
+        txn.todoList.items.append(
+            TodoItem(title="Task 2", status=ItemStatus.PENDING)
+        )
+        txn.todoList.items.append(
+            TodoItem(title="Task 3", status=ItemStatus.PENDING)
+        )
+        txn.todoList.items[0].status = ItemStatus.COMPLETED
+        
+    print("Transaction completed successfully")
+    doc.to_file("tasks.tron")
+    
+except ValueError as e:
+    print(f"Transaction rolled back: {e}")
+```
+
+### Example 13: Transactional Updates with ValidatedUpdater
+
+```python
+from vagenda import todo, ItemStatus
+from vagenda.updater import create_updater
+
+# Create initial document
+initial_doc = todo("0.2").add_item("Task 1", ItemStatus.PENDING).build()
+
+# Perform multiple updates atomically
+updater = create_updater(initial_doc)
+
+def batch_updates(upd):
+    """Function that performs multiple updates."""
+    result = upd.add_item("Task 2", ItemStatus.PENDING)
+    if not result.success:
+        return result
+    
+    result = upd.add_item("Task 3", ItemStatus.PENDING)
+    if not result.success:
+        return result
+    
+    result = upd.update_item(0, status=ItemStatus.IN_PROGRESS)
+    return result
+
+result = updater.transaction(batch_updates)
+
+if result.success:
+    print("Transaction completed")
+    print(f"Total items: {len(result.document.todoList.items)}")
+else:
+    print(f"Transaction rolled back: {result.errors}")
+    print(f"Original items: {len(initial_doc.todoList.items)}")
 ```
 
 ## CLI Tool Design
