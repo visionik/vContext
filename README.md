@@ -1436,7 +1436,41 @@ Plan {
 }
 ```
 
+### Playbook structure
+
+A playbook contains:
+- **Strategies**: reusable patterns discovered through execution
+- **Learnings**: durable insights that persist across work
+- **Reflections**: agent self-analysis after milestones/failures
+- **Metrics** (optional): summary statistics for playbook evolution and impact
+
+### Playbook evolution cycle
+
+```
+1. Execution → Collect feedback
+   ↓
+2. Reflection → Analyze outcomes
+   ↓
+3. Strategy/Learning extraction → Write down reusable patterns
+   ↓
+4. Curation → Refine, tag, link evidence, update confidence
+   ↓
+5. Application → Use the playbook in the next run
+   ↓
+   (repeat)
+```
+
+### Preventing context collapse
+
+ACE is designed to reduce “forgetting” over long horizons:
+- Prefer **refining** strategies over replacing them.
+- Track **confidence** and keep low-confidence hypotheses explicitly.
+- Link learnings to **evidence** (e.g., a change log entry, a failure, a metric).
+- Keep a **reflection trail** so later agents can see why a rule exists.
+
 ### Example
+
+The TRON example below is intentionally minimal. The JSON example shows a richer playbook with reflections and metrics.
 
 **TRON:**
 ```tron
@@ -1481,7 +1515,7 @@ plan: Plan(
 )
 ```
 
-**JSON:**
+**JSON (richer example):**
 ```json
 {
   "vAgendaInfo": {
@@ -1489,42 +1523,77 @@ plan: Plan(
   },
   "plan": {
     "id": "plan-003",
-  "title": "API development patterns",
-  "status": "completed",
-  "narratives": {
-    "proposal": {
-      "title": "Overview",
-      "content": "Document learned patterns"
-    }
-  },
-  "playbook": {
-    "version": 1,
-    "created": "2024-12-27T09:00:00Z",
-    "updated": "2024-12-27T15:00:00Z",
-    "strategies": [
-      {
-        "id": "strat-1",
-        "title": "Test-first development",
-        "description": "Write tests before implementation for better coverage",
-        "confidence": 0.95,
-        "createdAt": "2024-12-27T10:00:00Z",
-        "updatedAt": "2024-12-27T10:00:00Z"
+    "title": "API development patterns",
+    "status": "completed",
+    "narratives": {
+      "proposal": {
+        "title": "Overview",
+        "content": "Document learned patterns"
       }
-    ],
-    "learnings": [
-      {
-        "id": "learn-1",
-        "content": "Early validation prevents late-stage refactoring",
-        "confidence": 0.9,
-        "discoveredAt": "2024-12-27T14:00:00Z",
-        "discoveredBy": {
-          "id": "agent-1",
-          "type": "aiAgent",
-          "name": "Claude"
+    },
+    "playbook": {
+      "version": 3,
+      "created": "2024-12-01T00:00:00Z",
+      "updated": "2024-12-27T15:00:00Z",
+      "strategies": [
+        {
+          "id": "strat-001",
+          "title": "Parallel Phase Execution",
+          "description": "Run independent phases in parallel when they don’t share hard dependencies",
+          "context": "When phases have independent resources",
+          "confidence": 0.95,
+          "examples": ["Frontend and backend work parallelized"],
+          "antipatterns": ["Don’t parallelize shared schema migrations"],
+          "createdAt": "2024-12-15T10:00:00Z",
+          "updatedAt": "2024-12-20T14:00:00Z",
+          "usageCount": 12,
+          "successRate": 0.92,
+          "source": "execution",
+          "tags": ["performance", "planning"]
         }
+      ],
+      "learnings": [
+        {
+          "id": "learn-001",
+          "content": "Stakeholders require compliance documentation earlier than expected",
+          "evidence": ["Added security audit phase after stakeholder request"],
+          "confidence": 0.9,
+          "domain": "compliance",
+          "applicability": "Projects with customer data",
+          "discoveredAt": "2024-12-27T14:00:00Z",
+          "discoveredBy": {
+            "id": "agent-a",
+            "type": "aiAgent",
+            "model": "claude-3.5-sonnet"
+          },
+          "reinforcementCount": 3,
+          "tags": ["compliance"]
+        }
+      ],
+      "reflections": [
+        {
+          "id": "refl-001",
+          "timestamp": "2024-12-27T15:00:00Z",
+          "agent": {
+            "id": "agent-a",
+            "type": "aiAgent",
+            "model": "claude-3.5-sonnet"
+          },
+          "scope": "Phase 1 completion",
+          "trigger": "completion",
+          "observation": "Phase 1 completed faster than estimated due to parallel execution strategy",
+          "analysis": "Coordination overhead stayed low; the strategy appears broadly applicable.",
+          "improvements": ["Map dependencies upfront for parallelization planning"],
+          "strategiesApplied": ["strat-001"]
+        }
+      ],
+      "metrics": {
+        "totalStrategies": 1,
+        "totalLearnings": 1,
+        "averageConfidence": 0.925,
+        "lastReflection": "2024-12-27T15:00:00Z"
       }
-    ]
-  }
+    }
   }
 }
 ```
