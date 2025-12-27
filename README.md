@@ -23,6 +23,39 @@ This enables both agentic systems and human-facing tools to share a common repre
 
 **Author**: Jonathan Taylor (visionik@pobox.com)
 
+## Conformance and normative language
+
+The key words **MUST**, **SHOULD**, and **MAY** in this document are to be interpreted as normative requirements.
+
+A document is **vAgenda Core v0.2 conformant** if:
+- It is a single object containing `vAgendaInfo` and exactly one of `todoList` or `plan`.
+- `vAgendaInfo.version` MUST equal `"0.2"`.
+- Any `status` fields MUST use only the enumerated values defined in this spec.
+
+### Extensibility and unknown fields
+
+- Producers MAY include additional fields not defined in core or extensions.
+- Consumers MUST ignore unknown fields.
+- Tools that rewrite documents SHOULD preserve unknown fields (do not drop extension data).
+
+### Date/time and timezone
+
+- All `datetime` values MUST be RFC 3339 / ISO 8601 timestamps that include an explicit offset (`Z` or `±hh:mm`).
+- `timezone` (when present) SHOULD be treated as display intent (IANA timezone name), not as a parsing fallback.
+
+### Identifiers and sequencing
+
+When Extension 2 (Identifiers) and/or Extension 10 (Version Control & Sync) are in use:
+- Within a single container, `id` values MUST be unique (e.g., within `todoList.items`, within `plan.phases`).
+- `uid` values (when present) SHOULD be globally unique and stable across copies.
+- `sequence` values (when present) MUST be monotonically non-decreasing for a given document.
+
+## Machine-verifiable schemas (JSON)
+
+This spec includes JSON Schema files intended for validation and tooling:
+- Core schema: `schemas/vagenda-core.schema.json`
+- ACE extension schema: `schemas/vagenda-extension-ace.schema.json`
+
 ## Design Philosophy
 
 vAgenda uses a **modular, layered architecture**:
@@ -46,8 +79,8 @@ vAgenda supports both TRON and JSON encodings. **TRON is the preferred format** 
 ```json
 {
   "items": [
-    {"id": "1", "title": "Auth", "status": "done"},
-    {"id": "2", "title": "API", "status": "progress"},
+    {"id": "1", "title": "Auth", "status": "completed"},
+    {"id": "2", "title": "API", "status": "inProgress"},
     {"id": "3", "title": "Tests", "status": "pending"}
   ]
 }
@@ -58,8 +91,8 @@ vAgenda supports both TRON and JSON encodings. **TRON is the preferred format** 
 class Item: id, title, status
 
 items: [
-  Item("1", "Auth", "done"),
-  Item("2", "API", "progress"),
+  Item("1", "Auth", "completed"),
+  Item("2", "API", "inProgress"),
   Item("3", "Tests", "pending")
 ]
 ```
@@ -321,6 +354,19 @@ plan: Plan(
 
 Extensions add optional fields to core types. Implementations can support any combination.
 
+## Extension documents
+
+Some extensions have dedicated spec documents:
+
+- `vAgenda-extension-ACE.md` — ACE (Agentic Context Engineering)
+- `vAgenda-extension-MCP.md` — Model Context Protocol (MCP) integration
+- `vAgenda-extension-beads.md` — Beads integration
+- `vAgenda-extension-claude.md` — Claude integration
+- `vAgenda-extension-security.md` — Security extension
+- `vAgenda-extension-api-go.md` — Go API extension
+- `vAgenda-extension-api-python.md` — Python API extension
+- `vAgenda-extension-api-typescript.md` — TypeScript API extension
+
 ## Extension 1: Timestamps
 
 **Depends on:** Core only
@@ -545,7 +591,7 @@ class TodoItem: id, title, status, description, priority, tags, metadata
 TodoItem(
   "item-2",
   "Implement JWT authentication",
-  "in-progress",
+  "inProgress",
   "Add JWT token generation and validation for secure API access",
   "high",
   ["security", "backend", "auth"],
@@ -558,7 +604,7 @@ TodoItem(
 {
   "id": "item-2",
   "title": "Implement JWT authentication",
-  "status": "in-progress",
+  "status": "inProgress",
   "description": "Add JWT token generation and validation for secure API access",
   "priority": "high",
   "tags": ["security", "backend", "auth"],
@@ -615,7 +661,7 @@ vAgendaInfo: vAgendaInfo("0.2")
 plan: Plan(
   "plan-002",
   "Build authentication system",
-  "in-progress",
+  "inProgress",
   {
     "proposal": Narrative(
       "Overview",
@@ -624,7 +670,7 @@ plan: Plan(
   },
   [
     Phase("phase-1", "Database setup", "completed", []),
-    Phase("phase-2", "JWT implementation", "in-progress", ["phase-1"]),
+    Phase("phase-2", "JWT implementation", "inProgress", ["phase-1"]),
     Phase("phase-3", "OAuth integration", "pending", ["phase-2"])
   ]
 )
@@ -639,7 +685,7 @@ plan: Plan(
   "plan": {
     "id": "plan-002",
   "title": "Build authentication system",
-  "status": "in-progress",
+  "status": "inProgress",
   "narratives": {
     "proposal": {
       "title": "Overview",
@@ -656,7 +702,7 @@ plan: Plan(
     {
       "id": "phase-2",
       "title": "JWT implementation",
-      "status": "in-progress",
+      "status": "inProgress",
       "dependencies": ["phase-1"]
     },
     {
@@ -1347,256 +1393,12 @@ plan: Plan(
 
 ## Extension 12: ACE (Agentic Context Engineering)
 
-**Depends on:** Extension 2 (Identifiers) — for strategy/learning references; Extension 10 (Version Control & Sync) — for `Agent` type
+The ACE extension spec has been moved to `vAgenda-extension-ACE.md` (see that document for the full schema, invariants, merge semantics, and examples).
 
-Adds evolving playbooks for **long-term memory** (potentially very long-term). While TodoLists provide short-term memory (hours to days) and Plans provide medium-term memory (days to weeks/months), ACE playbooks accumulate strategies and learnings that persist across multiple projects, sessions, and iterations — forming institutional knowledge that prevents information loss over time.
+- **Requires**: Extension 2 (Identifiers)
+- **Recommended**: Extension 10 (Version Control & Sync)
 
-Based on the ACE paradigm from ["Agentic Context Engineering"](https://arxiv.org/abs/2510.04618) (arXiv:2510.04618), which treats contexts as evolving playbooks that prevent information loss through structured accumulation and refinement.
-
-### New Types
-```javascript
-Playbook {
-  version: number         # Playbook version
-  created: datetime       # When playbook was created
-  updated: datetime       # Last update time
-  strategies: Strategy[]  # Accumulated strategies
-  learnings: Learning[]   # Domain insights
-  reflections: Reflection[] # Agent reflections
-  metrics?: PlaybookMetrics # Success metrics
-}
-
-Strategy {
-  id: string              # Unique strategy identifier
-  title: string           # Short strategy name
-  description: string     # What this strategy does
-  context?: string        # When/where to apply
-  confidence: number      # 0.0-1.0
-  examples?: string[]     # Example scenarios
-  antipatterns?: string[] # What to avoid
-  createdAt: datetime
-  updatedAt: datetime
-  usageCount?: number
-  successRate?: number    # 0.0-1.0
-  source?: enum           # "execution" | "reflection" | "manual" | "transferred"
-  relatedStrategies?: string[]
-  tags?: string[]
-}
-
-Learning {
-  id: string              # Unique learning identifier
-  content: string         # The insight learned
-  evidence?: string[]     # Supporting evidence
-  confidence: number      # 0.0-1.0
-  domain?: string         # Domain area
-  applicability?: string  # When this applies
-  discoveredAt: datetime
-  discoveredBy: Agent
-  reinforcementCount?: number
-  contradictions?: string[] # IDs of conflicting learnings
-  tags?: string[]
-}
-
-Reflection {
-  id: string              # Unique reflection identifier
-  timestamp: datetime
-  agent: Agent
-  scope?: string          # What was reflected on
-  trigger: enum           # "completion" | "failure" | "milestone" | "scheduled" | "manual"
-  observation: string     # What was observed
-  analysis?: string       # Analysis of what happened
-  improvements?: string[]
-  strategiesApplied?: string[]
-  strategiesProposed?: Strategy[]
-  learningsExtracted?: Learning[]
-}
-
-PlaybookMetrics {
-  totalStrategies: number
-  totalLearnings: number
-  averageConfidence: number
-  lastReflection?: datetime
-  adaptationRate?: number
-  successImpact?: number
-}
-```
-
-### TodoList Extensions
-```javascript
-TodoList {
-  // Prior extensions...
-  playbook?: Playbook      # Evolving strategies and learnings
-}
-```
-
-### Plan Extensions
-```javascript
-Plan {
-  // Prior extensions...
-  playbook?: Playbook      # Evolving strategies and learnings
-}
-```
-
-### Playbook structure
-
-A playbook contains:
-- **Strategies**: reusable patterns discovered through execution
-- **Learnings**: durable insights that persist across work
-- **Reflections**: agent self-analysis after milestones/failures
-- **Metrics** (optional): summary statistics for playbook evolution and impact
-
-### Playbook evolution cycle
-
-```
-1. Execution → Collect feedback
-   ↓
-2. Reflection → Analyze outcomes
-   ↓
-3. Strategy/Learning extraction → Write down reusable patterns
-   ↓
-4. Curation → Refine, tag, link evidence, update confidence
-   ↓
-5. Application → Use the playbook in the next run
-   ↓
-   (repeat)
-```
-
-### Preventing context collapse
-
-ACE is designed to reduce “forgetting” over long horizons:
-- Prefer **refining** strategies over replacing them.
-- Track **confidence** and keep low-confidence hypotheses explicitly.
-- Link learnings to **evidence** (e.g., a change log entry, a failure, a metric).
-- Keep a **reflection trail** so later agents can see why a rule exists.
-
-### Example
-
-The TRON example below is intentionally minimal. The JSON example shows a richer playbook with reflections and metrics.
-
-**TRON:**
-```tron
-class vAgendaInfo: version
-class Plan: id, title, status, narratives, playbook
-class Narrative: title, content
-class Playbook: version, created, updated, strategies, learnings
-class Strategy: id, title, description, confidence, createdAt, updatedAt
-class Learning: id, content, confidence, discoveredAt, discoveredBy
-class Agent: id, type, name
-
-vAgendaInfo: vAgendaInfo("0.2")
-plan: Plan(
-  "plan-003",
-  "API development patterns",
-  "completed",
-  {"proposal": Narrative("Overview", "Document learned patterns")},
-  Playbook(
-    1,
-    "2024-12-27T09:00:00Z",
-    "2024-12-27T15:00:00Z",
-    [
-      Strategy(
-        "strat-1",
-        "Test-first development",
-        "Write tests before implementation for better coverage",
-        0.95,
-        "2024-12-27T10:00:00Z",
-        "2024-12-27T10:00:00Z"
-      )
-    ],
-    [
-      Learning(
-        "learn-1",
-        "Early validation prevents late-stage refactoring",
-        0.9,
-        "2024-12-27T14:00:00Z",
-        Agent("agent-1", "aiAgent", "Claude")
-      )
-    ]
-  )
-)
-```
-
-**JSON (richer example):**
-```json
-{
-  "vAgendaInfo": {
-    "version": "0.2"
-  },
-  "plan": {
-    "id": "plan-003",
-    "title": "API development patterns",
-    "status": "completed",
-    "narratives": {
-      "proposal": {
-        "title": "Overview",
-        "content": "Document learned patterns"
-      }
-    },
-    "playbook": {
-      "version": 3,
-      "created": "2024-12-01T00:00:00Z",
-      "updated": "2024-12-27T15:00:00Z",
-      "strategies": [
-        {
-          "id": "strat-001",
-          "title": "Parallel Phase Execution",
-          "description": "Run independent phases in parallel when they don’t share hard dependencies",
-          "context": "When phases have independent resources",
-          "confidence": 0.95,
-          "examples": ["Frontend and backend work parallelized"],
-          "antipatterns": ["Don’t parallelize shared schema migrations"],
-          "createdAt": "2024-12-15T10:00:00Z",
-          "updatedAt": "2024-12-20T14:00:00Z",
-          "usageCount": 12,
-          "successRate": 0.92,
-          "source": "execution",
-          "tags": ["performance", "planning"]
-        }
-      ],
-      "learnings": [
-        {
-          "id": "learn-001",
-          "content": "Stakeholders require compliance documentation earlier than expected",
-          "evidence": ["Added security audit phase after stakeholder request"],
-          "confidence": 0.9,
-          "domain": "compliance",
-          "applicability": "Projects with customer data",
-          "discoveredAt": "2024-12-27T14:00:00Z",
-          "discoveredBy": {
-            "id": "agent-a",
-            "type": "aiAgent",
-            "model": "claude-3.5-sonnet"
-          },
-          "reinforcementCount": 3,
-          "tags": ["compliance"]
-        }
-      ],
-      "reflections": [
-        {
-          "id": "refl-001",
-          "timestamp": "2024-12-27T15:00:00Z",
-          "agent": {
-            "id": "agent-a",
-            "type": "aiAgent",
-            "model": "claude-3.5-sonnet"
-          },
-          "scope": "Phase 1 completion",
-          "trigger": "completion",
-          "observation": "Phase 1 completed faster than estimated due to parallel execution strategy",
-          "analysis": "Coordination overhead stayed low; the strategy appears broadly applicable.",
-          "improvements": ["Map dependencies upfront for parallelization planning"],
-          "strategiesApplied": ["strat-001"]
-        }
-      ],
-      "metrics": {
-        "totalStrategies": 1,
-        "totalLearnings": 1,
-        "averageConfidence": 0.925,
-        "lastReflection": "2024-12-27T15:00:00Z"
-      }
-    }
-  }
-}
-```
+ACE adds long-term memory via `playbook.entries` and supports incremental updates via `AcePatch` (see the extension document for full details).
 
 ---
 
@@ -1655,7 +1457,7 @@ Implementations define only the classes for extensions they support.
 | 9. Security | Core | None |
 | 10. Version Control | Identifiers | None |
 | 11. Forking | Version Control | None |
-| 12. ACE | Identifiers, Version Control | None |
+|| 12. ACE (`vAgenda-extension-ACE.md`) | Identifiers, Version Control | None |
 
 ---
 
@@ -1771,11 +1573,7 @@ Editors should:
 - Use three-way merge for conflict detection
 
 ### ACE
-- Add strategies rather than replacing (prevent context collapse)
-- Track confidence and refine over time
-- Link learnings to specific evidence
-- Trigger reflections at completions, failures, milestones
-- Document antipatterns alongside strategies
+See `vAgenda-extension-ACE.md` for ACE-specific best practices (e.g. grow-and-refine, evidence linking, dedup, and AcePatch update guidance).
 
 ---
 
@@ -1785,85 +1583,89 @@ Editors should:
 
 ```json
 {
-  "version": "0.2",
-  "id": "plan-001",
-  "uid": "20241227T000000Z-123456@example.com",
-  "title": "Implement microservices architecture",
-  "description": "Migrate from monolith to microservices",
-  "created": "2024-12-27T00:00:00Z",
-  "updated": "2024-12-27T10:00:00Z",
-  "status": "inProgress",
-  "author": "Architecture Team",
-  "sequence": 5,
-  
-  "narratives": {
-    "proposal": {
-      "title": "Proposed Changes",
-      "content": "Split into three services: auth, api, worker"
-    },
-    "problem": {
-      "title": "Problem Statement",
-      "content": "Monolith limits scalability"
-    }
+  "vAgendaInfo": {
+    "version": "0.2",
+    "created": "2024-12-27T00:00:00Z",
+    "updated": "2024-12-27T10:00:00Z"
   },
-  
-  "phases": [
-    {
-      "id": "phase-1",
-      "uid": "phase-1-uid",
-      "title": "Foundation",
-      "description": "Set up infrastructure",
-      "order": 1,
-      "status": "completed",
-      "startDate": "2024-12-01T00:00:00Z",
-      "endDate": "2024-12-15T00:00:00Z",
-      "percentComplete": 100,
-      "participants": [
-        {
-          "id": "backend-team",
-          "name": "Backend Team",
-          "role": "owner",
-          "status": "accepted"
-        }
-      ]
-    }
-  ],
-  
-  "playbook": {
-    "version": 1,
-    "created": "2024-12-01T00:00:00Z",
-    "updated": "2024-12-27T10:00:00Z",
-    "strategies": [
+  "plan": {
+    "id": "plan-001",
+    "uid": "20241227T000000Z-123456@example.com",
+    "title": "Implement microservices architecture",
+    "description": "Migrate from monolith to microservices",
+    "status": "inProgress",
+    "author": "Architecture Team",
+    "sequence": 5,
+
+    "narratives": {
+      "proposal": {
+        "title": "Proposed Changes",
+        "content": "Split into three services: auth, api, worker"
+      },
+      "problem": {
+        "title": "Problem Statement",
+        "content": "Monolith limits scalability"
+      }
+    },
+
+    "phases": [
       {
-        "id": "strat-001",
-        "title": "Parallel Phase Execution",
-        "description": "Run independent phases in parallel",
-        "confidence": 0.95,
-        "usageCount": 3,
-        "successRate": 1.0,
-        "source": "execution",
-        "tags": ["performance"]
+        "id": "phase-1",
+        "uid": "phase-1-uid",
+        "title": "Foundation",
+        "description": "Set up infrastructure",
+        "order": 1,
+        "status": "completed",
+        "startDate": "2024-12-01T00:00:00Z",
+        "endDate": "2024-12-15T00:00:00Z",
+        "percentComplete": 100,
+        "participants": [
+          {
+            "id": "backend-team",
+            "name": "Backend Team",
+            "role": "owner",
+            "status": "accepted"
+          }
+        ]
       }
     ],
-    "learnings": [],
-    "reflections": [],
-    "metrics": {
-      "totalStrategies": 1,
-      "totalLearnings": 0,
-      "averageConfidence": 0.95
+
+    "playbook": {
+      "version": 1,
+      "created": "2024-12-01T00:00:00Z",
+      "updated": "2024-12-27T10:00:00Z",
+      "entries": [
+        {
+          "id": "entry-001",
+          "kind": "strategy",
+          "title": "Parallel Phase Execution",
+          "text": "Run independent phases in parallel when they don’t share hard dependencies",
+          "confidence": 0.95,
+          "helpfulCount": 3,
+          "harmfulCount": 0,
+          "feedbackType": "executionOutcome",
+          "status": "active",
+          "tags": ["performance"]
+        }
+      ],
+      "metrics": {
+        "totalEntries": 1,
+        "averageConfidence": 0.95,
+        "lastUpdated": "2024-12-27T10:00:00Z"
+      }
+    },
+
+    "metadata": {
+      "extensions": [
+        "rich-metadata",
+        "hierarchical",
+        "workflow",
+        "participants",
+        "version-control",
+        "ace"
+      ],
+      "customField": "custom value"
     }
-  },
-  
-  "metadata": {
-    "extensions": [
-      "rich-metadata",
-      "hierarchical",
-      "workflow",
-      "participants",
-      "version-control",
-      "ace"
-    ],
-    "customField": "custom value"
   }
 }
 ```
