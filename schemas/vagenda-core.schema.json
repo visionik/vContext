@@ -10,9 +10,15 @@
     "todoList": {"$ref": "#/$defs/TodoList"},
     "plan": {"$ref": "#/$defs/Plan"}
   },
-  "anyOf": [
-    {"required": ["todoList"]},
-    {"required": ["plan"]}
+  "oneOf": [
+    {
+      "required": ["todoList"],
+      "not": {"required": ["plan"]}
+    },
+    {
+      "required": ["plan"],
+      "not": {"required": ["todoList"]}
+    }
   ],
   "additionalProperties": true,
   "$defs": {
@@ -44,6 +50,7 @@
         "description": {"type": "string"},
         "tags": {"type": "array", "items": {"type": "string"}},
         "metadata": {"type": "object"},
+        "uris": {"type": "array", "items": {"$ref": "#/$defs/URI"}},
         "agent": {"$ref": "#/$defs/Agent"},
         "lastModifiedBy": {"$ref": "#/$defs/Agent"},
         "changeLog": {
@@ -115,6 +122,7 @@
           "additionalProperties": true
         },
         "items": {"type": "array", "items": {"$ref": "#/$defs/PlanItem"}},
+        "uris": {"type": "array", "items": {"$ref": "#/$defs/URI"}},
         "references": {"type": "array", "items": {"$ref": "#/$defs/Reference"}},
         "attachments": {"type": "array", "items": {"$ref": "#/$defs/Attachment"}},
         "created": {"$ref": "#/$defs/dateTime"},
