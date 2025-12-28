@@ -377,10 +377,12 @@ Plan {
   title: string           # Plan title
   status: enum            # "draft" | "proposed" | "approved" | "inProgress" | "completed" | "cancelled"
   narratives: {
-    proposal: Narrative   # Proposed solution (required, uses "Proposal" title)
+    proposal: string      # Proposed solution (required)
   }
 }
 ```
+
+**Note**: Plan narratives use bare strings since the key (proposal, hypothesis, etc.) provides semantic context. Item-level narratives (TodoItem, PlanItem, etc.) use Narrative objects with title+content since they lack this structural context.
 
 ### PlanItem (Core)
 
@@ -509,10 +511,7 @@ plan: Plan(
   "Add user authentication",
   "draft",
   {
-    "proposal": Narrative(
-      "Proposal",
-      "Implement JWT-based authentication with refresh tokens"
-    )
+    "proposal": "Implement JWT-based authentication with refresh tokens"
   },
   [
     PlanItem("Database schema", "completed"),
@@ -531,10 +530,7 @@ plan: Plan(
     "title": "Add user authentication",
     "status": "draft",
     "narratives": {
-      "proposal": {
-        "title": "Proposal",
-        "content": "Implement JWT-based authentication with refresh tokens"
-      }
+      "proposal": "Implement JWT-based authentication with refresh tokens"
     },
     "items": [
       {
@@ -982,17 +978,17 @@ plan: Plan(
   ],
   Fork("b28c7d9d-22e7-4cd1-8f36-6d2ef2fbf12a", 5, "2025-12-28T06:10:00Z", "Exploring alternative queueing strategy", "unmerged"),
   {
-    "proposal": Narrative("Proposal", "1) Fix N+1 DB queries in webhook processing.\n2) Add queue-depth based autoscaling.\n3) Add p95/p99 alerts + dashboards.\n4) Add rollback drill + runbook improvements."),
-    "problem": Narrative("Problem", "Production latency regression increased webhook processing time from ~250ms to >2s p95 under load."),
-    "background": Narrative("Background", "Webhook handler performs per-event DB lookups (N+1) and competes with background reconciliation jobs."),
-    "constraint": Narrative("Constraint", "- No changes to webhook API contract\n- Must maintain exactly-once delivery guarantee\n- Zero downtime deployment required\n- SLA: p95 latency < 500ms"),
-    "hypothesis": Narrative("Hypothesis", "Moving reconciliation to separate worker pool will eliminate DB contention, reducing p95 latency by 60%+. Query batching will reduce DB round trips by 80%."),
-    "alternative": Narrative("Alternative", "- Add more replicas only (insufficient: DB bottleneck)\n- Change DB isolation level (riskier)\n- Move reconciliation to separate worker pool (selected)"),
-    "risk": Narrative("Risk", "- Changing worker pool may affect ordering guarantees\n- Autoscaling could amplify DB load if not bounded\nMitigations: rate limits, circuit breakers, staged rollout."),
-    "test": Narrative("Test", "- Reproduce regression with load test\n- Confirm p95<400ms at 2x typical throughput\n- Run rollback drill in staging\n- Validate alert noise for 48h"),
-    "action": Narrative("Action", "1) Feature flag new worker pool\n2) Canary 5%\n3) Ramp 25% → 100%\n4) Post-deploy review at 24h"),
-    "observation": Narrative("Observation", "After implementing changes:\n- p95 latency: 180ms (target: <400ms) ✓\n- p99 latency: 320ms (was 3200ms)\n- DB query count: reduced 78%\n- Zero webhook delivery failures during rollout"),
-    "reflection": Narrative("Reflection", "Load testing proved critical - caught queue saturation issue in staging. Should have profiled DB queries earlier to identify N+1 pattern sooner. Worker pool separation pattern worked well, consider for other high-throughput endpoints.")
+    "proposal": "1) Fix N+1 DB queries in webhook processing.\n2) Add queue-depth based autoscaling.\n3) Add p95/p99 alerts + dashboards.\n4) Add rollback drill + runbook improvements.",
+    "problem": "Production latency regression increased webhook processing time from ~250ms to >2s p95 under load.",
+    "background": "Webhook handler performs per-event DB lookups (N+1) and competes with background reconciliation jobs.",
+    "constraint": "- No changes to webhook API contract\n- Must maintain exactly-once delivery guarantee\n- Zero downtime deployment required\n- SLA: p95 latency < 500ms",
+    "hypothesis": "Moving reconciliation to separate worker pool will eliminate DB contention, reducing p95 latency by 60%+. Query batching will reduce DB round trips by 80%.",
+    "alternative": "- Add more replicas only (insufficient: DB bottleneck)\n- Change DB isolation level (riskier)\n- Move reconciliation to separate worker pool (selected)",
+    "risk": "- Changing worker pool may affect ordering guarantees\n- Autoscaling could amplify DB load if not bounded\nMitigations: rate limits, circuit breakers, staged rollout.",
+    "test": "- Reproduce regression with load test\n- Confirm p95<400ms at 2x typical throughput\n- Run rollback drill in staging\n- Validate alert noise for 48h",
+    "action": "1) Feature flag new worker pool\n2) Canary 5%\n3) Ramp 25% → 100%\n4) Post-deploy review at 24h",
+    "observation": "After implementing changes:\n- p95 latency: 180ms (target: <400ms) ✓\n- p99 latency: 320ms (was 3200ms)\n- DB query count: reduced 78%\n- Zero webhook delivery failures during rollout",
+    "reflection": "Load testing proved critical - caught queue saturation issue in staging. Should have profiled DB queries earlier to identify N+1 pattern sooner. Worker pool separation pattern worked well, consider for other high-throughput endpoints."
   },
   [
     URI("file://./todo/inc-2042-todo.vcontext.json", "x-vcontext/todoList", "Execution checklist"),
@@ -1132,50 +1128,17 @@ plan: Plan(
     },
 
     "narratives": {
-      "proposal": {
-        "title": "Proposal",
-        "content": "1) Fix N+1 DB queries in webhook processing.\n2) Add queue-depth based autoscaling.\n3) Add p95/p99 alerts + dashboards.\n4) Add rollback drill + runbook improvements."
-      },
-      "problem": {
-        "title": "Problem",
-        "content": "Production latency regression increased webhook processing time from ~250ms to >2s p95 under load." 
-      },
-      "background": {
-        "title": "Background",
-        "content": "Webhook handler performs per-event DB lookups (N+1) and competes with background reconciliation jobs." 
-      },
-      "constraint": {
-        "title": "Constraint",
-        "content": "- No changes to webhook API contract\n- Must maintain exactly-once delivery guarantee\n- Zero downtime deployment required\n- SLA: p95 latency < 500ms"
-      },
-      "hypothesis": {
-        "title": "Hypothesis",
-        "content": "Moving reconciliation to separate worker pool will eliminate DB contention, reducing p95 latency by 60%+. Query batching will reduce DB round trips by 80%."
-      },
-      "alternative": {
-        "title": "Alternative",
-        "content": "- Add more replicas only (insufficient: DB bottleneck)\n- Change DB isolation level (riskier)\n- Move reconciliation to separate worker pool (selected)"
-      },
-      "risk": {
-        "title": "Risk",
-        "content": "- Changing worker pool may affect ordering guarantees\n- Autoscaling could amplify DB load if not bounded\nMitigations: rate limits, circuit breakers, staged rollout." 
-      },
-      "test": {
-        "title": "Test",
-        "content": "- Reproduce regression with load test\n- Confirm p95<400ms at 2x typical throughput\n- Run rollback drill in staging\n- Validate alert noise for 48h" 
-      },
-      "action": {
-        "title": "Action",
-        "content": "1) Feature flag new worker pool\n2) Canary 5%\n3) Ramp 25% → 100%\n4) Post-deploy review at 24h"
-      },
-      "observation": {
-        "title": "Observation",
-        "content": "After implementing changes:\n- p95 latency: 180ms (target: <400ms) ✓\n- p99 latency: 320ms (was 3200ms)\n- DB query count: reduced 78%\n- Zero webhook delivery failures during rollout"
-      },
-      "reflection": {
-        "title": "Reflection",
-        "content": "Load testing proved critical - caught queue saturation issue in staging. Should have profiled DB queries earlier to identify N+1 pattern sooner. Worker pool separation pattern worked well, consider for other high-throughput endpoints."
-      }
+      "proposal": "1) Fix N+1 DB queries in webhook processing.\n2) Add queue-depth based autoscaling.\n3) Add p95/p99 alerts + dashboards.\n4) Add rollback drill + runbook improvements.",
+      "problem": "Production latency regression increased webhook processing time from ~250ms to >2s p95 under load.",
+      "background": "Webhook handler performs per-event DB lookups (N+1) and competes with background reconciliation jobs.",
+      "constraint": "- No changes to webhook API contract\n- Must maintain exactly-once delivery guarantee\n- Zero downtime deployment required\n- SLA: p95 latency < 500ms",
+      "hypothesis": "Moving reconciliation to separate worker pool will eliminate DB contention, reducing p95 latency by 60%+. Query batching will reduce DB round trips by 80%.",
+      "alternative": "- Add more replicas only (insufficient: DB bottleneck)\n- Change DB isolation level (riskier)\n- Move reconciliation to separate worker pool (selected)",
+      "risk": "- Changing worker pool may affect ordering guarantees\n- Autoscaling could amplify DB load if not bounded\nMitigations: rate limits, circuit breakers, staged rollout.",
+      "test": "- Reproduce regression with load test\n- Confirm p95<400ms at 2x typical throughput\n- Run rollback drill in staging\n- Validate alert noise for 48h",
+      "action": "1) Feature flag new worker pool\n2) Canary 5%\n3) Ramp 25% → 100%\n4) Post-deploy review at 24h",
+      "observation": "After implementing changes:\n- p95 latency: 180ms (target: <400ms) ✓\n- p99 latency: 320ms (was 3200ms)\n- DB query count: reduced 78%\n- Zero webhook delivery failures during rollout",
+      "reflection": "Load testing proved critical - caught queue saturation issue in staging. Should have profiled DB queries earlier to identify N+1 pattern sooner. Worker pool separation pattern worked well, consider for other high-throughput endpoints."
     },
 
     "references": [

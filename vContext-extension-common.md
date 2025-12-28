@@ -237,20 +237,20 @@ Plan {
   reviewers?: string[]     # Approvers
   tags?: string[]          # Categorical labels
   narratives: {
-    proposal: Narrative,     # Proposal (required, standard title)
-    overview?: Narrative,    # Overview (standard title)
-    background?: Narrative,  # Background (standard title)
-    problem?: Narrative,     # Problem (standard title)
-    constraint?: Narrative,  # Constraint (standard title)
-    hypothesis?: Narrative,  # Hypothesis (standard title)
-    alternative?: Narrative, # Alternative (standard title)
-    risk?: Narrative,        # Risk (standard title)
-    test?: Narrative,        # Test (standard title)
-    action?: Narrative,      # Action (standard title)
-    observation?: Narrative, # Observation (standard title)
-    result?: Narrative,      # Result (standard title)
-    reflection?: Narrative,  # Reflection (standard title)
-    custom?: Narrative[]     # User-defined narratives
+    proposal: string,        # Proposal (required)
+    overview?: string,       # Overview
+    background?: string,     # Background
+    problem?: string,        # Problem
+    constraint?: string,     # Constraint
+    hypothesis?: string,     # Hypothesis
+    alternative?: string,    # Alternative
+    risk?: string,           # Risk
+    test?: string,           # Test
+    action?: string,         # Action
+    observation?: string,    # Observation
+    result?: string,         # Result
+    reflection?: string,     # Reflection
+    custom?: string[]        # User-defined narratives
   }
   metadata?: object        # Custom fields
 }
@@ -361,10 +361,7 @@ plan: Plan(
   "Build authentication system",
   "inProgress",
   {
-    "proposal": Narrative(
-      "Proposal",
-      "Multi-step authentication implementation"
-    )
+    "proposal": "Multi-step authentication implementation"
   },
   [
     PlanItem("item-1", "Database setup", "completed", []),
@@ -385,10 +382,7 @@ plan: Plan(
   "title": "Build authentication system",
   "status": "inProgress",
   "narratives": {
-    "proposal": {
-      "title": "Proposal",
-      "content": "Multi-step authentication implementation"
-    }
+    "proposal": "Multi-step authentication implementation"
   },
   "items": [
     {
