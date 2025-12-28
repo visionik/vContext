@@ -42,7 +42,9 @@ vContext aims to establish a universal, open standard for agentic memory systems
 
 8. MAY be **extended to serve as a transactional log** of agentic coding sessions for legal and intellectual property defense
 
-9. MAY **also be use for non-AI tools** that work with todo lists, plans, and playbooks.
+9. MAY enable **rapid adoption of new agentic research** (ACE, GEPA, System 3, etc.) via third-party tools built on vContext docs
+
+10. MAY **also be use for non-AI tools** that work with todo lists, plans, and playbooks.
 
 By standardizing how agentic systems remember and organize their work, vContext enables a future where agents and tools can seamlessly share context, learn from each other's experiences, and collaborate across platforms.
 
