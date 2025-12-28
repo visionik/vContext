@@ -63,7 +63,7 @@ A document is **vAgenda Core v0.3 conformant** if:
 ### Identifiers and sequencing
 
 When Extension 2 (Identifiers) and/or Extension 10 (Version Control & Sync) are in use:
-- Within a single container, `id` values MUST be unique (e.g., within `todoList.items`, within `plan.phases`).
+- Within a single container, `id` values MUST be unique (e.g., within `todoList.items`, within `plan.items`).
 - `uid` values (when present) SHOULD be globally unique and stable across copies.
 - `sequence` values (when present) MUST be monotonically non-decreasing for a given document.
 
@@ -293,7 +293,7 @@ TodoItem {
 
 ### Plan (Core)
 
-**Purpose**: A structured design document for **medium-term memory**. Used to organize projects, document approaches, and coordinate multi-phase work. Plans can contain phases and reference other resources.
+**Purpose**: A structured design document for **medium-term memory**. Used to organize projects, document approaches, and coordinate multi-step work. Plans contain `items` (PlanItems) and may reference other resources.
 
 ```javascript
 Plan {
@@ -339,7 +339,7 @@ class vAgendaInfo: version
 class TodoList: items
 class TodoItem: title, status
 
-vAgendaInfo: vAgendaInfo("0.2")
+vAgendaInfo: vAgendaInfo("0.3")
 todoList: TodoList([
   TodoItem("Implement authentication", "pending"),
   TodoItem("Write API documentation", "pending")
@@ -350,7 +350,7 @@ todoList: TodoList([
 ```json
 {
   "vAgendaInfo": {
-    "version": "0.2"
+    "version": "0.3"
   },
   "todoList": {
     "items": [
@@ -376,7 +376,7 @@ class Plan: title, status, narratives, items
 class PlanItem: title, status
 class Narrative: title, content
 
-vAgendaInfo: vAgendaInfo("0.2")
+vAgendaInfo: vAgendaInfo("0.3")
 plan: Plan(
   "Add user authentication",
   "draft",
@@ -397,7 +397,7 @@ plan: Plan(
 ```json
 {
   "vAgendaInfo": {
-    "version": "0.2"
+    "version": "0.3"
   },
   "plan": {
     "title": "Add user authentication",
@@ -474,7 +474,7 @@ class vAgendaInfo: version, created, updated, timezone
 class TodoList: items
 class TodoItem: title, status, created, updated
 
-vAgendaInfo: vAgendaInfo("0.2", "2024-12-27T09:00:00Z", "2024-12-27T10:00:00Z", "America/Los_Angeles")
+vAgendaInfo: vAgendaInfo("0.3", "2024-12-27T09:00:00Z", "2024-12-27T10:00:00Z", "America/Los_Angeles")
 todoList: TodoList([
   TodoItem(
     "Implement authentication",
@@ -495,7 +495,7 @@ todoList: TodoList([
 ```json
 {
   "vAgendaInfo": {
-    "version": "0.2",
+    "version": "0.3",
     "created": "2024-12-27T09:00:00Z",
     "updated": "2024-12-27T10:00:00Z",
     "timezone": "America/Los_Angeles"
@@ -523,7 +523,7 @@ todoList: TodoList([
 
 **Depends on:** Core only
 
-Adds stable identifiers for cross-referencing items, phases, and documents. Required for any extension that needs to reference or track relationships between entities.
+Adds stable identifiers for cross-referencing items and documents. Required for any extension that needs to reference or track relationships between entities.
 
 ### TodoList Extensions
 ```javascript
@@ -565,7 +565,7 @@ class vAgendaInfo: version
 class TodoList: id, items
 class TodoItem: id, title, status
 
-vAgendaInfo: vAgendaInfo("0.2")
+vAgendaInfo: vAgendaInfo("0.3")
 todoList: TodoList(
   "todo-001",
   [
@@ -579,7 +579,7 @@ todoList: TodoList(
 ```json
 {
   "vAgendaInfo": {
-    "version": "0.2"
+    "version": "0.3"
   },
   "todoList": {
     "id": "todo-001",
@@ -720,8 +720,8 @@ Plan {
 ```javascript
 PlanItem {
   // Core + Rich Metadata fields...
-  dependencies?: string[] # IDs of phases that must complete first
-  subItems?: PlanItem[]     # Child phases (nested hierarchy)
+  dependencies?: string[] # IDs of items that must complete first
+  subItems?: PlanItem[]     # Child items (nested hierarchy)
   todoList?: TodoList     # Associated todo list
 }
 ```
@@ -732,11 +732,11 @@ PlanItem {
 ```tron
 class vAgendaInfo: version
 class TodoItem: id, title, status, dependencies
-class Plan: id, title, status, narratives, phases
+class Plan: id, title, status, narratives, items
 class PlanItem: id, title, status, dependencies
 class Narrative: title, content
 
-vAgendaInfo: vAgendaInfo("0.2")
+vAgendaInfo: vAgendaInfo("0.3")
 plan: Plan(
   "plan-002",
   "Build authentication system",
@@ -759,7 +759,7 @@ plan: Plan(
 ```json
 {
   "vAgendaInfo": {
-    "version": "0.2"
+    "version": "0.3"
   },
   "plan": {
     "id": "plan-002",
@@ -771,7 +771,7 @@ plan: Plan(
       "content": "Multi-phase authentication implementation"
     }
   },
-  "phases": [
+  "items": [
     {
       "id": "phase-1",
       "title": "Database setup",
@@ -1317,7 +1317,7 @@ PlanItem {
   // Prior extensions...
   uid?: string            # Globally unique identifier
   sequence?: number       # Revision counter
-  lastModifiedBy?: Agent  # Last agent to modify this phase
+  lastModifiedBy?: Agent  # Last agent to modify this item
 }
 ```
 
@@ -1331,7 +1331,7 @@ class TodoItem: id, title, status
 class Agent: id, type, name, model
 class Change: sequence, timestamp, agent, operation, reason
 
-vAgendaInfo: vAgendaInfo("0.2")
+vAgendaInfo: vAgendaInfo("0.3")
 todoList: TodoList(
   "todo-002",
   [
@@ -1352,7 +1352,7 @@ todoList: TodoList(
 ```json
 {
   "vAgendaInfo": {
-    "version": "0.2"
+    "version": "0.3"
   },
   "todoList": {
     "id": "todo-002",
@@ -1494,7 +1494,7 @@ class Plan: id, title, status, narratives, uid, fork
 class Narrative: title, content
 class Fork: parentUid, parentSequence, forkedAt, forkReason, mergeStatus
 
-vAgendaInfo: vAgendaInfo("0.2")
+vAgendaInfo: vAgendaInfo("0.3")
 plan: Plan(
   "plan-fork-001",
   "Authentication - Alternative approach",
@@ -1515,7 +1515,7 @@ plan: Plan(
 ```json
 {
   "vAgendaInfo": {
-    "version": "0.2"
+    "version": "0.3"
   },
   "plan": {
     "id": "plan-fork-001",
@@ -1546,7 +1546,7 @@ The Playbooks extension spec is in `vAgenda-extension-playbooks.md` (see that do
 - **Requires**: Extension 2 (Identifiers)
 - **Recommended**: Extension 10 (Version Control & Sync)
 
-Playbooks add long-term memory via `playbook.entries` as an append-only log of playbook entries (each entry has an `operation` and a per-entry linked-list reference for updates/deprecations).
+Playbooks add long-term memory via `playbook.items` as an append-only log of playbook items (each item has an `operation` and a per-item linked-list reference for updates/deprecations).
 
 ---
 
@@ -1577,7 +1577,7 @@ class TodoItem: title, status
 # Plan (Core)
 class Plan: title, status, narratives
 
-# Phase (Core)
+# PlanItem (Core)
 class PlanItem: title, status
 
 # Narrative (Core)
@@ -1732,7 +1732,7 @@ See `vAgenda-extension-playbooks.md` for playbooks best practices (e.g. grow-and
 ```json
 {
   "vAgendaInfo": {
-    "version": "0.2",
+    "version": "0.3",
     "created": "2024-12-27T00:00:00Z",
     "updated": "2024-12-27T10:00:00Z"
   },
@@ -1756,13 +1756,12 @@ See `vAgenda-extension-playbooks.md` for playbooks best practices (e.g. grow-and
       }
     },
 
-    "phases": [
+    "items": [
       {
-        "id": "phase-1",
-        "uid": "phase-1-uid",
+        "id": "item-1",
+        "uid": "item-1-uid",
         "title": "Foundation",
         "description": "Set up infrastructure",
-        "order": 1,
         "status": "completed",
         "startDate": "2024-12-01T00:00:00Z",
         "endDate": "2024-12-15T00:00:00Z",
@@ -1778,30 +1777,13 @@ See `vAgenda-extension-playbooks.md` for playbooks best practices (e.g. grow-and
       }
     ],
 
-    "playbook": {
-      "version": 1,
-      "created": "2024-12-01T00:00:00Z",
-      "updated": "2024-12-27T10:00:00Z",
-      "entries": [
-        {
-          "id": "entry-001",
-          "kind": "strategy",
-          "title": "Parallel Phase Execution",
-          "text": "Run independent phases in parallel when they don’t share hard dependencies",
-          "confidence": 0.95,
-          "helpfulCount": 3,
-          "harmfulCount": 0,
-          "feedbackType": "executionOutcome",
-          "status": "active",
-          "tags": ["performance"]
-        }
-      ],
-      "metrics": {
-        "totalEntries": 1,
-        "averageConfidence": 0.95,
-        "lastUpdated": "2024-12-27T10:00:00Z"
+    "uris": [
+      {
+        "uri": "file://./microservices-playbook.vagenda.json",
+        "type": "x-vagenda/playbook",
+        "description": "Related playbook (long-term learnings and strategies)"
       }
-    },
+    ],
 
     "metadata": {
       "extensions": [
@@ -1810,7 +1792,8 @@ See `vAgenda-extension-playbooks.md` for playbooks best practices (e.g. grow-and
         "workflow",
         "participants",
         "version-control",
-        "playbooks"
+        "playbooks",
+        "resources"
       ],
       "customField": "custom value"
     }
@@ -1821,11 +1804,12 @@ See `vAgenda-extension-playbooks.md` for playbooks best practices (e.g. grow-and
 This example uses:
 - **Core**: Basic structure
 - **Rich Metadata**: title, description, author
-- **Hierarchical**: phases array
+- **Hierarchical**: items array
 - **Workflow**: dates, percentComplete
 - **Participants**: team assignment
 - **Version Control**: uid, sequence
-- **Playbooks**: playbook with entries
+- **Resources**: `uris` referencing a separate Playbook document
+- **Playbooks**: stored in its own Playbook document (`x-vagenda/playbook`)
 
 ---
 
