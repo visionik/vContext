@@ -113,28 +113,26 @@ func TestUpdater_AddUpdateRemovePlanNarratives(t *testing.T) {
 		Plan: &core.Plan{
 			Title:  "Test Plan",
 			Status: core.PlanStatusDraft,
-			Narratives: map[string]core.Narrative{
-				"proposal": {Title: "Proposal", Content: "Content"},
+			Narratives: map[string]string{
+				"proposal": "Content",
 			},
 		},
 	}
 
 	u := NewUpdater(doc)
 	err := u.Transaction(func(u *Updater) error {
-		doc.Plan.AddNarrative("overview", core.Narrative{Title: "Overview", Content: "Content"})
+		doc.Plan.AddNarrative("overview", "Content")
 		return nil
 	})
 	require.NoError(t, err)
 	assert.Len(t, doc.Plan.Narratives, 2)
 
 	err = u.Transaction(func(u *Updater) error {
-		n := doc.Plan.Narratives["overview"]
-		n.Content = "Updated"
-		doc.Plan.Narratives["overview"] = n
+		doc.Plan.Narratives["overview"] = "Updated"
 		return nil
 	})
 	require.NoError(t, err)
-	assert.Equal(t, "Updated", doc.Plan.Narratives["overview"].Content)
+	assert.Equal(t, "Updated", doc.Plan.Narratives["overview"])
 
 	err = u.Transaction(func(u *Updater) error {
 		doc.Plan.RemoveNarrative("overview")
@@ -152,7 +150,7 @@ func TestUpdater_PlanPhaseMutationsViaTransaction(t *testing.T) {
 		Plan: &core.Plan{
 			Title:      "Test Plan",
 			Status:     core.PlanStatusDraft,
-			Narratives: map[string]core.Narrative{"proposal": {Title: "Proposal", Content: "Content"}},
+			Narratives: map[string]string{"proposal": "Content"},
 			Items: []core.PlanItem{
 				{Title: "Phase 1", Status: core.PlanItemStatusPending},
 				{Title: "Phase 2", Status: core.PlanItemStatusPending},

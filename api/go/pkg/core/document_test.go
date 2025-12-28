@@ -48,7 +48,7 @@ func TestDocument_PlanMutators(t *testing.T) {
 
 	t.Run("AddNarrative errors with no plan", func(t *testing.T) {
 		d := &Document{Info: Info{Version: "0.2"}}
-		err := d.AddNarrative("proposal", Narrative{Title: "t", Content: "c"})
+	err := d.AddNarrative("proposal", "c")
 		assert.ErrorIs(t, err, ErrNoPlan)
 	})
 

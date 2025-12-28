@@ -86,7 +86,7 @@ func TestValidator_ValidateTodoList(t *testing.T) {
 			Plan: &core.Plan{
 				Title:      "Plan",
 				Status:     core.PlanStatusDraft,
-				Narratives: map[string]core.Narrative{},
+				Narratives: map[string]string{},
 			},
 		}
 
@@ -105,8 +105,8 @@ func TestValidator_ValidatePlan(t *testing.T) {
 			Plan: &core.Plan{
 				Title:  "Test Plan",
 				Status: core.PlanStatusDraft,
-				Narratives: map[string]core.Narrative{
-					"proposal": {Title: "Proposal", Content: "Content"},
+				Narratives: map[string]string{
+					"proposal": "Content",
 				},
 			},
 		}
@@ -121,8 +121,8 @@ func TestValidator_ValidatePlan(t *testing.T) {
 			Plan: &core.Plan{
 				Title:  "",
 				Status: core.PlanStatusDraft,
-				Narratives: map[string]core.Narrative{
-					"proposal": {Title: "Proposal", Content: "Content"},
+				Narratives: map[string]string{
+					"proposal": "Content",
 				},
 			},
 		}
@@ -138,8 +138,8 @@ func TestValidator_ValidatePlan(t *testing.T) {
 			Plan: &core.Plan{
 				Title:  "Plan",
 				Status: core.PlanStatus("invalid"),
-				Narratives: map[string]core.Narrative{
-					"proposal": {Title: "Proposal", Content: "Content"},
+				Narratives: map[string]string{
+					"proposal": "Content",
 				},
 			},
 		}
@@ -155,7 +155,7 @@ func TestValidator_ValidatePlan(t *testing.T) {
 			Plan: &core.Plan{
 				Title:      "Plan",
 				Status:     core.PlanStatusDraft,
-				Narratives: map[string]core.Narrative{},
+				Narratives: map[string]string{},
 			},
 		}
 
@@ -164,39 +164,22 @@ func TestValidator_ValidatePlan(t *testing.T) {
 		assert.Contains(t, err.Error(), "proposal narrative is required")
 	})
 
-	t.Run("narrative with empty title fails validation", func(t *testing.T) {
-		doc := &core.Document{
-			Info: core.Info{Version: "0.2"},
-			Plan: &core.Plan{
-				Title:  "Plan",
-				Status: core.PlanStatusDraft,
-				Narratives: map[string]core.Narrative{
-					"proposal": {Title: "", Content: "Content"},
+		t.Run("narrative with empty content fails validation", func(t *testing.T) {
+			doc := &core.Document{
+				Info: core.Info{Version: "0.2"},
+				Plan: &core.Plan{
+					Title:  "Plan",
+					Status: core.PlanStatusDraft,
+					Narratives: map[string]string{
+						"proposal": "",
+					},
 				},
-			},
-		}
+			}
 
-		err := v.Validate(doc)
-		assert.Error(t, err)
-		assert.Contains(t, err.Error(), "title is required")
-	})
-
-	t.Run("narrative with empty content fails validation", func(t *testing.T) {
-		doc := &core.Document{
-			Info: core.Info{Version: "0.2"},
-			Plan: &core.Plan{
-				Title:  "Plan",
-				Status: core.PlanStatusDraft,
-				Narratives: map[string]core.Narrative{
-					"proposal": {Title: "Title", Content: ""},
-				},
-			},
-		}
-
-		err := v.Validate(doc)
-		assert.Error(t, err)
-		assert.Contains(t, err.Error(), "content is required")
-	})
+			err := v.Validate(doc)
+			assert.Error(t, err)
+			assert.Contains(t, err.Error(), "content is required")
+		})
 }
 
 func TestValidator_ValidateExtensions(t *testing.T) {
@@ -224,8 +207,8 @@ func TestValidator_ValidatePhases(t *testing.T) {
 			Plan: &core.Plan{
 				Title:  "Plan",
 				Status: core.PlanStatusDraft,
-				Narratives: map[string]core.Narrative{
-					"proposal": {Title: "Proposal", Content: "Content"},
+				Narratives: map[string]string{
+					"proposal": "Content",
 				},
 				Items: []core.PlanItem{
 					{Title: "Phase 1", Status: core.PlanItemStatusPending},
@@ -244,8 +227,8 @@ func TestValidator_ValidatePhases(t *testing.T) {
 			Plan: &core.Plan{
 				Title:  "Plan",
 				Status: core.PlanStatusDraft,
-				Narratives: map[string]core.Narrative{
-					"proposal": {Title: "Proposal", Content: "Content"},
+				Narratives: map[string]string{
+					"proposal": "Content",
 				},
 				Items: []core.PlanItem{
 					{Title: "", Status: core.PlanItemStatusPending},
@@ -265,8 +248,8 @@ func TestValidator_ValidatePhases(t *testing.T) {
 			Plan: &core.Plan{
 				Title:  "Plan",
 				Status: core.PlanStatusDraft,
-				Narratives: map[string]core.Narrative{
-					"proposal": {Title: "Proposal", Content: "Content"},
+				Narratives: map[string]string{
+					"proposal": "Content",
 				},
 				Items: []core.PlanItem{
 					{Title: "Phase", Status: core.PlanItemStatus("invalid")},

@@ -4,8 +4,7 @@
   },
   "todoList": {
     "narrative": {
-      "title": "Overview",
-      "content": "Expand vContext standard narrative titles from 9 to 13, replacing Context with Background and adding Hypothesis, Observation, Constraint, and Reflection."
+      "Overview": "Expand vContext standard narrative titles from 9 to 13, replacing Context with Background and adding Hypothesis, Observation, Constraint, and Reflection."
     },
     "items": [
       {
@@ -13,8 +12,7 @@
         "title": "Update Narrative definition in README.md with 13 standard titles",
         "status": "completed",
         "narrative": {
-          "title": "Result",
-          "content": "Updated README.md to define 13 standard titles organized by understand → design → execute → learn workflow. Changed Context to Background, kept Alternative singular, added Hypothesis, Observation, Constraint, Reflection."
+          "Result": "Updated README.md to define 13 standard titles organized by understand → design → execute → learn workflow. Changed Context to Background, kept Alternative singular, added Hypothesis, Observation, Constraint, Reflection."
         }
       },
       {
@@ -22,8 +20,7 @@
         "title": "Update Plan narratives structure in Extension 3",
         "status": "completed",
         "narrative": {
-          "title": "Result",
-          "content": "Updated vContext-extension-common.md Plan Extensions to include all 13 narrative keys: overview, background, problem, constraint, hypothesis, alternative, risk, test, action, observation, result, reflection."
+          "Result": "Updated vContext-extension-common.md Plan Extensions to include all 13 narrative keys: overview, background, problem, constraint, hypothesis, alternative, risk, test, action, observation, result, reflection."
         }
       },
       {
@@ -31,8 +28,7 @@
         "title": "Update JSON schema with new narrative keys",
         "status": "completed",
         "narrative": {
-          "title": "Result",
-          "content": "Updated vcontext-core.schema.json to replace context with background and add constraint, hypothesis, observation, reflection to Plan narratives properties."
+          "Result": "Updated vcontext-core.schema.json to replace context with background and add constraint, hypothesis, observation, reflection to Plan narratives properties."
         }
       },
       {
@@ -40,8 +36,7 @@
         "title": "Update all examples to use Background instead of Context",
         "status": "completed",
         "narrative": {
-          "title": "Result",
-          "content": "Replaced all occurrences of Context → Background in examples across README.md and vContext-extension-common.md. Updated both TRON and JSON format examples, including TodoItem, Playbook, and Plan narratives."
+          "Result": "Replaced all occurrences of Context → Background in examples across README.md and vContext-extension-common.md. Updated both TRON and JSON format examples, including TodoItem, Playbook, and Plan narratives."
         }
       },
       {
@@ -49,8 +44,7 @@
         "title": "Update Appendix A examples with new narrative structure",
         "status": "completed",
         "narrative": {
-          "title": "Result",
-          "content": "Enhanced Appendix A2 Plan example to include all new narrative titles. Added constraint (requirements), hypothesis (testable predictions), observation (actual metrics after implementation), and reflection (process learnings). Example now demonstrates complete understand → design → execute → learn workflow."
+          "Result": "Enhanced Appendix A2 Plan example to include all new narrative titles. Added constraint (requirements), hypothesis (testable predictions), observation (actual metrics after implementation), and reflection (process learnings). Example now demonstrates complete understand → design → execute → learn workflow."
         }
       },
       {
@@ -58,8 +52,7 @@
         "title": "Commit and push changes",
         "status": "completed",
         "narrative": {
-          "title": "Result",
-          "content": "Committed changes with message 'feat: expand narrative titles from 9 to 13 standard titles' and pushed to origin/master. Commit e648d6d includes 4 files changed, 100 insertions, 25 deletions."
+          "Result": "Committed changes with message 'feat: expand narrative titles from 9 to 13 standard titles' and pushed to origin/master. Commit e648d6d includes 4 files changed, 100 insertions, 25 deletions."
         }
       }
     ]

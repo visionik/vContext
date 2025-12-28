@@ -202,8 +202,8 @@ func TestConverter_Plan(t *testing.T) {
 		Plan: &core.Plan{
 			Title:  "Test Plan",
 			Status: core.PlanStatusDraft,
-			Narratives: map[string]core.Narrative{
-				"proposal": {Title: "Proposal", Content: "Content"},
+			Narratives: map[string]string{
+				"proposal": "Content",
 			},
 		},
 	}

@@ -174,12 +174,6 @@ class TodoList(BaseModel):
         extra = "allow"
 
 
-class Narrative(BaseModel):
-    """Named documentation block."""
-    title: str = Field(description="Narrative heading")
-    content: str = Field(description="Markdown content")
-
-
 class PlanItem(BaseModel):
     """Stage of work within a plan."""
     title: str = Field(description="PlanItem name")
@@ -193,9 +187,9 @@ class Plan(BaseModel):
     """Structured design document."""
     title: str = Field(description="Plan title")
     status: PlanStatus = Field(description="Current status")
-    narratives: Dict[str, Narrative] = Field(
+    narratives: Dict[str, str] = Field(
         default_factory=dict,
-        description="Named narrative blocks"
+        description="Narratives (key -> markdown string)"
     )
     items: List[PlanItem] = Field(
         default_factory=list,
@@ -402,7 +396,7 @@ class TodoListBuilder:
 # vcontext/builder/plan_builder.py
 
 from typing import Dict, Optional
-from ..core.types import Document, Info, Plan, Narrative, PlanStatus
+from ..core.types import Document, Info, Plan, PlanStatus
 
 
 class PlanBuilder:
@@ -426,30 +420,22 @@ class PlanBuilder:
         self._plan.status = status
         return self
 
-    def narrative(
-        self,
-        key: str,
-        title: str,
-        content: str
-    ) -> "PlanBuilder":
-        """Add a narrative."""
-        self._plan.narratives[key] = Narrative(
-            title=title,
-            content=content
-        )
+    def narrative(self, key: str, content: str) -> "PlanBuilder":
+        """Add a narrative (key -> markdown string)."""
+        self._plan.narratives[key] = content
         return self
 
-    def proposal(self, title: str, content: str) -> "PlanBuilder":
+    def proposal(self, content: str) -> "PlanBuilder":
         """Add proposal narrative (required)."""
-        return self.narrative("proposal", title, content)
+        return self.narrative("proposal", content)
 
-    def problem(self, title: str, content: str) -> "PlanBuilder":
+    def problem(self, content: str) -> "PlanBuilder":
         """Add problem narrative."""
-        return self.narrative("problem", title, content)
+        return self.narrative("problem", content)
 
-    def context(self, title: str, content: str) -> "PlanBuilder":
-        """Add context narrative."""
-        return self.narrative("context", title, content)
+    def background(self, content: str) -> "PlanBuilder":
+        """Add background narrative."""
+        return self.narrative("background", content)
 
     def build(self) -> Document:
         """Build the document."""
@@ -643,7 +629,7 @@ class TodoListMutator:
 # vcontext/mutator/plan_mutator.py
 
 from typing import Optional
-from ..core.types import Plan, Narrative, PlanStatus
+from ..core.types import Plan, PlanStatus
 
 
 class PlanMutator:
@@ -652,25 +638,21 @@ class PlanMutator:
     def __init__(self, plan: Plan):
         self._plan = plan
     
-    def set_narrative(self, key: str, title: str, content: str) -> Narrative:
+    def set_narrative(self, key: str, content: str) -> str:
         """Add or update a narrative."""
-        narrative = Narrative(title=title, content=content)
-        self._plan.narratives[key] = narrative
-        return narrative
+        self._plan.narratives[key] = content
+        return content
     
-    def remove_narrative(self, key: str) -> Optional[Narrative]:
+    def remove_narrative(self, key: str) -> Optional[str]:
         """Remove a narrative."""
         return self._plan.narratives.pop(key, None)
     
-    def update_narrative(self, key: str, **updates) -> Narrative:
+    def update_narrative(self, key: str, content: str) -> str:
         """Update narrative content."""
         if key not in self._plan.narratives:
             raise KeyError(f"Narrative not found: {key}")
-        
-        narrative = self._plan.narratives[key]
-        for k, v in updates.items():
-            setattr(narrative, k, v)
-        return narrative
+        self._plan.narratives[key] = content
+        return content
     
     def set_status(self, status: PlanStatus) -> None:
         """Set plan status."""
@@ -694,7 +676,7 @@ def mutate_plan(plan: Plan) -> PlanMutator:
 
 from typing import Callable, Dict
 from copy import deepcopy
-from ..core.types import Document, TodoItem, Narrative, ItemStatus, PlanStatus
+from ..core.types import Document, TodoItem, ItemStatus, PlanStatus
 
 
 class ImmutableUpdater:
@@ -762,7 +744,6 @@ class ImmutableUpdater:
     def set_narrative(
         doc: Document,
         key: str,
-        title: str,
         content: str
     ) -> Document:
         """Set narrative in Plan (immutable)."""
@@ -770,7 +751,7 @@ class ImmutableUpdater:
             raise ValueError("Document has no Plan")
         
         new_doc = deepcopy(doc)
-        new_doc.plan.narratives[key] = Narrative(title=title, content=content)
+        new_doc.plan.narratives[key] = content
         return new_doc
     
     @staticmethod
@@ -945,7 +926,6 @@ class ValidatedUpdater:
     def set_narrative(
         self,
         key: str,
-        title: str,
         content: str
     ) -> UpdateResult:
         """Set plan narrative with validation."""
@@ -955,9 +935,8 @@ class ValidatedUpdater:
                 errors=["Document has no Plan"]
             )
         
-        from ..core.types import Narrative
         original = self._doc.plan.narratives.get(key)
-        self._doc.plan.narratives[key] = Narrative(title=title, content=content)
+        self._doc.plan.narratives[key] = content
         
         errors = self.validate()
         if errors:

@@ -48,8 +48,8 @@ func main() {
 	planDoc := builder.NewPlan("Add user authentication", "0.4").
 		WithAuthor("team-lead").
 		WithStatus(core.PlanStatusDraft).
-		WithProposal("Proposed Changes", "Implement JWT-based authentication with refresh tokens").
-		WithProblem("Problem Statement", "Current system lacks secure authentication").
+		WithProposal("Implement JWT-based authentication with refresh tokens").
+		WithProblem("Current system lacks secure authentication").
 		AddPendingItem("Database setup").
 		AddInProgressItem("JWT implementation").
 		AddPendingItem("OAuth integration").

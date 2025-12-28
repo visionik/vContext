@@ -189,16 +189,10 @@ func (v *validator) validatePlan(plan *core.Plan) ValidationErrors {
 	}
 
 	// Validate all narratives
-	for key, narrative := range plan.Narratives {
-		if narrative.Title == "" {
+	for key, content := range plan.Narratives {
+		if content == "" {
 			errors = append(errors, ValidationError{
-				Field:   fmt.Sprintf("plan.narratives.%s.title", key),
-				Message: "title is required",
-			})
-		}
-		if narrative.Content == "" {
-			errors = append(errors, ValidationError{
-				Field:   fmt.Sprintf("plan.narratives.%s.content", key),
+				Field:   fmt.Sprintf("plan.narratives.%s", key),
 				Message: "content is required",
 			})
 		}

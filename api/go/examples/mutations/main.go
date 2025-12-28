@@ -53,24 +53,18 @@ func main() {
 	plan := &core.Plan{}
 
 	// Add narratives
-	plan.AddNarrative("overview", core.Narrative{
-		Title:   "Overview",
-		Content: "This is the project overview",
-	})
-	plan.AddNarrative("details", core.Narrative{
-		Title:   "Details",
-		Content: "Project details here",
-	})
+	plan.AddNarrative("overview", "This is the project overview")
+	plan.AddNarrative("details", "Project details here")
 	fmt.Printf("   Added 2 narratives, total: %d\n", len(plan.Narratives))
 
 	// Update narrative
-	err = plan.UpdateNarrative("overview", func(n *core.Narrative) {
-		n.Content = "Updated overview content"
+	err = plan.UpdateNarrative("overview", func(content *string) {
+		*content = "Updated overview content"
 	})
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Printf("   Updated narrative 'overview': %s\n", plan.Narratives["overview"].Content)
+	fmt.Printf("   Updated narrative 'overview': %s\n", plan.Narratives["overview"])
 
 	// Add plan items
 	plan.AddPlanItem(core.PlanItem{Title: "Phase 1", Status: core.PlanItemStatusPending})
@@ -120,7 +114,7 @@ func main() {
 	// Try invalid mutation (wrong document type)
 	invalidDoc := builder.NewPlan("My Plan", "1.0").
 		WithDescription("A plan document").
-		WithProposal("Proposal", "Required proposal content").
+		WithProposal("Required proposal content").
 		Build()
 
 	badUpd := updater.NewUpdater(invalidDoc)

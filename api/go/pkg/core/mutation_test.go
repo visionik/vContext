@@ -93,24 +93,23 @@ func TestTodoListFindItem(t *testing.T) {
 
 func TestPlanAddNarrative(t *testing.T) {
 	plan := &Plan{}
-	narrative := Narrative{Title: "Overview", Content: "Some content"}
 
-	plan.AddNarrative("overview", narrative)
+	plan.AddNarrative("overview", "Some content")
 
 	assert.Len(t, plan.Narratives, 1)
-	assert.Equal(t, "Some content", plan.Narratives["overview"].Content)
+	assert.Equal(t, "Some content", plan.Narratives["overview"])
 
 	// Update existing
-	plan.AddNarrative("overview", Narrative{Title: "Overview", Content: "Updated content"})
+	plan.AddNarrative("overview", "Updated content")
 	assert.Len(t, plan.Narratives, 1)
-	assert.Equal(t, "Updated content", plan.Narratives["overview"].Content)
+	assert.Equal(t, "Updated content", plan.Narratives["overview"])
 }
 
 func TestPlanRemoveNarrative(t *testing.T) {
 	plan := &Plan{
-		Narratives: map[string]Narrative{
-			"overview": {Title: "Overview", Content: "Content 1"},
-			"details":  {Title: "Details", Content: "Content 2"},
+		Narratives: map[string]string{
+			"overview": "Content 1",
+			"details":  "Content 2",
 		},
 	}
 
@@ -123,20 +122,20 @@ func TestPlanRemoveNarrative(t *testing.T) {
 
 func TestPlanUpdateNarrative(t *testing.T) {
 	plan := &Plan{
-		Narratives: map[string]Narrative{
-			"overview": {Title: "Overview", Content: "Original"},
+		Narratives: map[string]string{
+			"overview": "Original",
 		},
 	}
 
-	err := plan.UpdateNarrative("overview", func(n *Narrative) {
-		n.Content = "Updated"
+	err := plan.UpdateNarrative("overview", func(content *string) {
+		*content = "Updated"
 	})
 
 	require.NoError(t, err)
-	assert.Equal(t, "Updated", plan.Narratives["overview"].Content)
+	assert.Equal(t, "Updated", plan.Narratives["overview"])
 
 	// Nonexistent key
-	err = plan.UpdateNarrative("nonexistent", func(n *Narrative) {})
+	err = plan.UpdateNarrative("nonexistent", func(content *string) {})
 	assert.ErrorIs(t, err, ErrNarrativeNotFound)
 }
 

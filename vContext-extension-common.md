@@ -289,7 +289,6 @@ PlaybookItem {
 **TRON:**
 ```tron
 class TodoItem: id, title, status, narrative, priority, tags, metadata
-class Narrative: title, content
 
 TodoItem(
   "item-2",
@@ -352,7 +351,6 @@ class vContextInfo: version
 class TodoItem: id, title, status, dependencies
 class Plan: id, title, status, narratives, items
 class PlanItem: id, title, status, dependencies
-class Narrative: title, content
 
 vContextInfo: vContextInfo("0.4")
 plan: Plan(
@@ -664,10 +662,7 @@ URIs enable linking related vContext documents without embedding them:
     "title": "Authentication System",
     "status": "inProgress",
     "narratives": {
-      "proposal": {
-        "title": "Overview",
-        "content": "Implement JWT-based auth"
-      }
+      "proposal": "Implement JWT-based auth"
     },
     "uris": [
       {
@@ -1104,7 +1099,6 @@ PlanItem {
 ```tron
 class vContextInfo: version
 class Plan: id, title, status, narratives, uid, fork
-class Narrative: title, content
 class Fork: parentUid, parentSequence, forkedAt, forkReason, mergeStatus
 
 vContextInfo: vContextInfo("0.4")
@@ -1112,7 +1106,7 @@ plan: Plan(
   "plan-fork-001",
   "Authentication - Alternative approach",
   "inProgress",
-  {"proposal": Narrative("Alternative", "Try OAuth2 instead of JWT")},
+  {"proposal": "Try OAuth2 instead of JWT"},
   "660e8400-e29b-41d4-a716-446655440001",
   Fork(
     "550e8400-e29b-41d4-a716-446655440000",
@@ -1135,10 +1129,7 @@ plan: Plan(
   "title": "Authentication - Alternative approach",
   "status": "inProgress",
   "narratives": {
-    "proposal": {
-      "title": "Alternative",
-      "content": "Try OAuth2 instead of JWT"
-    }
+    "proposal": "Try OAuth2 instead of JWT"
   },
   "uid": "660e8400-e29b-41d4-a716-446655440001",
   "fork": {
@@ -1193,8 +1184,6 @@ class Plan: title, status, narratives
 # PlanItem (Core)
 class PlanItem: title, status
 
-# Narrative (Core)
-class Narrative: title, content
 ```
 
 ### Extension TRON Classes

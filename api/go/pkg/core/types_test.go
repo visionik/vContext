@@ -99,7 +99,7 @@ func TestDocument_Structure(t *testing.T) {
 			Plan: &Plan{
 				Title:      "Test Plan",
 				Status:     PlanStatusDraft,
-				Narratives: map[string]Narrative{},
+				Narratives: map[string]string{},
 			},
 		}
 

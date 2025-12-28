@@ -495,7 +495,6 @@ todoList: TodoList([
 class vContextInfo: version
 class Plan: title, status, narratives, items
 class PlanItem: title, status
-class Narrative: title, content
 
 vContextInfo: vContextInfo("0.4")
 plan: Plan(
@@ -544,7 +543,6 @@ plan: Plan(
 class vContextInfo: version
 class Playbook: title, narrative, items
 class PlaybookItem: title, status, content
-class Narrative: title, content
 
 vContextInfo: vContextInfo("0.4")
 playbook: Playbook(
@@ -636,7 +634,6 @@ These examples are intentionally "real-world" and include fields from **Core + E
 ```tron
 class vContextInfo: version, author, description, created, updated, timezone, metadata
 class TodoList: id, uid, title, narrative, tags, sequence, agent, lastModifiedBy, changeLog, uris, items
-class Narrative: title, content
 class Agent: id, type, name, email
 class ChangeLogEntry: sequence, timestamp, agent, operation, reason
 class URI: uri, type, title, description
@@ -786,8 +783,7 @@ todoList: TodoList(
     "uid": "f7d2a4c6-1e3f-4d62-9c9a-3a2e8f4b1f10",
     "title": "INC-2042: Payment webhook latency regression",
     "narrative": {
-      "title": "Overview",
-      "content": "Follow-ups after incident. Goal: prevent recurrence and improve observability."
+      "Overview": "Follow-ups after incident. Goal: prevent recurrence and improve observability."
     },
     "tags": ["incident", "payments", "webhooks", "on-call"],
     "sequence": 12,
@@ -925,7 +921,6 @@ class Plan: id, uid, title, status, author, reviewers, tags, created, updated, t
 class Agent: id, type, name
 class ChangeLogEntry: sequence, timestamp, agent, operation, reason
 class Fork: parentUid, parentSequence, forkedAt, forkReason, mergeStatus
-class Narrative: title, content
 class URI: uri, type, title
 class PlanItem: id, uid, title, status, narrative, tags, dependencies, startDate, percentComplete, participants, classification, todoList, subItems, location
 class Participant: id, name, role, status
@@ -1028,7 +1023,7 @@ plan: Plan(
       "p3-uid",
       "Rollout + rollback drill",
       "pending",
-      Narrative("Background", "Canary rollout, validate rollback, and document runbook."),
+      {"Background": "Canary rollout, validate rollback, and document runbook."},
       null,
       ["p1", "p2"],
       null,

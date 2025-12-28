@@ -86,14 +86,14 @@ func (d *Document) RemovePlanItem(index int) error {
 }
 
 // AddNarrative adds or updates a narrative in the Plan.
-func (d *Document) AddNarrative(key string, narrative Narrative) error {
+func (d *Document) AddNarrative(key string, content string) error {
 	if d.Plan == nil {
 		return ErrNoPlan
 	}
 	if d.Plan.Narratives == nil {
-		d.Plan.Narratives = make(map[string]Narrative)
+		d.Plan.Narratives = make(map[string]string)
 	}
-	d.Plan.Narratives[key] = narrative
+	d.Plan.Narratives[key] = content
 	return nil
 }
 
@@ -124,7 +124,7 @@ func (d *Document) GetPlanItems() []PlanItem {
 }
 
 // GetNarratives returns all narratives (nil-safe).
-func (d *Document) GetNarratives() map[string]Narrative {
+func (d *Document) GetNarratives() map[string]string {
 	if d.Plan == nil {
 		return nil
 	}

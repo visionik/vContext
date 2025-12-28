@@ -78,9 +78,9 @@ func TestPlanBuilder(t *testing.T) {
 			WithAuthor("team-lead").
 			WithDescription("Authentication implementation").
 			WithStatus(core.PlanStatusApproved).
-			WithProposal("Proposal", "Use JWT").
-			WithProblem("Problem", "No auth").
-			WithContext("Context", "Current state").
+			WithProposal("Use JWT").
+			WithProblem("No auth").
+			WithContext("Current state").
 			AddPendingItem("Phase 1").
 			AddInProgressItem("Phase 2").
 			AddCompletedItem("Phase 3").
@@ -91,9 +91,9 @@ func TestPlanBuilder(t *testing.T) {
 		assert.Equal(t, core.PlanStatusApproved, doc.Plan.Status)
 
 		assert.Len(t, doc.Plan.Narratives, 3)
-		assert.Equal(t, "Use JWT", doc.Plan.Narratives["proposal"].Content)
-		assert.Equal(t, "No auth", doc.Plan.Narratives["problem"].Content)
-		assert.Equal(t, "Current state", doc.Plan.Narratives["context"].Content)
+		assert.Equal(t, "Use JWT", doc.Plan.Narratives["proposal"])
+		assert.Equal(t, "No auth", doc.Plan.Narratives["problem"])
+		assert.Equal(t, "Current state", doc.Plan.Narratives["background"])
 
 		assert.Len(t, doc.Plan.Items, 3)
 		assert.Equal(t, core.PlanItemStatusPending, doc.Plan.Items[0].Status)
@@ -103,21 +103,21 @@ func TestPlanBuilder(t *testing.T) {
 
 	t.Run("supports all narrative types", func(t *testing.T) {
 		doc := NewPlan("Full Plan", "0.2").
-			WithProposal("P", "proposal content").
-			WithProblem("Prob", "problem content").
-			WithContext("Ctx", "context content").
-			WithAlternatives("Alt", "alternatives content").
-			WithRisks("Risk", "risks content").
-			WithTesting("Test", "testing content").
+			WithProposal("proposal content").
+			WithProblem("problem content").
+			WithContext("background content").
+			WithAlternative("alternative content").
+			WithRisk("risk content").
+			WithTest("test content").
 			Build()
 
 		assert.Len(t, doc.Plan.Narratives, 6)
 		assert.Contains(t, doc.Plan.Narratives, "proposal")
 		assert.Contains(t, doc.Plan.Narratives, "problem")
-		assert.Contains(t, doc.Plan.Narratives, "context")
-		assert.Contains(t, doc.Plan.Narratives, "alternatives")
-		assert.Contains(t, doc.Plan.Narratives, "risks")
-		assert.Contains(t, doc.Plan.Narratives, "testing")
+		assert.Contains(t, doc.Plan.Narratives, "background")
+		assert.Contains(t, doc.Plan.Narratives, "alternative")
+		assert.Contains(t, doc.Plan.Narratives, "risk")
+		assert.Contains(t, doc.Plan.Narratives, "test")
 	})
 
 	t.Run("supports AddPlanItem with custom status", func(t *testing.T) {

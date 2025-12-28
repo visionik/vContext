@@ -397,7 +397,6 @@ These examples show how a playbook might look in practice for an agentic softwar
 ```tron
 class vContextInfo: version
 class Plan: id, title, status, narratives, playbook
-class Narrative: title, content
 class Playbook: version, created, updated, entries, metrics
 class PlaybookMetrics: totalEntries, averageConfidence, lastUpdated
 class PlaybookItem:
@@ -413,10 +412,7 @@ plan: Plan(
   "Agent workflow rules",
   "inProgress",
   {
-    "proposal": Narrative(
-      "Overview",
-      "Curate reusable agent workflow strategies and warnings; evolve via append-only playbook entries."
-    )
+    "proposal": "Curate reusable agent workflow strategies and warnings; evolve via append-only playbook entries."
   },
   Playbook(
     7,
@@ -483,10 +479,7 @@ plan: Plan(
     "title": "Agent workflow rules",
     "status": "inProgress",
     "narratives": {
-      "proposal": {
-        "title": "Overview",
-        "content": "Curate reusable agent workflow strategies and warnings; evolve via append-only playbook entries."
-      }
+      "proposal": "Curate reusable agent workflow strategies and warnings; evolve via append-only playbook entries."
     },
     "playbook": {
       "version": 7,

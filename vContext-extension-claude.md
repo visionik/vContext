@@ -161,26 +161,15 @@ I'll create a structured plan in vContext format:
 class vContextInfo: version
 class Plan: title, status, narratives, phases, claudeThinking
 class PlanItem: title, status
-class Narrative: title, content
 
 vContextInfo: vContextInfo("0.4")
 plan: Plan(
   "Add OAuth2 Support",
   "draft",
   {
-    "proposal": Narrative(
-      "Approach",
-      "Add OAuth2 alongside existing JWT, maintain backward compatibility"
-    ),
-    "problem": Narrative(
-      "Context", 
-      "Users want Google/GitHub login. Current JWT-only limits adoption."
-    ),
-    "claudeThinking": Narrative(
-      "Reasoning",
-      "Key decision: Keep JWT for API tokens, use OAuth for user login. This avoids
-       breaking existing API clients while adding user-friendly login options."
-    )
+    "proposal": "Add OAuth2 alongside existing JWT, maintain backward compatibility",
+    "problem": "Users want Google/GitHub login. Current JWT-only limits adoption.",
+    "claudeThinking": "Key decision: Keep JWT for API tokens, use OAuth for user login. This avoids breaking existing API clients while adding user-friendly login options."
   },
   [
     PlanItem("OAuth provider integration", "pending"),

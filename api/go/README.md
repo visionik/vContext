@@ -55,10 +55,8 @@ func main() {
 planDoc := builder.NewPlan("Add user authentication", "0.2").
     WithAuthor("team-lead").
     WithStatus(core.PlanStatusDraft).
-    WithProposal("Proposed Changes", 
-        "Implement JWT-based authentication with refresh tokens").
-    WithProblem("Problem Statement", 
-        "Current system lacks secure authentication").
+    WithProposal("Implement JWT-based authentication with refresh tokens").
+    WithProblem("Current system lacks secure authentication").
     AddPendingPlanItem("Database setup").
     AddInProgressPlanItem("JWT implementation").
     Build()
@@ -132,8 +130,6 @@ Structured design document for medium-term memory with narratives and plan items
 ### PlanItem
 Stage of work within a plan.
 
-### Narrative
-Named documentation block within a plan.
 
 ## API Reference
 
@@ -153,9 +149,9 @@ builder.NewTodoList(version string) *TodoListBuilder
 builder.NewPlan(title, version string) *PlanBuilder
   .WithAuthor(author string)
   .WithStatus(status core.PlanStatus)
-  .WithProposal(title, content string)
-  .WithProblem(title, content string)
-  .WithContext(title, content string)
+  .WithProposal(content string)
+  .WithProblem(content string)
+  .WithBackground(content string)  // alias: WithContext(content)
   .AddPlanItem(title string, status core.PlanItemStatus)
   .AddPendingPlanItem(title string)
   .Build() *core.Document
@@ -221,9 +217,9 @@ todoList.UpdateItem(index int, updates func(*TodoItem)) error
 todoList.FindItem(predicate func(*TodoItem) bool) *TodoItem
 
 // Plan mutations
-plan.AddNarrative(key string, narrative Narrative)
+plan.AddNarrative(key string, content string)
 plan.RemoveNarrative(key string)
-plan.UpdateNarrative(key string, updates func(*Narrative)) error
+plan.UpdateNarrative(key string, updates func(*string)) error
 plan.AddPlanItem(item PlanItem)
 plan.RemovePlanItem(index int) error
 plan.UpdatePlanItem(index int, updates func(*PlanItem)) error

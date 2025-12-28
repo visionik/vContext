@@ -24,7 +24,7 @@ func NewPlanWithStatus(version, title string, status core.PlanStatus) *PlanBuild
 			Plan: &core.Plan{
 				Title:      title,
 				Status:     status,
-				Narratives: make(map[string]core.Narrative),
+				Narratives: make(map[string]string),
 			},
 		},
 	}
@@ -49,42 +49,44 @@ func (b *PlanBuilder) WithStatus(status core.PlanStatus) *PlanBuilder {
 }
 
 // WithNarrative adds a narrative to the plan.
-func (b *PlanBuilder) WithNarrative(key, title, content string) *PlanBuilder {
-	b.doc.Plan.Narratives[key] = core.Narrative{
-		Title:   title,
-		Content: content,
-	}
+func (b *PlanBuilder) WithNarrative(key, content string) *PlanBuilder {
+	b.doc.Plan.Narratives[key] = content
 	return b
 }
 
 // WithProposal adds the required proposal narrative.
-func (b *PlanBuilder) WithProposal(title, content string) *PlanBuilder {
-	return b.WithNarrative("proposal", title, content)
+func (b *PlanBuilder) WithProposal(content string) *PlanBuilder {
+	return b.WithNarrative("proposal", content)
 }
 
 // WithProblem adds a problem statement narrative.
-func (b *PlanBuilder) WithProblem(title, content string) *PlanBuilder {
-	return b.WithNarrative("problem", title, content)
+func (b *PlanBuilder) WithProblem(content string) *PlanBuilder {
+	return b.WithNarrative("problem", content)
 }
 
-// WithContext adds a context narrative.
-func (b *PlanBuilder) WithContext(title, content string) *PlanBuilder {
-	return b.WithNarrative("context", title, content)
+// WithBackground adds a background narrative.
+func (b *PlanBuilder) WithBackground(content string) *PlanBuilder {
+	return b.WithNarrative("background", content)
 }
 
-// WithAlternatives adds an alternatives narrative.
-func (b *PlanBuilder) WithAlternatives(title, content string) *PlanBuilder {
-	return b.WithNarrative("alternatives", title, content)
+// WithContext is an alias for WithBackground (kept for compatibility).
+func (b *PlanBuilder) WithContext(content string) *PlanBuilder {
+	return b.WithBackground(content)
 }
 
-// WithRisks adds a risks narrative.
-func (b *PlanBuilder) WithRisks(title, content string) *PlanBuilder {
-	return b.WithNarrative("risks", title, content)
+// WithAlternative adds an alternative narrative.
+func (b *PlanBuilder) WithAlternative(content string) *PlanBuilder {
+	return b.WithNarrative("alternative", content)
 }
 
-// WithTesting adds a testing narrative.
-func (b *PlanBuilder) WithTesting(title, content string) *PlanBuilder {
-	return b.WithNarrative("testing", title, content)
+// WithRisk adds a risk narrative.
+func (b *PlanBuilder) WithRisk(content string) *PlanBuilder {
+	return b.WithNarrative("risk", content)
+}
+
+// WithTest adds a test narrative.
+func (b *PlanBuilder) WithTest(content string) *PlanBuilder {
+	return b.WithNarrative("test", content)
 }
 
 // AddPlanItem adds a plan item to the plan.

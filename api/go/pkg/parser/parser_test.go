@@ -37,10 +37,7 @@ const validPlanJSON = `{
     "title": "Test Plan",
     "status": "draft",
     "narratives": {
-      "proposal": {
-        "title": "Proposal",
-        "content": "Test content"
-      }
+      "proposal": "Test content"
     }
   }
 }`

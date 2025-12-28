@@ -434,7 +434,7 @@ PlanCore(
   "Microservices Migration",                     # title (REQUIRED)
   "approved",                                     # status (REQUIRED)
   {                                               # narratives (REQUIRED)
-    "proposal": Narrative("Proposal", "Migrate to microservices...")
+    "proposal": "Migrate to microservices..."
   }
 )
 ```
@@ -455,8 +455,8 @@ PlanFull(
   ["architecture", "migration", "q1-2025"],      # tags (Extension 3)
   {"budget": 100000},                             # metadata (Extension 3)
   {                                               # narratives (REQUIRED)
-    "proposal": Narrative("Proposal", "Migrate to microservices..."),
-    "problem": Narrative("Problem", "Monolith doesn't scale...")
+    "proposal": "Migrate to microservices...",
+    "problem": "Monolith doesn't scale..."
   },
   [                                               # items (Extension 4) - PlanItem[]
     PlanItem("Foundation", "completed"),
@@ -1124,7 +1124,7 @@ Minimal valid entities:
 ```tron
 TodoItem("Fix bug", "pending")
 PlanItem("Foundation", "completed")                          # Renamed from Phase
-Plan("Migration", "approved", {"proposal": Narrative(...)})
+Plan("Migration", "approved", {"proposal": "..."})
 Playbook("Best Practices", [...])
 PlaybookItem("Test First", "active", "evt-1", "target-1", "append")  # Renamed from PlaybookEntry
 ```

@@ -4,8 +4,7 @@
   },
   "todoList": {
     "narrative": {
-      "title": "Overview",
-      "content": "Simplify narrative structure by making Plan narratives use strings instead of Narrative objects, while keeping Narrative objects for item-level narratives (TodoItem, PlanItem, TodoList, Playbook) where semantic context isn't provided by structure."
+      "Overview": "Simplify narrative structure by making Plan narratives use strings instead of Narrative objects, while keeping Narrative objects for item-level narratives (TodoItem, PlanItem, TodoList, Playbook) where semantic context isn't provided by structure."
     },
     "items": [
       {
@@ -13,8 +12,7 @@
         "title": "Update Narrative definition and Plan narrative structure in README.md",
         "status": "completed",
         "narrative": {
-          "title": "Result",
-          "content": "Updated Plan core spec to use 'proposal: string' and added note explaining Plan narratives use strings (key provides context) while item narratives use Narrative objects (no structural context). Updated minimal Plan examples in both TRON and JSON."
+          "Result": "Updated Plan core spec to use 'proposal: string' and added note explaining Plan narratives use strings (key provides context) while item narratives use Narrative objects (no structural context). Updated minimal Plan examples in both TRON and JSON."
         }
       },
       {
@@ -22,8 +20,7 @@
         "title": "Update Extension 3 Plan narratives to use strings",
         "status": "completed",
         "narrative": {
-          "title": "Result",
-          "content": "Updated all 13 Plan narrative fields in Extension 3 from Narrative type to string type. Changed custom from Narrative[] to string[]."
+          "Result": "Updated all 13 Plan narrative fields in Extension 3 from Narrative type to string type. Changed custom from Narrative[] to string[]."
         }
       },
       {
@@ -31,8 +28,7 @@
         "title": "Update JSON schema Plan narratives to string type",
         "status": "completed",
         "narrative": {
-          "title": "Result",
-          "content": "Changed all Plan narrative properties from Narrative refs to string type in vcontext-core.schema.json. Updated custom from array of Narrative to array of string."
+          "Result": "Changed all Plan narrative properties from Narrative refs to string type in vcontext-core.schema.json. Updated custom from array of Narrative to array of string."
         }
       },
       {
@@ -40,8 +36,7 @@
         "title": "Update all Plan narrative examples to use strings",
         "status": "completed",
         "narrative": {
-          "title": "Result",
-          "content": "Updated Appendix A2 Plan example in both TRON and JSON formats. Replaced all Narrative(title, content) calls with bare strings for all 11 narrative fields."
+          "Result": "Updated Appendix A2 Plan example in both TRON and JSON formats. Replaced all Narrative(title, content) calls with bare strings for all 11 narrative fields."
         }
       },
       {
@@ -49,8 +44,7 @@
         "title": "Update Extension 3 and 4 example Plan narratives",
         "status": "completed",
         "narrative": {
-          "title": "Result",
-          "content": "Updated Extension 4 example Plan narratives in both TRON and JSON to use bare strings."
+          "Result": "Updated Extension 4 example Plan narratives in both TRON and JSON to use bare strings."
         }
       },
       {

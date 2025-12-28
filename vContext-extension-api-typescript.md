@@ -791,7 +791,7 @@ export class TodoListMutator {
 
 // mutator/plan-mutator.ts
 
-import type { Plan, Narrative, PlanStatus } from "@vcontext/core";
+import type { Plan, PlanStatus } from "@vcontext/core";
 
 /**
  * Helper functions for mutating Plan
@@ -802,8 +802,8 @@ export class PlanMutator {
   /**
    * Add or update a narrative
    */
-  setNarrative(key: string, narrative: Narrative): void {
-    this.plan.narratives[key] = narrative;
+  setNarrative(key: string, content: string): void {
+    this.plan.narratives[key] = content;
   }
 
   /**
@@ -816,11 +816,11 @@ export class PlanMutator {
   /**
    * Update narrative content
    */
-  updateNarrative(key: string, updates: Partial<Narrative>): void {
+  updateNarrative(key: string, content: string): void {
     if (!(key in this.plan.narratives)) {
       throw new Error(`Narrative not found: ${key}`);
     }
-    Object.assign(this.plan.narratives[key], updates);
+    this.plan.narratives[key] = content;
   }
 
   /**
@@ -851,7 +851,7 @@ export function mutatePlan(plan: Plan): PlanMutator {
 ```typescript
 // updater/immutable.ts
 
-import type { Document, TodoList, TodoItem, Plan, Narrative, ItemStatus, PlanStatus } from "@vcontext/core";
+import type { Document, TodoList, TodoItem, Plan, ItemStatus, PlanStatus } from "@vcontext/core";
 
 /**
  * Immutable update helpers using structural sharing
@@ -943,7 +943,7 @@ export class ImmutableUpdater {
   static setNarrative(
     doc: Document,
     key: string,
-    narrative: Narrative
+    content: string
   ): Document {
     if (!doc.plan) {
       throw new Error("Document has no Plan");
@@ -955,7 +955,7 @@ export class ImmutableUpdater {
         ...doc.plan,
         narratives: {
           ...doc.plan.narratives,
-          [key]: narrative
+          [key]: content
         }
       }
     };
@@ -985,7 +985,7 @@ export class ImmutableUpdater {
 ```typescript
 // updater/validated.ts
 
-import type { Document, TodoItem, ItemStatus, PlanStatus, Narrative } from "@vcontext/core";
+import type { Document, TodoItem, ItemStatus, PlanStatus } from "@vcontext/core";
 import { Validator, type ValidationResult } from "@vcontext/validator";
 
 export interface UpdateResult {
@@ -1175,7 +1175,7 @@ export class ValidatedUpdater {
   /**
    * Set plan narrative with validation
    */
-  setNarrative(key: string, narrative: Narrative): UpdateResult {
+  setNarrative(key: string, content: string): UpdateResult {
     if (!this.doc.plan) {
       return {
         success: false,
@@ -1187,7 +1187,7 @@ export class ValidatedUpdater {
     }
 
     const original = this.doc.plan.narratives[key];
-    this.doc.plan.narratives[key] = narrative;
+    this.doc.plan.narratives[key] = content;
     
     const validation = this.validate();
     

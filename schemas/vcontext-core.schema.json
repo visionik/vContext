@@ -184,15 +184,6 @@
       },
       "additionalProperties": true
     },
-    "Narrative": {
-      "type": "object",
-      "required": ["title", "content"],
-      "properties": {
-        "title": {"type": "string"},
-        "content": {"type": "string"}
-      },
-      "additionalProperties": true
-    },
     "TodoStatus": {"enum": ["pending", "inProgress", "completed", "blocked", "cancelled"]},
     "PlanItemStatus": {"enum": ["pending", "inProgress", "completed", "blocked", "cancelled"]},
     "PlanStatus": {"enum": ["draft", "proposed", "approved", "inProgress", "completed", "cancelled"]},

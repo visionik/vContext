@@ -73,10 +73,10 @@ func (s ItemStatus) IsValid() bool {
 
 // Plan represents a structured design document for medium-term memory.
 type Plan struct {
-	Title      string               `json:"title" tron:"title"`
-	Status     PlanStatus           `json:"status" tron:"status"`
-	Narratives map[string]Narrative `json:"narratives" tron:"narratives"`
-	Items      []PlanItem           `json:"items,omitempty" tron:"items,omitempty"`
+	Title      string            `json:"title" tron:"title"`
+	Status     PlanStatus        `json:"status" tron:"status"`
+	Narratives map[string]string `json:"narratives" tron:"narratives"`
+	Items      []PlanItem        `json:"items,omitempty" tron:"items,omitempty"`
 }
 
 // PlanStatus represents the status of a plan.
@@ -141,11 +141,6 @@ func (s PlanItemStatus) IsValid() bool {
 	}
 }
 
-// Narrative represents a named block of documentation within a plan.
-type Narrative struct {
-	Title   string `json:"title" tron:"title"`
-	Content string `json:"content" tron:"content"`
-}
 
 // TodoList mutation methods
 
@@ -185,11 +180,11 @@ func (tl *TodoList) FindItem(predicate func(*TodoItem) bool) *TodoItem {
 // Plan mutation methods
 
 // AddNarrative adds or updates a narrative in the Plan.
-func (p *Plan) AddNarrative(key string, narrative Narrative) {
+func (p *Plan) AddNarrative(key string, content string) {
 	if p.Narratives == nil {
-		p.Narratives = make(map[string]Narrative)
+		p.Narratives = make(map[string]string)
 	}
-	p.Narratives[key] = narrative
+	p.Narratives[key] = content
 }
 
 // RemoveNarrative removes a narrative from the Plan.
@@ -198,13 +193,13 @@ func (p *Plan) RemoveNarrative(key string) {
 }
 
 // UpdateNarrative applies updates to a narrative.
-func (p *Plan) UpdateNarrative(key string, updates func(*Narrative)) error {
-	narrative, exists := p.Narratives[key]
+func (p *Plan) UpdateNarrative(key string, updates func(*string)) error {
+	content, exists := p.Narratives[key]
 	if !exists {
 		return fmt.Errorf("%w: key=%q", ErrNarrativeNotFound, key)
 	}
-	updates(&narrative)
-	p.Narratives[key] = narrative
+	updates(&content)
+	p.Narratives[key] = content
 	return nil
 }
 
