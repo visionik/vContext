@@ -2175,6 +2175,29 @@ This spec is intentionally iterative. The following open questions are candidate
    - Potential benefit: shorter and more natural language.
    - Potential cost: breaking change across all documents/tools and less familiar than `inProgress`.
 
+7. **Do we need both `id` and `uid` everywhere?**
+   - Today: `id` is typically container-local, while `uid` is intended to be globally unique/stable for sync.
+   - Alternative: standardize on one identifier concept for most entities, reserving dual identifiers only for append-only event logs.
+
+8. **Should `narratives` remain a keyed object, or become `Narrative[]` with a `type` field?**
+   - Today: `narratives` is an object with well-known keys (`proposal`, `problem`, `risks`, etc.) plus optional custom keys.
+   - Alternative: model narratives as an array `{type, title, content}` to reduce schema surface area and avoid key proliferation.
+
+9. **Should status enums be unified across types?**
+   - Today: TodoItem/PlanItem share one enum, Plans have another, and PlaybookItems have a different lifecycle.
+   - Alternative: unify where possible (or define a small base set + type-specific extensions) to simplify tooling.
+
+10. **Do we need `blocked` / `cancelled` as first-class statuses?**
+   - Alternative: treat these as tags or derived states, keeping the core status progression smaller.
+
+11. **Do we need both `completed` timestamps and status transitions?**
+   - Today: items can have `completed` timestamps and also have a terminal status (`completed`).
+   - Alternative: infer completion timestamps from status transitions + `updated`, or standardize how tools set `completed`.
+
+12. **Should containers support standardized derived metrics?**
+   - Alternative: keep documents purely declarative and have tools compute progress/rollups (counts, rates) rather than storing them.
+   - Counterpoint: stored metrics can speed up UIs and enable offline/low-cost summaries if clearly marked as derived.
+
 ---
 
 # Appendix C: License
