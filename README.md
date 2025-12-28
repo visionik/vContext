@@ -219,6 +219,8 @@ vContext serves as the canonical storage format, while Markdown can be generated
 
 # Part 1: Core (Minimum Viable Account)
 
+_* In this context, "account" means a written or stored record or description of events, experiences, or facts._
+
 ## Design Principles
 
 - **Format-agnostic**: Support both JSON and [TRON](https://tron-format.github.io/) encodings
