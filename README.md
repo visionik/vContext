@@ -2154,6 +2154,16 @@ These examples are intentionally "real-world" and include fields from **Core + E
 
 ---
 
-# Appendix B: License
+# Appendix B: Outstanding Questions
+
+This spec is intentionally iterative. The following open questions are candidates for future simplification or clarification.
+
+1. **Do we need separate `references` and `uris`?**
+   - Today: `uris` can point to anything (external URLs, files, other vAgenda documents), while `references` are vAgenda-only links.
+   - Alternative: remove `references` entirely and rely on `uris` + a constrained `type` set for vAgenda document linking.
+
+---
+
+# Appendix C: License
 
 This specification is released under CC BY 4.0.
