@@ -2218,6 +2218,12 @@ This spec is intentionally iterative. The following open questions are candidate
    - Alternative: keep documents purely declarative and have tools compute progress/rollups (counts, rates) rather than storing them.
    - Counterpoint: stored metrics can speed up UIs and enable offline/low-cost summaries if clearly marked as derived.
 
+13. **Should we support a .jsonl format for context streaming?**
+   - Today: vContext documents are single JSON/TRON objects containing one container (TodoList, Plan, or Playbook).
+   - Alternative: define a JSONL (JSON Lines) format where each line is a separate vContext document or container, enabling streaming consumption of large context collections.
+   - Use cases: LLMs consuming multiple documents in sequence, batch processing, log-style append operations, large-scale context aggregation.
+   - Consideration: how would this interact with cross-document references and container linking?
+
 ---
 
 # Appendix C: License
