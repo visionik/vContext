@@ -954,22 +954,14 @@ Location {
   url?: string            # Link to location info
 }
 
-Reference {
-  type: enum              # "file" | "line" | "range" | "url" | "issue" | "pr"
-  path?: string           # File path or URL
-  line?: number           # Single line number
-  start?: number          # Range start
-  end?: number            # Range end
-  description?: string    # What this references
-}
-
-Attachment {
-  name: string            # Filename
-  type: string            # MIME type
-  path?: string           # Local path
-  url?: string            # Remote URL
-  encoding?: string       # "base64" | "utf8" | etc.
-  data?: string           # Inline content
+VAgendaReference {
+  # Same shape as URI, but MUST point to another vAgenda document.
+  uri: string             # MUST be a URI to a vAgenda document (file:// or https://)
+  type: enum              # MUST be one of:
+                          #   "x-vagenda/todoList" | "x-vagenda/plan" | "x-vagenda/playbook"
+  title?: string
+  description?: string
+  tags?: string[]
 }
 ```
 
@@ -1002,9 +994,8 @@ PlanItem {
 ```javascript
 Plan {
   // Prior extensions...
-  uris?: URI[]            # References to other containers or resources
-  references?: Reference[] # Files, lines, URLs, issues
-  attachments?: Attachment[] # Diagrams, configs, etc.
+  uris?: URI[]                    # External resources OR other vAgenda documents
+  references?: VAgendaReference[] # vAgenda-only links (subset of URI)
 }
 ```
 
@@ -1995,18 +1986,15 @@ These examples are intentionally "real-world" and include fields from **Core + E
     },
 
     "references": [
-      {"type": "issue", "path": "https://github.com/org/repo/issues/2042", "description": "Incident issue"},
-      {"type": "pr", "path": "https://github.com/org/repo/pull/1842", "description": "Fix N+1 queries"},
-      {"type": "file", "path": "services/webhooks/handler.ts", "description": "Webhook handler"}
-    ],
-
-    "attachments": [
-      {"name": "latency-before-after.png", "type": "image/png", "url": "https://files.example.com/inc-2042/latency.png"}
+      {"uri": "file://./todo/inc-2042-todo.vagenda.json", "type": "x-vagenda/todoList", "title": "Execution checklist"},
+      {"uri": "file://./playbooks/platform-reliability-playbook.vagenda.json", "type": "x-vagenda/playbook", "title": "Reliability playbook"}
     ],
 
     "uris": [
-      {"uri": "file://./todo/inc-2042-todo.vagenda.json", "type": "x-vagenda/todoList", "title": "Execution checklist"},
-      {"uri": "file://./playbooks/platform-reliability-playbook.vagenda.json", "type": "x-vagenda/playbook", "title": "Reliability playbook"}
+      {"uri": "https://github.com/org/repo/issues/2042", "type": "x-github/issue", "title": "INC-2042 issue"},
+      {"uri": "https://github.com/org/repo/pull/1842", "type": "x-github/pr", "title": "Fix N+1 queries"},
+      {"uri": "file://./services/webhooks/handler.ts", "type": "text/plain", "title": "Webhook handler"},
+      {"uri": "https://files.example.com/inc-2042/latency.png", "type": "image/png", "title": "Latency before/after"}
     ],
 
     "items": [

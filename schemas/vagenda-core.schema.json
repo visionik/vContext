@@ -128,8 +128,7 @@
         },
         "items": {"type": "array", "items": {"$ref": "#/$defs/PlanItem"}},
         "uris": {"type": "array", "items": {"$ref": "#/$defs/URI"}},
-        "references": {"type": "array", "items": {"$ref": "#/$defs/Reference"}},
-        "attachments": {"type": "array", "items": {"$ref": "#/$defs/Attachment"}},
+        "references": {"type": "array", "items": {"$ref": "#/$defs/VAgendaReference"}},
         "created": {"$ref": "#/$defs/dateTime"},
         "updated": {"$ref": "#/$defs/dateTime"},
         "timezone": {"type": "string"},
@@ -207,6 +206,18 @@
       },
       "additionalProperties": true
     },
+    "VAgendaReference": {
+      "allOf": [
+        {"$ref": "#/$defs/URI"},
+        {
+          "type": "object",
+          "required": ["uri", "type"],
+          "properties": {
+            "type": {"enum": ["x-vagenda/todoList", "x-vagenda/plan", "x-vagenda/playbook"]}
+          }
+        }
+      ]
+    },
     "Location": {
       "type": "object",
       "properties": {
@@ -219,32 +230,6 @@
           "items": {"type": "number"}
         },
         "url": {"type": "string"}
-      },
-      "additionalProperties": true
-    },
-    "Reference": {
-      "type": "object",
-      "required": ["type"],
-      "properties": {
-        "type": {"enum": ["file", "line", "range", "url", "issue", "pr"]},
-        "path": {"type": "string"},
-        "line": {"type": "integer", "minimum": 1},
-        "start": {"type": "integer", "minimum": 1},
-        "end": {"type": "integer", "minimum": 1},
-        "description": {"type": "string"}
-      },
-      "additionalProperties": true
-    },
-    "Attachment": {
-      "type": "object",
-      "required": ["name", "type"],
-      "properties": {
-        "name": {"type": "string"},
-        "type": {"type": "string"},
-        "path": {"type": "string"},
-        "url": {"type": "string"},
-        "encoding": {"type": "string"},
-        "data": {"type": "string"}
       },
       "additionalProperties": true
     },
