@@ -498,18 +498,22 @@ TemplateParam {
 
 ```json
 {
-  "vContextInfo": {"version": "0.3"},
+  "vContextInfo": {"version": "0.4"},
   "playbook": {
-    "id": "backend-playbook",
-    "title": "Backend Development Patterns",
+    "version": 1,
+    "created": "2025-12-27T00:00:00Z",
+    "updated": "2025-12-27T00:00:00Z",
     "items": [
       {
-        "id": "oauth-pattern",
+        "eventId": "evt-0001",
+        "targetId": "oauth-pattern",
+        "operation": "append",
         "kind": "strategy",
         "title": "OAuth2 Integration Pattern",
-        "text": "Standard approach for adding OAuth2 to existing authentication systems",
+        "narrative": {"Summary": "Standard approach for adding OAuth2 to existing authentication systems"},
         "status": "active",
         "tags": ["oauth", "authentication", "security"],
+        "createdAt": "2025-12-27T00:00:00Z",
         
         "problemModelTemplate": {
           "entities": [

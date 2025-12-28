@@ -36,7 +36,7 @@ This extension defines how vContext documents are exposed as MCP resources and h
 
 **Required**:
 - Extension 2 (Identifiers) - for referencing specific items via MCP tools
-- Core vContext types (TodoList, TodoItem, Plan, PlanItem, Narrative)
+- Core vContext types (TodoList, TodoItem, Plan, PlanItem)
 
 **Recommended**:
 - Extension 1 (Timestamps) - track when MCP operations occurred
@@ -172,7 +172,7 @@ vcontext_delete_todo({
 vcontext_create_plan({
   title: string,
   status?: PlanStatus,
-  narratives?: Record<string, Narrative>,
+  narratives?: Record<string, string>,
   items?: PlanItem[]
 })
 
@@ -181,7 +181,7 @@ vcontext_update_plan({
   id: string,
   title?: string,
   status?: PlanStatus,
-  narratives?: Record<string, Narrative>
+  narratives?: Record<string, string>
 })
 
 // Add a PlanItem to a Plan
@@ -199,19 +199,23 @@ vcontext_update_plan_item({
   status?: PlanItemStatus
 })
 
-// Add learning to playbook
+// Add learning to playbook (append-only)
 vcontext_add_learning({
-  category: string,                # "strategies" | "decisions" | "patterns" | "gotchas"
-  title: string,
-  content: string,
-  tags?: string[]
+  targetId: string,
+  kind: "strategy" | "learning" | "rule" | "warning" | "note",
+  title?: string,
+  narrative: Record<string, string>,
+  tags?: string[],
+  evidence?: string[],
+  confidence?: number
 })
 
 // Query playbook learnings
 vcontext_query_playbook({
-  category?: string,
+  kind?: "strategy" | "learning" | "rule" | "warning" | "note",
   tags?: string[],
-  searchText?: string
+  searchText?: string,
+  limit?: number
 })
 ```
 
@@ -1116,15 +1120,8 @@ MCP makes playbooks accessible:
       },
       "narratives": {
         "type": "object",
-        "description": "Named narratives (problem, proposal, decision, etc.)",
-        "additionalProperties": {
-          "type": "object",
-          "properties": {
-            "title": { "type": "string" },
-            "content": { "type": "string" }
-          },
-          "required": ["content"]
-        }
+        "description": "Named narratives (problem, proposal, decision, etc.) as keyed markdown strings",
+        "additionalProperties": {"type": "string"}
       },
       "phases": {
         "type": "array",
@@ -1153,34 +1150,44 @@ MCP makes playbooks accessible:
 ```json
 {
   "name": "vcontext_add_learning",
-  "description": "Add a learning to the playbook (requires Extension 12)",
+  "description": "Append a new PlaybookItem event (requires Extension 12)",
   "inputSchema": {
     "type": "object",
     "properties": {
-      "category": {
+      "targetId": {
         "type": "string",
-        "enum": ["strategies", "decisions", "patterns", "gotchas", "codingKnowledge", "tooling"],
-        "description": "Category for this learning"
+        "description": "Stable ID for this learning (targetId)"
+      },
+      "kind": {
+        "type": "string",
+        "enum": ["strategy", "learning", "rule", "warning", "note"],
+        "description": "Kind of playbook entry"
       },
       "title": {
         "type": "string",
-        "description": "Short title for the learning"
+        "description": "Optional title"
       },
-      "content": {
-        "type": "string",
-        "description": "Detailed description of what was learned"
+      "narrative": {
+        "type": "object",
+        "minProperties": 1,
+        "additionalProperties": {"type": "string"},
+        "description": "Named narrative blocks as keyed markdown strings"
       },
       "tags": {
         "type": "array",
-        "items": { "type": "string" },
-        "description": "Tags for categorization and search"
+        "items": {"type": "string"}
       },
-      "context": {
-        "type": "string",
-        "description": "Context where this learning was discovered"
+      "evidence": {
+        "type": "array",
+        "items": {"type": "string"}
+      },
+      "confidence": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 1
       }
     },
-    "required": ["category", "title", "content"]
+    "required": ["targetId", "kind", "narrative"]
   }
 }
 ```
@@ -1190,18 +1197,18 @@ MCP makes playbooks accessible:
 ```json
 {
   "name": "vcontext_query_playbook",
-  "description": "Search the playbook for relevant learnings (requires Extension 12)",
+  "description": "Search the playbook for relevant entries (requires Extension 12)",
   "inputSchema": {
     "type": "object",
     "properties": {
-      "category": {
+      "kind": {
         "type": "string",
-        "enum": ["strategies", "decisions", "patterns", "gotchas", "codingKnowledge", "tooling"],
-        "description": "Filter by category"
+        "enum": ["strategy", "learning", "rule", "warning", "note"],
+        "description": "Filter by kind"
       },
       "tags": {
         "type": "array",
-        "items": { "type": "string" },
+        "items": {"type": "string"},
         "description": "Filter by tags (AND logic)"
       },
       "searchText": {

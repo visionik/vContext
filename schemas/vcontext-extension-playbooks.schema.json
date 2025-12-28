@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://vcontext.dev/schemas/vcontext-extension-playbooks.schema.json",
   "title": "vContext Extension Schema: Playbooks",
-  "description": "JSON Schema for vContext Playbooks extension types (v0.3 extension).",
+  "description": "JSON Schema for vContext Playbooks types (v0.4).",
   "type": "object",
   "additionalProperties": true,
   "$defs": {
@@ -32,7 +32,11 @@
 
         "kind": {"enum": ["strategy", "learning", "rule", "warning", "note"]},
         "title": {"type": "string"},
-        "text": {"type": "string", "minLength": 1},
+        "narrative": {
+          "type": "object",
+          "minProperties": 1,
+          "additionalProperties": {"type": "string"}
+        },
         "tags": {"type": "array", "items": {"type": "string"}},
         "evidence": {"type": "array", "items": {"type": "string"}},
         "confidence": {"type": "number", "minimum": 0, "maximum": 1},
@@ -61,7 +65,7 @@
       "allOf": [
         {
           "if": {"properties": {"operation": {"enum": ["append", "initial"]}}},
-          "then": {"required": ["kind", "text"]}
+          "then": {"required": ["kind", "narrative"]}
         },
         {
           "if": {"properties": {"operation": {"enum": ["update", "deprecate"]}}},

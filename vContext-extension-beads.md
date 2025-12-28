@@ -275,14 +275,8 @@ bd import --format=vcontext session-handoff.json
     "beadsProject": ".beads",
     
     "narratives": {
-      "proposal": {
-        "title": "Approach",
-        "content": "Add OAuth2 alongside JWT. OAuth for user login, JWT for API tokens."
-      },
-      "context": {
-        "title": "Constraints",
-        "content": "Must maintain backward compatibility with existing JWT auth."
-      }
+      "proposal": "Add OAuth2 alongside JWT. OAuth for user login, JWT for API tokens.",
+      "context": "Must maintain backward compatibility with existing JWT auth."
     },
     
     "items": [
@@ -344,17 +338,23 @@ Human or agent reviews and creates PlaybookItem:
 {
   "vContextInfo": {"version": "0.4"},
   "playbook": {
-    "id": "backend-playbook",
+    "version": 1,
+    "created": "2025-12-20T00:00:00Z",
+    "updated": "2025-12-27T00:00:00Z",
     "items": [
       {
-        "id": "oauth-learning",
+        "eventId": "evt-0001",
+        "targetId": "oauth-learning",
+        "operation": "append",
         "kind": "strategy",
         "title": "OAuth Integration Best Practices",
-        "text": "When adding OAuth: 1) Configure provider first, 2) Test token lifecycle early, 3) Maintain JWT compatibility. Beads dependency tracking prevented premature integration.",
+        "narrative": {
+          "Guidance": "When adding OAuth: (1) Configure provider first, (2) Test token lifecycle early, (3) Maintain JWT compatibility.",
+          "Why": "Beads dependency tracking prevented premature integration."
+        },
         "status": "active",
         "confidence": 0.9,
         "tags": ["oauth", "authentication"],
-        
         "beadsSource": {
           "project": ".beads",
           "issuesCompleted": ["bd-a1b2", "bd-c3d4", "bd-e5f6"],
@@ -363,7 +363,6 @@ Human or agent reviews and creates PlaybookItem:
             "end": "2025-12-27T00:00:00Z"
           }
         },
-        
         "evidence": [
           {
             "type": "reference",
@@ -375,7 +374,8 @@ Human or agent reviews and creates PlaybookItem:
             "uri": "beads://bd-c3d4",
             "summary": "Token lifecycle testing caught expiry bug early"
           }
-        ]
+        ],
+        "createdAt": "2025-12-27T00:00:00Z"
       }
     ]
   }
@@ -672,18 +672,23 @@ todoList: TodoList(
 {
   "vContextInfo": {"version": "0.4"},
   "playbook": {
-    "id": "backend-patterns",
-    "title": "Backend Development Patterns",
+    "version": 1,
+    "created": "2025-12-20T00:00:00Z",
+    "updated": "2025-12-27T00:00:00Z",
     "items": [
       {
-        "id": "auth-strategy",
+        "eventId": "evt-0001",
+        "targetId": "auth-strategy",
+        "operation": "append",
         "kind": "strategy",
         "title": "Dependency-First Auth Implementation",
-        "text": "When implementing authentication: 1) Setup infrastructure first (DB, providers), 2) Implement core auth logic, 3) Add tests, 4) Integrate with app. This dependency order, tracked in Beads, prevented integration bugs.",
+        "narrative": {
+          "Guidance": "When implementing authentication: (1) Setup infrastructure first (DB, providers), (2) Implement core auth logic, (3) Add tests, (4) Integrate with app.",
+          "Why": "This dependency order, tracked in Beads, prevented integration bugs."
+        },
         "status": "active",
         "confidence": 0.92,
         "tags": ["authentication", "dependencies", "testing"],
-        
         "beadsSource": {
           "project": ".beads",
           "issuesCompleted": ["bd-001", "bd-002", "bd-003", "bd-004"],
@@ -692,7 +697,6 @@ todoList: TodoList(
             "end": "2025-12-27T00:00:00Z"
           }
         },
-        
         "evidence": [
           {
             "type": "reference",
@@ -709,7 +713,8 @@ todoList: TodoList(
             "uri": "beads://bd-003",
             "summary": "Testing - caught token expiry bug before integration"
           }
-        ]
+        ],
+        "createdAt": "2025-12-27T00:00:00Z"
       }
     ]
   }

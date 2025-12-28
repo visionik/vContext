@@ -315,18 +315,9 @@ Generate → Critique → Revise:
       }
     ],
     "narratives": {
-      "proposal": {
-        "title": "Initial Approach",
-        "content": "JWT-based authentication with email/password..."
-      },
-      "critique": {
-        "title": "Security Review Findings",
-        "content": "## Critical Issues\n1. Token expiration missing\n2. Reset tokens in URL\n\n## Recommendations\nSee revised design phase..."
-      },
-      "revision": {
-        "title": "Updated Design",
-        "content": "Based on security review:\n- Added 1hr JWT expiration\n- Implemented refresh token rotation\n- Moved reset tokens to POST body\n- Added rate limiting (10 req/min)"
-      }
+      "proposal": "JWT-based authentication with email/password...",
+      "critique": "## Critical Issues\n1. Token expiration missing\n2. Reset tokens in URL\n\n## Recommendations\nSee revised design phase...",
+      "revision": "Based on security review:\n- Added 1hr JWT expiration\n- Implemented refresh token rotation\n- Moved reset tokens to POST body\n- Added rate limiting (10 req/min)"
     }
   }
 }
@@ -393,7 +384,9 @@ Constraints and experimental outcomes can inform Playbook entries:
   "operation": "append",
   "kind": "learning",
   "title": "Database indexing typically exceeds predictions",
-  "text": "B-tree indexes on high-cardinality columns consistently perform 15-30% better than predicted. Factor this into estimates.",
+  "narrative": {
+    "Learning": "B-tree indexes on high-cardinality columns consistently perform 15-30% better than predicted. Factor this into estimates."
+  },
   "tags": ["database", "performance", "indexing"],
   "evidence": ["exp-001", "exp-007", "exp-023"],
   "confidence": 0.85,

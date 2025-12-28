@@ -88,7 +88,7 @@ Playbook {
   version: number           # Playbook version (monotonic; increments on update)
   created: datetime         # When playbook was created
   updated: datetime         # Last update time
-  items: PlaybookItem[]  # Append-only log of playbook entries
+  items: PlaybookItem[]     # Append-only log of playbook events
   metrics?: PlaybookMetrics # Optional summary stats
 }
 
@@ -100,7 +100,7 @@ PlaybookItem {
 
   kind?: enum               # "strategy" | "learning" | "rule" | "warning" | "note" (required for initial/append)
   title?: string            # Optional short label
-  text?: string             # Entry content (required for initial/append; optional for update)
+  narrative?: object        # Narrative map (Title Case keys -> markdown strings)
   tags?: string[]
   evidence?: string[]
   confidence?: number       # 0.0-1.0
@@ -152,7 +152,7 @@ Plan {
 
 ### Playbook
 
-A `Playbook` is the long-lived container. It holds the entry list (`entries`) plus optional summary metrics.
+A `Playbook` is the long-lived container. It holds the event list (`items`) plus optional summary metrics.
 
 **JSON example:**
 
@@ -161,7 +161,7 @@ A `Playbook` is the long-lived container. It holds the entry list (`entries`) pl
   "version": 4,
   "created": "2025-01-10T18:00:00Z",
   "updated": "2025-12-27T08:00:00Z",
-  "entries": [],
+  "items": [],
   "metrics": {
     "totalEntries": 0,
     "lastUpdated": "2025-12-27T08:00:00Z"
@@ -188,7 +188,7 @@ Guidance:
   "operation": "append",
   "kind": "strategy",
   "title": "Write a failing test first",
-  "text": "Before changing code, write a failing test that reproduces the bug; then implement the minimal fix.",
+  "narrative": {"Overview": "Before changing code, write a failing test that reproduces the bug; then implement the minimal fix."},
   "tags": ["testing", "debugging"],
   "confidence": 0.95,
   "feedbackType": "executionOutcome",
@@ -220,7 +220,7 @@ Guidance:
   "targetId": "entry-test-first",
   "operation": "update",
   "prevEventId": "evt-0101",
-  "text": "Write a failing test first; then implement the minimal change that makes it pass; finally refactor with tests green.",
+  "narrative": {"Overview": "Write a failing test first; then implement the minimal change that makes it pass; finally refactor with tests green."},
   "createdAt": "2025-12-27T09:20:00Z",
   "reason": "Refined wording after repeated use"
 }
@@ -234,7 +234,7 @@ Guidance:
   "targetId": "entry-tests-before-fix-v2",
   "operation": "append",
   "kind": "strategy",
-  "text": "Write a failing test first; then implement the minimal change that makes it pass; finally refactor with tests green.",
+  "narrative": {"Overview": "Write a failing test first; then implement the minimal change that makes it pass; finally refactor with tests green."},
   "supersedes": ["entry-test-first"],
   "createdAt": "2025-12-27T09:30:00Z"
 }
@@ -259,7 +259,7 @@ Guidance:
   "targetId": "entry-test-first-duplicate",
   "operation": "append",
   "kind": "strategy",
-  "text": "Always start with a failing test.",
+  "narrative": {"Overview": "Always start with a failing test."},
   "duplicateOf": "entry-test-first",
   "status": "deprecated",
   "deprecatedReason": "Duplicate entry; keep canonical entry-test-first",
@@ -281,7 +281,7 @@ Guidance:
 
 ### PlaybookItem operations (event log)
 
-Playbook updates are represented by appending new `PlaybookItem` objects to `playbook.entries`.
+Playbook updates are represented by appending new `PlaybookItem` objects to `playbook.items`.
 
 #### initial / append
 
@@ -293,7 +293,7 @@ Create a new logical entry (a new `targetId`). `operation: "initial"` and `opera
   "targetId": "entry-task-first",
   "operation": "append",
   "kind": "rule",
-  "text": "For repeatable workflows, add a Task target instead of documenting raw shell commands.",
+  "narrative": {"Overview": "For repeatable workflows, add a Task target instead of documenting raw shell commands."},
   "status": "active",
   "feedbackType": "humanReview",
   "createdAt": "2025-12-27T09:00:00Z",
@@ -311,7 +311,7 @@ Update an existing logical entry by pointing at the previous event for that `tar
   "targetId": "entry-task-first",
   "operation": "update",
   "prevEventId": "evt-0001",
-  "text": "For repeatable workflows, add a Task target instead of documenting raw shell commands; keep tasks small and declarative.",
+  "narrative": {"Overview": "For repeatable workflows, add a Task target instead of documenting raw shell commands; keep tasks small and declarative."},
   "createdAt": "2025-12-27T09:10:00Z",
   "reason": "Clarify the preferred task style"
 }
@@ -352,7 +352,7 @@ Soft-deprecate an entry (retain history).
 
 ## Playbook invariants (normative)
 
-- Tools MUST update playbooks by **appending** new `PlaybookItem` events to `playbook.entries`.
+- Tools MUST update playbooks by **appending** new `PlaybookItem` events to `playbook.items`.
 - `PlaybookItem.targetId` MUST be stable once created.
 - For a given `targetId`, updates MUST form a per-entry linked list via `prevEventId`.
   - `operation: "append"|"initial"` events MUST NOT set `prevEventId`.
@@ -362,7 +362,7 @@ Soft-deprecate an entry (retain history).
 
 ## Merge semantics (deterministic, non-LLM)
 
-Playbooks are append-only: merging is performed by **set/concat union** of `playbook.entries`.
+Playbooks are append-only: merging is performed by **set/concat union** of `playbook.items`.
 
 To compute a “current view” for a given `targetId`, consumers traverse the per-entry linked list (following `prevEventId`) to find the head event and apply its field updates and accumulated `delta` counters.
 
@@ -380,7 +380,7 @@ Deprecation events SHOULD win over an `active` status unless explicitly reactiva
 
 ## Best practices
 
-- Prefer **append-only** updates (add a new `PlaybookItem` event) over rewriting `playbook.entries` wholesale.
+- Prefer **append-only** updates (add a new `PlaybookItem` event) over rewriting `playbook.items` wholesale.
 - Keep entries **atomic** (one idea per entry) to make merge/dedup easier.
 - Add **evidence** as soon as you have it (links to PRs, traces, changeLog entries, benchmark results).
 - When revising an entry substantially, create a successor entry and connect them via `supersedes/supersededBy` rather than silently editing history.
@@ -397,11 +397,11 @@ These examples show how a playbook might look in practice for an agentic softwar
 ```tron
 class vContextInfo: version
 class Plan: id, title, status, narratives, playbook
-class Playbook: version, created, updated, entries, metrics
+class Playbook: version, created, updated, items, metrics
 class PlaybookMetrics: totalEntries, averageConfidence, lastUpdated
 class PlaybookItem:
   eventId, targetId, operation, prevEventId,
-  kind, title, text, tags, evidence, confidence,
+  kind, title, narrative, tags, evidence, confidence,
   delta, feedbackType, createdAt,
   status, deprecatedReason, supersedes, supersededBy, duplicateOf,
   reason
@@ -426,7 +426,7 @@ plan: Plan(
         null,
         "rule",
         "Task-first workflow",
-        "For repeatable workflows, add a Task target instead of documenting raw shell commands.",
+        {"Overview": "For repeatable workflows, add a Task target instead of documenting raw shell commands."},
         ["workflow", "taskfile"],
         ["docs:warp.md"],
         0.9,
@@ -485,14 +485,14 @@ plan: Plan(
       "version": 7,
       "created": "2025-01-10T18:00:00Z",
       "updated": "2025-12-27T09:20:00Z",
-      "entries": [
+      "items": [
         {
           "eventId": "evt-0001",
           "targetId": "entry-task-first",
           "operation": "append",
           "kind": "rule",
           "title": "Task-first workflow",
-          "text": "For repeatable workflows, add a Task target instead of documenting raw shell commands.",
+          "narrative": {"Overview": "For repeatable workflows, add a Task target instead of documenting raw shell commands."},
           "tags": ["workflow", "taskfile"],
           "evidence": ["docs:warp.md"],
           "confidence": 0.9,

@@ -661,20 +661,25 @@ Long-term learning about pattern effectiveness.
 **JSON**:
 ```json
 {
-  "vContextInfo": {
-    "version": "0.3"
-  },
+  "vContextInfo": {"version": "0.4"},
   "playbook": {
-    "id": "playbook-001",
-    "title": "Development Best Practices",
+    "version": 1,
+    "created": "2025-12-27T00:00:00Z",
+    "updated": "2025-12-27T00:00:00Z",
     "items": [
       {
-        "id": "entry-001",
+        "eventId": "evt-0001",
+        "targetId": "entry-001",
+        "operation": "append",
         "kind": "strategy",
         "title": "Use Reflection Pattern for Complex Refactoring",
-        "text": "When refactoring complex modules (>500 LOC, multiple dependencies), employ reflection pattern with 2-3 iterations. First iteration focuses on structure, second on edge cases, third on optimization.",
+        "narrative": {
+          "Guidance": "When refactoring complex modules (>500 LOC, multiple dependencies), employ reflection pattern with 2-3 iterations.",
+          "Iterations": "Iteration 1 focuses on structure, iteration 2 on edge cases, iteration 3 on optimization."
+        },
         "confidence": 0.92,
         "status": "active",
+        "createdAt": "2025-12-27T00:00:00Z",
         "patternsUsed": ["reflection", "toolUse"],
         "patternEffectiveness": {
           "reflection": {

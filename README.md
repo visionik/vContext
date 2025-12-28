@@ -426,29 +426,52 @@ These titles provide a consistent vocabulary across all vContext entities. Tools
 
 ### Playbook (Core)
 
-**Purpose**: A collection of accumulated knowledge for **long-term memory**. Used to store lessons learned, best practices, warnings, and strategies that persist across sessions. Playbooks help agents avoid repeating mistakes and apply proven approaches.
+**Purpose**: A collection of accumulated knowledge for **long-term memory**. Playbooks are designed to support *evolving contexts* via structured, incremental updates (generation → reflection → curation) and to avoid context collapse from monolithic rewrites.
+
+vContext represents playbooks as an **append-only event log**: tools evolve guidance by appending new `PlaybookItem` events, optionally linking updates via `prevEventId`.
 
 ```javascript
 Playbook {
-  title: string           # Playbook title
-  narrative?: object      # Optional descriptions (map of title: content)
-  items: PlaybookItem[]   # Array of playbook entries
+  version: number          # Monotonic playbook version
+  created: datetime        # When playbook was created
+  updated: datetime        # Last update time
+  items: PlaybookItem[]    # Append-only log of playbook events
+  metrics?: object         # Optional summary fields
 }
 ```
 
 ### PlaybookItem (Core)
 
-**Purpose**: A single piece of accumulated knowledge or guidance. The minimal core version includes just the essential fields. Advanced features (event sourcing, metrics, linked-list updates) are available via Extension 12.
+**Purpose**: A single append-only event that creates, refines, or deprecates a logical playbook entry.
 
 ```javascript
 PlaybookItem {
-  title: string           # Brief summary of the guidance
-  status: enum            # "active" | "deprecated" | "quarantined"
-  content: string         # The actual guidance or lesson learned
+  eventId: string          # Unique id for this event
+  targetId: string         # Stable id for the logical entry being evolved
+  operation: enum          # "initial" | "append" | "update" | "deprecate"
+  prevEventId?: string     # Prior eventId for this targetId (required for update/deprecate)
+  kind?: enum              # "strategy" | "learning" | "rule" | "warning" | "note" (required for initial/append)
+
+  title?: string           # Optional short label
+  narrative?: object       # Narrative map (Title Case keys -> markdown strings)
+
+  tags?: string[]
+  evidence?: string[]
+  confidence?: number      # 0.0–1.0
+  delta?: object           # Merge-safe counters (e.g., helpfulCount/harmfulCount)
+  feedbackType?: enum
+
+  status?: enum            # "active" | "deprecated" | "quarantined"
+  deprecatedReason?: string
+  supersedes?: string[]
+  supersededBy?: string
+  duplicateOf?: string
+
+  createdAt: datetime      # When this event was created
+  reason?: string
+  metadata?: object
 }
 ```
-
-**Note**: PlaybookItem extends the abstract `Item` base class (title + status required). The `content` field is required in core to ensure each item contains actionable guidance.
 
 ## Core Examples
 
@@ -541,23 +564,23 @@ plan: Plan(
 **TRON:**
 ```tron
 class vContextInfo: version
-class Playbook: title, narrative, items
-class PlaybookItem: title, status, content
+class Playbook: version, created, updated, items
+class PlaybookItem: eventId, targetId, operation, kind, narrative, createdAt, status
 
 vContextInfo: vContextInfo("0.4")
 playbook: Playbook(
-  "Backend Development Best Practices",
-  {"Background": "Accumulated lessons learned from backend development"},
+  1,
+  "2025-12-28T00:00:00Z",
+  "2025-12-28T00:00:00Z",
   [
     PlaybookItem(
-      "Test database migrations in staging first",
-      "active",
-      "Always run database migrations in staging environment before production to catch schema conflicts early."
-    ),
-    PlaybookItem(
-      "Use connection pooling for database access",
-      "active",
-      "Configure connection pooling to handle load spikes and prevent connection exhaustion."
+      "evt-0001",
+      "entry-migrations-staging",
+      "append",
+      "rule",
+      {"Overview": "Always run database migrations in staging before production to catch schema conflicts early."},
+      "2025-12-28T00:00:00Z",
+      "active"
     )
   ]
 )
@@ -570,20 +593,20 @@ playbook: Playbook(
     "version": "0.4"
   },
   "playbook": {
-    "title": "Backend Development Best Practices",
-    "narrative": {
-      "Background": "Accumulated lessons learned from backend development"
-    },
+    "version": 1,
+    "created": "2025-12-28T00:00:00Z",
+    "updated": "2025-12-28T00:00:00Z",
     "items": [
       {
-        "title": "Test database migrations in staging first",
+        "eventId": "evt-0001",
+        "targetId": "entry-migrations-staging",
+        "operation": "append",
+        "kind": "rule",
+        "narrative": {
+          "Overview": "Always run database migrations in staging before production to catch schema conflicts early."
+        },
         "status": "active",
-        "content": "Always run database migrations in staging environment before production to catch schema conflicts early."
-      },
-      {
-        "title": "Use connection pooling for database access",
-        "status": "active",
-        "content": "Configure connection pooling to handle load spikes and prevent connection exhaustion."
+        "createdAt": "2025-12-28T00:00:00Z"
       }
     ]
   }
@@ -1338,7 +1361,10 @@ playbook: Playbook(
         "operation": "append",
         "kind": "strategy",
         "title": "Triage latency regressions with a 3-signal check",
-        "text": "When p95/p99 regresses, check (1) saturation (CPU/DB/queue), (2) error rate, (3) downstream latency. Avoid only scaling replicas until you confirm bottleneck.",
+        "narrative": {
+          "Overview": "When p95/p99 regresses, check (1) saturation (CPU/DB/queue), (2) error rate, (3) downstream latency.",
+          "Anti-pattern": "Avoid only scaling replicas until you confirm the bottleneck."
+        },
         "tags": ["reliability", "latency", "triage"],
         "evidence": ["INC-1988", "INC-2042"],
         "confidence": 0.9,
@@ -1362,7 +1388,9 @@ playbook: Playbook(
         "operation": "append",
         "kind": "rule",
         "title": "Always run a rollback drill after a risky change",
-        "text": "For changes that alter processing topology (new worker pools, new queues), run a rollback drill in staging and record time-to-recover + missing steps in the runbook.",
+        "narrative": {
+          "Guidance": "For changes that alter processing topology (new worker pools, new queues), run a rollback drill in staging and record time-to-recover + missing steps in the runbook."
+        },
         "tags": ["runbook", "rollback", "change-management"],
         "confidence": 0.95,
         "feedbackType": "humanReview",
@@ -1376,7 +1404,10 @@ playbook: Playbook(
         "operation": "append",
         "kind": "warning",
         "title": "Anti-pattern: scale-first masking DB bottlenecks",
-        "text": "If you scale replicas without bounding concurrency, you can amplify DB contention and worsen p99. Add queue bounds / rate limits before scaling.",
+        "narrative": {
+          "Problem": "If you scale replicas without bounding concurrency, you can amplify DB contention and worsen p99.",
+          "Mitigation": "Add queue bounds / rate limits before scaling."
+        },
         "tags": ["anti-pattern", "database", "latency"],
         "confidence": 0.85,
         "status": "active",
