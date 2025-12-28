@@ -2167,6 +2167,10 @@ This spec is intentionally iterative. The following open questions are candidate
    - For many uses, progress for TodoLists/Plans can be derived from item statuses (e.g., completed/total), optionally weighting blocked/cancelled.
    - Alternative: remove `percentComplete` and standardize derived progress calculations for containers and/or PlanItems only.
 
+5. **Do we need the `timezone` field?**
+   - Alternative: standardize on UTC timestamps only and let agents/apps display in local time when needed.
+   - Counterpoint: explicit timezone can represent user intent for display/scheduling (especially for due dates and reminders).
+
 ---
 
 # Appendix C: License
