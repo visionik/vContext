@@ -47,16 +47,20 @@
       {
         "id": "t5",
         "title": "Update Appendix A examples with new narrative structure",
-        "status": "cancelled",
+        "status": "completed",
         "narrative": {
-          "title": "Reflection",
-          "content": "Decided to keep Appendix A examples as-is. They already demonstrate the workflow properly and adding more narrative keys would make them overly complex. The spec and schema updates are sufficient."
+          "title": "Result",
+          "content": "Enhanced Appendix A2 Plan example to include all new narrative titles. Added constraint (requirements), hypothesis (testable predictions), observation (actual metrics after implementation), and reflection (process learnings). Example now demonstrates complete understand → design → execute → learn workflow."
         }
       },
       {
         "id": "t6",
         "title": "Commit and push changes",
-        "status": "pending"
+        "status": "completed",
+        "narrative": {
+          "title": "Result",
+          "content": "Committed changes with message 'feat: expand narrative titles from 9 to 13 standard titles' and pushed to origin/master. Commit e648d6d includes 4 files changed, 100 insertions, 25 deletions."
+        }
       }
     ]
   }
