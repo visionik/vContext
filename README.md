@@ -204,23 +204,17 @@ Markdown is still useful as a **generated output format** for humans, but vConte
 ## Architecture Layers
 
 ```
-┌─────────────────────────────────────┐
-│   Extensions (Optional Modules)     │
-│  ┌─────────────── ──────────────┐   │
-│  │  Advanced Playbook, etc.       │   │
-│  └────────────── ───────────────┘   │
-│  ┌────────────── ───────────────┐   │
-│  │   Workflow & Scheduling      │   │
-│  └─────────────── ──────────────┘   │
-│  ┌────────────── ───────────────┐   │
-│  │    Rich Metadata             │   │
-│  └─────────────── ──────────────┘   │
-├─────────────────────────────────────┤
-│   Core (MVA)                        │
-│   Item, TodoList, TodoItem,         │
-│   Plan, PlanItem,                   │
-│   Playbook, PlaybookItem            │
-└─────────────────────────────────────┘
+┌──────────────────────────────────────┐
+│ Extensions (Optional Modules)        │
+│ - Advanced playbook, etc.            │
+│ - Workflow & scheduling              │
+│ - Rich metadata                      │
+├──────────────────────────────────────┤
+│ Core (MVA)                           │
+│ - Item, TodoList, TodoItem           │
+│ - Plan, PlanItem                     │
+│ - Playbook, PlaybookItem             │
+└──────────────────────────────────────┘
 ```
 
 ---
