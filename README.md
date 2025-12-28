@@ -613,10 +613,132 @@ See also domain-specific extension documents:
 
 These examples are intentionally "real-world" and include fields from **Core + Extensions 1–12**. Unknown fields are allowed and tools should preserve them.
 
-**Note on format**: The examples below are shown in JSON for readability and completeness. These same documents can be represented in TRON format with 35-40% fewer tokens by using class definitions and positional parameters. See the core examples earlier in this spec for TRON syntax, or use a conversion tool to generate TRON from JSON.
+**Note on format**: Each example is shown in both JSON and TRON formats to demonstrate the token efficiency and readability differences.
 
 ## A1. TodoList (Operational Execution)
 
+**TRON:**
+```tron
+class vContextInfo: version, author, description, created, updated, timezone, metadata
+class TodoList: id, uid, title, description, tags, sequence, agent, lastModifiedBy, changeLog, uris, items
+class Agent: id, type, name, email
+class ChangeLogEntry: sequence, timestamp, agent, operation, reason
+class URI: uri, type, title, description
+class TodoItem: id, uid, title, status, description, priority, tags, created, updated, dueDate, percentComplete, timezone, participants, relatedComments, uris, classification, sequence, lastModifiedBy, lockedBy, dependencies, reminders, recurrence
+class Participant: id, name, email, role, status
+class Lock: agent, acquiredAt, type, expiresAt
+class Reminder: trigger, action, description
+class Recurrence: frequency, interval, byDay
+
+vContextInfo: vContextInfo(
+  "0.4",
+  "Platform Team",
+  "On-call followups for incident INC-2042",
+  "2025-12-27T17:20:00Z",
+  "2025-12-28T07:35:00Z",
+  "America/Los_Angeles",
+  {"extensions": ["timestamps", "identifiers", "rich-metadata", "hierarchical", "workflow", "participants", "resources", "recurring", "security", "version-control", "forking", "playbooks"]}
+)
+
+todoList: TodoList(
+  "todo-inc-2042",
+  "f7d2a4c6-1e3f-4d62-9c9a-3a2e8f4b1f10",
+  "INC-2042: Payment webhook latency regression",
+  "Follow-ups after incident. Goal: prevent recurrence and improve observability.",
+  ["incident", "payments", "webhooks", "on-call"],
+  12,
+  Agent("human-jt", "human", "JT", "visionik@pobox.com"),
+  Agent("agent-ops-bot", "system", "ops-bot", null),
+  [
+    ChangeLogEntry(10, "2025-12-28T06:50:00Z", Agent("agent-ops-bot", "system", "ops-bot", null), "update", "Auto-imported incident tasks from pager escalation"),
+    ChangeLogEntry(12, "2025-12-28T07:35:00Z", Agent("human-jt", "human", "JT", null), "update", "Added rollback drill and recurring SLA review")
+  ],
+  [
+    URI("https://status.example.com/incidents/INC-2042", "x-incident", "Incident timeline", "Primary incident record"),
+    URI("file://./plans/payment-webhooks-plan.vcontext.json", "x-vcontext/plan", "Remediation plan", null),
+    URI("file://./playbooks/platform-reliability-playbook.vcontext.json", "x-vcontext/playbook", "Reliability playbook", null)
+  ],
+  [
+    TodoItem(
+      "t1",
+      "8c0d8b2f-2d08-4e4a-a34f-6a21f8f8a0b1",
+      "Add p95/p99 alert for /webhooks/process",
+      "inProgress",
+      "Alert on sustained p95>2s for 10m. Include saturation + queue depth as signals.",
+      "critical",
+      ["observability", "alerts"],
+      "2025-12-28T06:55:00Z",
+      "2025-12-28T07:30:00Z",
+      "2025-12-29T02:00:00Z",
+      40,
+      "America/Los_Angeles",
+      [
+        Participant("human-jt", "JT", null, "owner", "accepted"),
+        Participant("human-alex", "Alex", "alex@example.com", "contributor", "accepted")
+      ],
+      ["pr-comment-1842", "pr-comment-1849"],
+      [URI("https://grafana.example.com/d/webhooks", "text/html", "Webhook dashboard", null)],
+      "private",
+      3,
+      Agent("human-jt", "human", "JT", null),
+      Lock(Agent("human-jt", "human", "JT", null), "2025-12-28T07:10:00Z", "soft", "2025-12-28T09:10:00Z"),
+      null,
+      null,
+      null
+    ),
+    TodoItem(
+      "t2",
+      "b112f9e9-1c84-4b8b-9893-6a0b2a1a40f7",
+      "Run rollback drill for payment-webhooks",
+      "pending",
+      "Practice rollback procedure in staging; capture time-to-recover and gaps.",
+      "high",
+      ["runbook", "resilience"],
+      "2025-12-28T07:33:00Z",
+      "2025-12-28T07:33:00Z",
+      "2025-12-30T18:00:00Z",
+      null,
+      null,
+      null,
+      null,
+      [URI("file://./docs/rollback.md", "text/markdown", "Rollback runbook", null)],
+      "confidential",
+      null,
+      null,
+      null,
+      ["t1"],
+      [Reminder("-PT1H", "email", "Rollback drill in 1 hour")],
+      null
+    ),
+    TodoItem(
+      "t3",
+      "61c0c8c1-1db5-4e4e-b5da-1b7cbb1b2c22",
+      "Weekly: review webhook SLA + alert thresholds",
+      "pending",
+      "Adjust for seasonal traffic. Ensure alert noise is acceptable.",
+      "medium",
+      ["recurring", "slo"],
+      "2025-12-28T07:34:00Z",
+      "2025-12-28T07:34:00Z",
+      "2026-01-05T18:00:00Z",
+      null,
+      null,
+      null,
+      null,
+      null,
+      "private",
+      null,
+      null,
+      null,
+      null,
+      [Reminder("-PT15M", "display", "SLA review starts in 15 minutes")],
+      Recurrence("weekly", 1, ["MO"])
+    )
+  ]
+)
+```
+
+**JSON:**
 ```json
 {
   "vContextInfo": {
@@ -771,6 +893,132 @@ These examples are intentionally "real-world" and include fields from **Core + E
 
 ## A2. Plan (Coordination + Documentation)
 
+**TRON:**
+```tron
+class vContextInfo: version, author, description, created, updated, timezone, metadata
+class Plan: id, uid, title, status, author, reviewers, description, tags, created, updated, timezone, sequence, agent, lastModifiedBy, changeLog, fork, narratives, references, uris, items
+class Agent: id, type, name
+class ChangeLogEntry: sequence, timestamp, agent, operation, reason
+class Fork: parentUid, parentSequence, forkedAt, forkReason, mergeStatus
+class Narrative: title, content
+class URI: uri, type, title
+class PlanItem: id, uid, title, status, description, tags, dependencies, startDate, percentComplete, participants, classification, todoList, subItems, location
+class Participant: id, name, role, status
+class TodoList: items
+class TodoItem: title, status
+class SubItem: id, title, status, dependencies, reminders, location
+class Reminder: trigger, action, description
+class Location: name, url
+
+vContextInfo: vContextInfo(
+  "0.4",
+  "Platform Team",
+  "Remediation plan for payment webhooks latency regression",
+  "2025-12-27T18:00:00Z",
+  "2025-12-28T07:20:00Z",
+  "America/Los_Angeles",
+  {"extensions": ["timestamps", "identifiers", "rich-metadata", "hierarchical", "workflow", "participants", "resources", "recurring", "security", "version-control", "forking", "playbooks"]}
+)
+
+plan: Plan(
+  "plan-payment-webhooks",
+  "b28c7d9d-22e7-4cd1-8f36-6d2ef2fbf12a",
+  "Payment webhooks: reduce latency + prevent recurrence",
+  "inProgress",
+  "Platform Team",
+  ["SRE Lead", "Payments TL"],
+  "Fix root cause, add guardrails, improve observability, and validate rollback.",
+  ["payments", "webhooks", "reliability"],
+  "2025-12-27T18:00:00Z",
+  "2025-12-28T07:20:00Z",
+  "America/Los_Angeles",
+  7,
+  Agent("human-jt", "human", "JT"),
+  Agent("human-jt", "human", "JT"),
+  [
+    ChangeLogEntry(6, "2025-12-28T06:40:00Z", Agent("human-jt", "human", "JT"), "update", "Added load-test acceptance criteria and rollout plan"),
+    ChangeLogEntry(7, "2025-12-28T07:20:00Z", Agent("human-jt", "human", "JT"), "update", "Expanded risks and rollback procedure")
+  ],
+  Fork("b28c7d9d-22e7-4cd1-8f36-6d2ef2fbf12a", 5, "2025-12-28T06:10:00Z", "Exploring alternative queueing strategy", "unmerged"),
+  {
+    "proposal": Narrative("Proposed Changes", "1) Fix N+1 DB queries in webhook processing.\n2) Add queue-depth based autoscaling.\n3) Add p95/p99 alerts + dashboards.\n4) Add rollback drill + runbook improvements."),
+    "problem": Narrative("Problem Statement", "Production latency regression increased webhook processing time from ~250ms to >2s p95 under load."),
+    "context": Narrative("Current State", "Webhook handler performs per-event DB lookups (N+1) and competes with background reconciliation jobs."),
+    "alternatives": Narrative("Alternatives Considered", "- Add more replicas only (insufficient: DB bottleneck)\n- Change DB isolation level (riskier)\n- Move reconciliation to separate worker pool (selected)"),
+    "risks": Narrative("Risks", "- Changing worker pool may affect ordering guarantees\n- Autoscaling could amplify DB load if not bounded\nMitigations: rate limits, circuit breakers, staged rollout."),
+    "testing": Narrative("Testing / Validation", "- Reproduce regression with load test\n- Confirm p95<400ms at 2x typical throughput\n- Run rollback drill in staging\n- Validate alert noise for 48h"),
+    "rollout": Narrative("Rollout", "1) Feature flag new worker pool\n2) Canary 5%\n3) Ramp 25% → 100%\n4) Post-deploy review at 24h")
+  },
+  [
+    URI("file://./todo/inc-2042-todo.vcontext.json", "x-vcontext/todoList", "Execution checklist"),
+    URI("file://./playbooks/platform-reliability-playbook.vcontext.json", "x-vcontext/playbook", "Reliability playbook")
+  ],
+  [
+    URI("https://github.com/org/repo/issues/2042", "x-github/issue", "INC-2042 issue"),
+    URI("https://github.com/org/repo/pull/1842", "x-github/pr", "Fix N+1 queries"),
+    URI("file://./services/webhooks/handler.ts", "text/plain", "Webhook handler"),
+    URI("https://files.example.com/inc-2042/latency.png", "image/png", "Latency before/after")
+  ],
+  [
+    PlanItem(
+      "p1",
+      "p1-uid",
+      "Diagnose and fix root cause",
+      "inProgress",
+      "Remove N+1 queries; isolate reconciliation job impact.",
+      ["root-cause"],
+      [],
+      "2025-12-27T18:30:00Z",
+      60,
+      [Participant("human-jt", "JT", "owner", "accepted")],
+      "private",
+      TodoList([TodoItem("Add query batching", "inProgress"), TodoItem("Write regression load test", "pending")]),
+      [
+        SubItem("p1-1", "Fix N+1 DB lookups", "inProgress", [], [Reminder("-PT30M", "display", "PR review in 30 minutes")], null),
+        SubItem("p1-2", "Split reconciliation to separate worker pool", "pending", ["p1-1"], null, Location("Remote", "https://zoom.example.com/room/ops"))
+      ],
+      null
+    ),
+    PlanItem(
+      "p2",
+      "p2-uid",
+      "Observability + guardrails",
+      "pending",
+      "Dashboards, alerts, SLOs, and bounded autoscaling.",
+      null,
+      ["p1"],
+      null,
+      null,
+      [Participant("human-alex", "Alex", "assignee", "accepted")],
+      "private",
+      null,
+      null,
+      null
+    ),
+    PlanItem(
+      "p3",
+      "p3-uid",
+      "Rollout + rollback drill",
+      "pending",
+      "Canary rollout, validate rollback, and document runbook.",
+      null,
+      ["p1", "p2"],
+      null,
+      null,
+      [
+        Participant("human-jt", "JT", "owner", "accepted"),
+        Participant("human-sre", "SRE Lead", "reviewer", "needsAction")
+      ],
+      "confidential",
+      null,
+      null,
+      null
+    )
+  ]
+)
+```
+
+**JSON:**
 ```json
 {
   "vContextInfo": {
@@ -952,6 +1200,103 @@ These examples are intentionally "real-world" and include fields from **Core + E
 
 ## A3. Playbook (Long-Term Memory)
 
+**TRON:**
+```tron
+class vContextInfo: version, author, description, created, updated, timezone, metadata
+class Playbook: version, created, updated, items, metrics
+class PlaybookItem: eventId, targetId, operation, prevEventId, kind, title, text, tags, evidence, confidence, feedbackType, status, createdAt, reason, delta
+class Delta: helpfulCount, harmfulCount
+class Metrics: totalEntries, averageConfidence, lastUpdated
+
+vContextInfo: vContextInfo(
+  "0.4",
+  "Platform Team",
+  "Reliability practices for latency regressions and incident followups",
+  "2025-11-10T18:00:00Z",
+  "2025-12-28T07:10:00Z",
+  "America/Los_Angeles",
+  {"extensions": ["timestamps", "identifiers", "rich-metadata", "version-control", "playbooks"]}
+)
+
+playbook: Playbook(
+  9,
+  "2025-11-10T18:00:00Z",
+  "2025-12-28T07:10:00Z",
+  [
+    PlaybookItem(
+      "evt-0900",
+      "pb-latency-regression-triage",
+      "append",
+      null,
+      "strategy",
+      "Triage latency regressions with a 3-signal check",
+      "When p95/p99 regresses, check (1) saturation (CPU/DB/queue), (2) error rate, (3) downstream latency. Avoid only scaling replicas until you confirm bottleneck.",
+      ["reliability", "latency", "triage"],
+      ["INC-1988", "INC-2042"],
+      0.9,
+      "executionOutcome",
+      "active",
+      "2025-12-10T09:00:00Z",
+      "Repeated incidents showed scaling alone delayed diagnosis",
+      null
+    ),
+    PlaybookItem(
+      "evt-0901",
+      "pb-latency-regression-triage",
+      "update",
+      "evt-0900",
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      "2025-12-28T07:05:00Z",
+      "Applied successfully during INC-2042",
+      Delta(2, null)
+    ),
+    PlaybookItem(
+      "evt-0910",
+      "pb-rollback-drill",
+      "append",
+      null,
+      "rule",
+      "Always run a rollback drill after a risky change",
+      "For changes that alter processing topology (new worker pools, new queues), run a rollback drill in staging and record time-to-recover + missing steps in the runbook.",
+      ["runbook", "rollback", "change-management"],
+      null,
+      0.95,
+      "humanReview",
+      "active",
+      "2025-12-28T07:10:00Z",
+      "Rollback procedures drift unless practiced",
+      null
+    ),
+    PlaybookItem(
+      "evt-0911",
+      "pb-scale-first-antipattern",
+      "append",
+      null,
+      "warning",
+      "Anti-pattern: scale-first masking DB bottlenecks",
+      "If you scale replicas without bounding concurrency, you can amplify DB contention and worsen p99. Add queue bounds / rate limits before scaling.",
+      ["anti-pattern", "database", "latency"],
+      null,
+      0.85,
+      null,
+      "active",
+      "2025-12-20T14:00:00Z",
+      "Observed multiple times in load-related regressions",
+      null
+    )
+  ],
+  Metrics(3, 0.9, "2025-12-28T07:10:00Z")
+)
+```
+
+**JSON:**
 ```json
 {
   "vContextInfo": {
