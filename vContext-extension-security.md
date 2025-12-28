@@ -35,7 +35,7 @@ Additionally, this extension addresses privacy compliance requirements (GDPR, CC
 ## Dependencies
 
 **Required**:
-- Core vContext types (vContextInfo, TodoList, TodoItem, Plan, Phase, Narrative)
+- Core vContext types (vContextInfo, TodoList, TodoItem, Plan, PlanItem, Narrative)
 - Extension 1 (Timestamps) - for temporal validity and expiration
 - Extension 2 (Identifiers) - for tracking entities and consent
 
@@ -62,7 +62,7 @@ Plain vContext document with no cryptographic protection.
 ```json
 {
   "vContextInfo": {
-    "version": "0.2",
+    "version": "0.4",
     "securityMode": "unsigned"
   },
   "todoList": {
@@ -252,12 +252,12 @@ Plan {
 }
 ```
 
-## Phase Extensions
+## PlanItem Extensions
 
 ```javascript
-Phase {
+PlanItem {
   // Prior extensions...
-  accessControl?: AccessControl # Phase-specific access rules
+  accessControl?: AccessControl # PlanItem-specific access rules
 }
 ```
 
@@ -293,7 +293,7 @@ Learning {
 // 1. Create unsigned plan
 const plan: VAgendaDocument = {
   vContextInfo: {
-    version: "0.2",
+    version: "0.4",
     author: "alice@example.com"
   },
   plan: {
@@ -304,7 +304,7 @@ const plan: VAgendaDocument = {
         content: "Migrate from MySQL to PostgreSQL for better JSON support..."
       }
     },
-    phases: [...]
+    items: [...]
   }
 };
 
@@ -341,7 +341,7 @@ const { payload } = await jwtVerify(jwt, publicKey);
 // 1. Create sensitive todo list
 const todoList: VAgendaDocument = {
   vContextInfo: {
-    version: "0.2",
+    version: "0.4",
     classification: "confidential"
   },
   todoList: {
@@ -395,7 +395,7 @@ const decrypted = JSON.parse(new TextDecoder().decode(plaintext));
 // Original plan (internal)
 const internalPlan: VAgendaDocument = {
   vContextInfo: {
-    version: "0.2",
+    version: "0.4",
     classification: "internal"
   },
   plan: {
@@ -536,7 +536,7 @@ const consent: ConsentRecord = {
 // Add to document
 const doc: VAgendaDocument = {
   vContextInfo: {
-    version: "0.2",
+    version: "0.4",
     consents: [consent]
   },
   todoList: {
@@ -570,7 +570,7 @@ if (canAnalyze(doc, "ai_analysis")) {
 // Public roadmap plan
 const publicPlan: VAgendaDocument = {
   vContextInfo: {
-    version: "0.2",
+    version: "0.4",
     classification: "public",
     accessControl: {
       owner: "product-team",
@@ -580,14 +580,14 @@ const publicPlan: VAgendaDocument = {
   plan: {
     title: "Q1 2025 Public Roadmap",
     classification: "public",
-    phases: [...]
+    items: [...]
   }
 };
 
 // Internal implementation plan (linked to public)
 const internalPlan: VAgendaDocument = {
   vContextInfo: {
-    version: "0.2",
+    version: "0.4",
     classification: "internal",
     accessControl: {
       owner: "engineering",
@@ -603,7 +603,7 @@ const internalPlan: VAgendaDocument = {
         content: "Detailed technical approach..."
       }
     },
-    phases: [
+    items: [
       {
         title: "Backend API Development",
         classification: "internal"
@@ -615,7 +615,7 @@ const internalPlan: VAgendaDocument = {
 // Confidential security hardening plan
 const confidentialPlan: VAgendaDocument = {
   vContextInfo: {
-    version: "0.2",
+    version: "0.4",
     classification: "confidential",
     accessControl: {
       owner: "security-team",
@@ -626,7 +626,7 @@ const confidentialPlan: VAgendaDocument = {
   plan: {
     title: "Security Hardening Q1 2025",
     classification: "confidential",
-    phases: [
+    items: [
       {
         title: "Penetration Testing",
         classification: "confidential",
@@ -895,11 +895,11 @@ class AccessControlService {
     
     // Filter plan phases
     if (filtered.plan) {
-      filtered.plan.phases = filtered.plan.phases?.filter(phase => {
-        const phaseAC = phase.accessControl;
-        if (!phaseAC) return true;
+      filtered.plan.items = filtered.plan.items?.filter(item => {
+        const itemAC = item.accessControl;
+        if (!itemAC) return true;
         
-        return this.canRead({ vContextInfo: { accessControl: phaseAC } } as any, user);
+        return this.canRead({ vContextInfo: { accessControl: itemAC } } as any, user);
       });
     }
     

@@ -137,8 +137,8 @@ class PlanStatus(str, Enum):
     CANCELLED = "cancelled"
 
 
-class PhaseStatus(str, Enum):
-    """Phase status values."""
+class PlanItemStatus(str, Enum):
+    """PlanItem status values."""
     PENDING = "pending"
     IN_PROGRESS = "inProgress"
     COMPLETED = "completed"
@@ -180,9 +180,9 @@ class Narrative(BaseModel):
     content: str = Field(description="Markdown content")
 
 
-class Phase(BaseModel):
+class PlanItem(BaseModel):
     """Stage of work within a plan."""
-    title: str = Field(description="Phase name")
+    title: str = Field(description="PlanItem name")
     status: PhaseStatus = Field(description="Current status")
 
     class Config:
@@ -1037,7 +1037,7 @@ Extensions use Pydantic's model inheritance:
 
 from pydantic import Field
 from ..core.types import TodoItem as CoreTodoItem, TodoList as CoreTodoList
-from ..core.types import Plan as CorePlan, Phase as CorePhase
+from ..core.types import Plan as CorePlan, PlanItem as CorePlanItem
 
 
 class TodoItemWithId(CoreTodoItem):
@@ -1055,8 +1055,8 @@ class PlanWithId(CorePlan):
     id: str = Field(description="Unique identifier")
 
 
-class PhaseWithId(CorePhase):
-    """Phase with identifier extension."""
+class PlanItemWithId(CorePlanItem):
+    """PlanItem with identifier extension."""
     id: str = Field(description="Unique identifier")
 
 

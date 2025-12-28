@@ -216,7 +216,7 @@ bd export --format=vcontext > session-handoff.json
 Example output:
 ```json
 {
-  "vContextInfo": {"version": "0.3"},
+  "vContextInfo": {"version": "0.4"},
   "todoList": {
     "id": "session-2025-12-27",
     "beadsProject": ".beads",
@@ -267,7 +267,7 @@ bd import --format=vcontext session-handoff.json
 
 ```json
 {
-  "vContextInfo": {"version": "0.3"},
+  "vContextInfo": {"version": "0.4"},
   "plan": {
     "id": "auth-plan",
     "title": "Add OAuth2 Support",
@@ -342,7 +342,7 @@ bd export --format=vcontext --closed-since=7d > week-retro.json
 Human or agent reviews and creates PlaybookItem:
 ```json
 {
-  "vContextInfo": {"version": "0.3"},
+  "vContextInfo": {"version": "0.4"},
   "playbook": {
     "id": "backend-playbook",
     "items": [
@@ -419,7 +419,7 @@ case "vcontext":
 **Minimal TodoList export**:
 ```json
 {
-  "vContextInfo": {"version": "0.3"},
+  "vContextInfo": {"version": "0.4"},
   "todoList": {
     "items": [
       {
@@ -446,7 +446,7 @@ case "vcontext":
 **With metrics** (requires `beads_viewer`):
 ```json
 {
-  "vContextInfo": {"version": "0.3"},
+  "vContextInfo": {"version": "0.4"},
   "todoList": {
     "items": [
       {
@@ -612,7 +612,7 @@ class vContextInfo: version
 class TodoList: id, items, beadsProject, beadsSyncedAt
 class TodoItem: id, title, status, beadsId, dependencies
 
-vContextInfo: vContextInfo("0.3")
+vContextInfo: vContextInfo("0.4")
 todoList: TodoList(
   "session-001",
   [
@@ -629,7 +629,7 @@ todoList: TodoList(
 **JSON**:
 ```json
 {
-  "vContextInfo": {"version": "0.3"},
+  "vContextInfo": {"version": "0.4"},
   "todoList": {
     "id": "session-002",
     "beadsProject": ".beads",
@@ -670,7 +670,7 @@ todoList: TodoList(
 **JSON**:
 ```json
 {
-  "vContextInfo": {"version": "0.3"},
+  "vContextInfo": {"version": "0.4"},
   "playbook": {
     "id": "backend-patterns",
     "title": "Backend Development Patterns",
@@ -750,4 +750,4 @@ This specification is released under CC BY 4.0.
 ### Version 0.1 (2025-12-27)
 - Initial draft
 - Separate BeadsMetrics type
-- Phase extensions (now PlanItem in v0.3)
+- PlanItem extensions (now PlanItem in v0.3)

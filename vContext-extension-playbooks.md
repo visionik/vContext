@@ -407,7 +407,7 @@ class PlaybookItem:
   status, deprecatedReason, supersedes, supersededBy, duplicateOf,
   reason
 
-vContextInfo: vContextInfo("0.2")
+vContextInfo: vContextInfo("0.4")
 plan: Plan(
   "plan-playbooks-realworld-001",
   "Agent workflow rules",
@@ -476,7 +476,7 @@ plan: Plan(
 ```json
 {
   "vContextInfo": {
-    "version": "0.2"
+    "version": "0.4"
   },
   "plan": {
     "id": "plan-playbooks-realworld-001",

@@ -105,7 +105,7 @@ type Plan struct {
     Title      string               `json:"title" tron:"title"`
     Status     PlanStatus           `json:"status" tron:"status"`
     Narratives map[string]Narrative `json:"narratives" tron:"narratives"`
-    Phases     []Phase              `json:"phases,omitempty" tron:"phases,omitempty"`
+    Phases     []PlanItem              `json:"items,omitempty" tron:"items,omitempty"`
 }
 
 // PlanStatus represents plan status
@@ -120,14 +120,14 @@ const (
     PlanStatusCancelled  PlanStatus = "cancelled"
 )
 
-// Phase represents a stage of work within a plan
-type Phase struct {
+// PlanItem represents a stage of work within a plan
+type PlanItem struct {
     Title  string      `json:"title" tron:"title"`
     Status PhaseStatus `json:"status" tron:"status"`
 }
 
 // PhaseStatus represents phase status
-type PhaseStatus string
+type PlanItemStatus string
 
 const (
     PhaseStatusPending    PhaseStatus = "pending"
@@ -206,7 +206,7 @@ builder.NewPlan(title, version string) *PlanBuilder
   .WithAlternatives(title, content string)
   .WithRisks(title, content string)
   .WithTesting(title, content string)
-  .AddPhase(title string, status core.PhaseStatus)
+  .AddPhase(title string, status core.PlanItemStatus)
   .AddPendingPhase(title string)
   .AddInProgressPhase(title string)
   .AddCompletedPhase(title string)
@@ -406,7 +406,7 @@ func TestConversion_JSONToTRON(t *testing.T) {
 ## Current implementation status (what exists in `api/go` today)
 
 Implemented:
-- Core types: `core.Document`, `core.TodoList`, `core.TodoItem`, `core.Plan`, `core.Phase`, `core.Narrative`
+- Core types: `core.Document`, `core.TodoList`, `core.TodoItem`, `core.Plan`, `core.PlanItem`, `core.Narrative`
 - Builders for TodoLists and Plans
 - Parsers: JSON, TRON (via `trongo`), and auto-detection
 - Converters: JSON/TRON encode helpers

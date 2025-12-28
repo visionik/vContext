@@ -107,7 +107,7 @@ class TodoList: items
 class TodoItem: id, title, status, claudeContext
 class ClaudeContext: conversationId, modelVersion, tokensUsed
 
-vContextInfo: vContextInfo("0.2", "claude-3.5-sonnet")
+vContextInfo: vContextInfo("0.4", "claude-3.5-sonnet")
 todoList: TodoList([
   TodoItem(
     "1", 
@@ -160,10 +160,10 @@ I'll create a structured plan in vContext format:
 
 class vContextInfo: version
 class Plan: title, status, narratives, phases, claudeThinking
-class Phase: title, status
+class PlanItem: title, status
 class Narrative: title, content
 
-vContextInfo: vContextInfo("0.2")
+vContextInfo: vContextInfo("0.4")
 plan: Plan(
   "Add OAuth2 Support",
   "draft",
@@ -183,10 +183,10 @@ plan: Plan(
     )
   },
   [
-    Phase("OAuth provider integration", "pending"),
-    Phase("User model updates", "pending"),
-    Phase("Login flow UI", "pending"),
-    Phase("Migration & testing", "pending")
+    PlanItem("OAuth provider integration", "pending"),
+    PlanItem("User model updates", "pending"),
+    PlanItem("Login flow UI", "pending"),
+    PlanItem("Migration & testing", "pending")
   ]
 )
 ```
@@ -209,7 +209,7 @@ class Strategy: id, title, description, confidence
 class Learning: id, content, confidence, discoveredBy
 class Agent: id, type, name, model
 
-vContextInfo: vContextInfo("0.2")
+vContextInfo: vContextInfo("0.4")
 plan: Plan(
   "OAuth Implementation Retrospective",
   "completed",
@@ -311,7 +311,7 @@ class vContextInfo: version
 class TodoList: items
 class TodoItem: id, title, status
 
-vContextInfo: vContextInfo("0.2")
+vContextInfo: vContextInfo("0.4")
 todoList: TodoList([
   TodoItem("1", "Fix bug", "completed"),
   TodoItem("2", "Add tests", "pending")
@@ -405,7 +405,7 @@ Even with Claude's massive context window, token efficiency matters:
 **JSON** (~2,800 tokens):
 ```json
 {
-  "version": "0.2",
+  "version": "0.4",
   "items": [
     {"id": "1", "title": "Implement JWT auth", "status": "in-progress", "dependencies": []},
     {"id": "2", "title": "Add auth tests", "status": "pending", "dependencies": ["1"]},
@@ -420,7 +420,7 @@ class vContextInfo: version
 class TodoList: items
 class TodoItem: id, title, status, dependencies
 
-vContextInfo: vContextInfo("0.2")
+vContextInfo: vContextInfo("0.4")
 todoList: TodoList([
   TodoItem("1", "Implement JWT auth", "inProgress", []),
   TodoItem("2", "Add auth tests", "pending", ["1"]),

@@ -36,7 +36,7 @@ This extension defines how vContext documents are exposed as MCP resources and h
 
 **Required**:
 - Extension 2 (Identifiers) - for referencing specific items via MCP tools
-- Core vContext types (TodoList, TodoItem, Plan, Phase, Narrative)
+- Core vContext types (TodoList, TodoItem, Plan, PlanItem, Narrative)
 
 **Recommended**:
 - Extension 1 (Timestamps) - track when MCP operations occurred
@@ -173,7 +173,7 @@ vcontext_create_plan({
   title: string,
   status?: PlanStatus,
   narratives?: Record<string, Narrative>,
-  phases?: Phase[]
+  items?: PlanItem[]
 })
 
 // Update a Plan
@@ -184,14 +184,14 @@ vcontext_update_plan({
   narratives?: Record<string, Narrative>
 })
 
-// Add a Phase to a Plan
+// Add a PlanItem to a Plan
 vcontext_add_phase({
   planId: string,
-  phase: Phase,
+  item: PlanItem,
   position?: number                # Insert at position, defaults to end
 })
 
-// Update a Phase
+// Update a PlanItem
 vcontext_update_phase({
   planId: string,
   phaseId: string,

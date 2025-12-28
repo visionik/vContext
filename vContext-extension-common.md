@@ -74,7 +74,7 @@ class vContextInfo: version, created, updated, timezone
 class TodoList: items
 class TodoItem: title, status, created, updated
 
-vContextInfo: vContextInfo("0.3", "2024-12-27T09:00:00Z", "2024-12-27T10:00:00Z", "America/Los_Angeles")
+vContextInfo: vContextInfo("0.4", "2024-12-27T09:00:00Z", "2024-12-27T10:00:00Z", "America/Los_Angeles")
 todoList: TodoList([
   TodoItem(
     "Implement authentication",
@@ -95,7 +95,7 @@ todoList: TodoList([
 ```json
 {
   "vContextInfo": {
-    "version": "0.3",
+    "version": "0.4",
     "created": "2024-12-27T09:00:00Z",
     "updated": "2024-12-27T10:00:00Z",
     "timezone": "America/Los_Angeles"
@@ -165,7 +165,7 @@ class vContextInfo: version
 class TodoList: id, items
 class TodoItem: id, title, status
 
-vContextInfo: vContextInfo("0.3")
+vContextInfo: vContextInfo("0.4")
 todoList: TodoList(
   "todo-001",
   [
@@ -179,7 +179,7 @@ todoList: TodoList(
 ```json
 {
   "vContextInfo": {
-    "version": "0.3"
+    "version": "0.4"
   },
   "todoList": {
     "id": "todo-001",
@@ -328,7 +328,7 @@ class Plan: id, title, status, narratives, items
 class PlanItem: id, title, status, dependencies
 class Narrative: title, content
 
-vContextInfo: vContextInfo("0.3")
+vContextInfo: vContextInfo("0.4")
 plan: Plan(
   "plan-002",
   "Build authentication system",
@@ -351,7 +351,7 @@ plan: Plan(
 ```json
 {
   "vContextInfo": {
-    "version": "0.3"
+    "version": "0.4"
   },
   "plan": {
     "id": "plan-002",
@@ -639,7 +639,7 @@ URIs enable linking related vContext documents without embedding them:
 **JSON (Plan referencing TodoList):**
 ```json
 {
-  "vContextInfo": {"version": "0.3"},
+  "vContextInfo": {"version": "0.4"},
   "plan": {
     "title": "Authentication System",
     "status": "inProgress",
@@ -663,7 +663,7 @@ URIs enable linking related vContext documents without embedding them:
 **JSON (TodoList with items referencing Plans):**
 ```json
 {
-  "vContextInfo": {"version": "0.3"},
+  "vContextInfo": {"version": "0.4"},
   "todoList": {
     "items": [
       {
@@ -924,7 +924,7 @@ class TodoItem: id, title, status
 class Agent: id, type, name, model
 class Change: sequence, timestamp, agent, operation, reason
 
-vContextInfo: vContextInfo("0.3")
+vContextInfo: vContextInfo("0.4")
 todoList: TodoList(
   "todo-002",
   [
@@ -945,7 +945,7 @@ todoList: TodoList(
 ```json
 {
   "vContextInfo": {
-    "version": "0.3"
+    "version": "0.4"
   },
   "todoList": {
     "id": "todo-002",
@@ -1087,7 +1087,7 @@ class Plan: id, title, status, narratives, uid, fork
 class Narrative: title, content
 class Fork: parentUid, parentSequence, forkedAt, forkReason, mergeStatus
 
-vContextInfo: vContextInfo("0.3")
+vContextInfo: vContextInfo("0.4")
 plan: Plan(
   "plan-fork-001",
   "Authentication - Alternative approach",
@@ -1108,7 +1108,7 @@ plan: Plan(
 ```json
 {
   "vContextInfo": {
-    "version": "0.3"
+    "version": "0.4"
   },
   "plan": {
     "id": "plan-fork-001",

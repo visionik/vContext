@@ -51,7 +51,7 @@ The library enables:
 │   │   ├── types.ts       # Core type definitions
 │   │   ├── document.ts    # Document class
 │   │   ├── todo.ts        # TodoList/TodoItem classes
-│   │   ├── plan.ts        # Plan/Phase/Narrative classes
+│   │   ├── plan.ts        # Plan/PlanItem/Narrative classes
 │   │   └── index.ts       # Exports
 │   └── package.json
 │
@@ -198,15 +198,15 @@ export type PlanStatus =
 /**
  * Stage of work within a plan
  */
-export interface Phase {
+export interface PlanItem {
   title: string;
   status: PhaseStatus;
 }
 
 /**
- * Phase status values
+ * PlanItem status values
  */
-export type PhaseStatus = 
+export type PlanItemStatus = 
   | "pending" 
   | "inProgress" 
   | "completed" 
@@ -233,7 +233,7 @@ export class VAgendaDocument {
   /**
    * Create a new TodoList document
    */
-  static createTodoList(version: string = "0.2"): VAgendaDocument {
+  static createTodoList(version: string = "0.4"): VAgendaDocument {
     return new VAgendaDocument({
       vContextInfo: { version },
       todoList: { items: [] }
@@ -245,7 +245,7 @@ export class VAgendaDocument {
    */
   static createPlan(
     title: string, 
-    version: string = "0.2"
+    version: string = "0.4"
   ): VAgendaDocument {
     return new VAgendaDocument({
       vContextInfo: { version },
@@ -399,7 +399,7 @@ export function parse(
 export class TodoListBuilder {
   private doc: Document;
 
-  constructor(version: string = "0.2") {
+  constructor(version: string = "0.4") {
     this.doc = {
       vContextInfo: { version },
       todoList: { items: [] }
@@ -458,7 +458,7 @@ export class TodoListBuilder {
 export class PlanBuilder {
   private doc: Document;
 
-  constructor(title: string, version: string = "0.2") {
+  constructor(title: string, version: string = "0.4") {
     this.doc = {
       vContextInfo: { version },
       plan: {
@@ -1249,7 +1249,7 @@ declare module "@vcontext/core" {
     id?: string;
   }
 
-  interface Phase {
+  interface PlanItem {
     id?: string;
   }
 }
@@ -1296,7 +1296,7 @@ declare module "@vcontext/core" {
 ```typescript
 import { todo } from "@vcontext/builder";
 
-const doc = todo("0.2")
+const doc = todo("0.4")
   .author("agent-alpha")
   .addItem("Implement authentication", "pending")
   .addItem("Write API documentation", "pending")
@@ -1334,7 +1334,7 @@ pending.forEach(item => console.log(`  - ${item.title}`));
 ```typescript
 import { plan } from "@vcontext/builder";
 
-const doc = plan("Add user authentication", "0.2")
+const doc = plan("Add user authentication", "0.4")
   .status("draft")
   .proposal(
     "Proposed Changes",
@@ -1356,7 +1356,7 @@ import { VAgendaDocument } from "@vcontext/core";
 import { validate } from "@vcontext/validator";
 
 const doc = VAgendaDocument.fromJSON(`{
-  "vContextInfo": {"version": "0.2"},
+  "vContextInfo": {"version": "0.4"},
   "todoList": {"items": []}
 }`);
 
@@ -1429,7 +1429,7 @@ import { useTodoList } from "@vcontext/react";
 
 function TodoListComponent() {
   const { items, addItem, updateItemStatus } = useTodoList({
-    vContextInfo: { version: "0.2" },
+    vContextInfo: { version: "0.4" },
     todoList: { items: [] }
   });
 
@@ -1593,7 +1593,7 @@ import { todo } from "@vcontext/builder";
 import { createUpdater } from "@vcontext/updater";
 
 // Create initial document
-const doc = todo("0.2")
+const doc = todo("0.4")
   .addItem("Task 1", "pending")
   .build();
 
@@ -1681,19 +1681,19 @@ import { TodoListBuilder } from "@vcontext/builder";
 
 describe("TodoListBuilder", () => {
   it("creates a valid document", () => {
-    const doc = new TodoListBuilder("0.2")
+    const doc = new TodoListBuilder("0.4")
       .author("test-author")
       .addItem("Task 1", "pending")
       .build();
 
-    expect(doc.vContextInfo.version).toBe("0.2");
+    expect(doc.vContextInfo.version).toBe("0.4");
     expect(doc.vContextInfo.author).toBe("test-author");
     expect(doc.todoList?.items).toHaveLength(1);
     expect(doc.todoList?.items[0].title).toBe("Task 1");
   });
 
   it("supports method chaining", () => {
-    const builder = new TodoListBuilder("0.2");
+    const builder = new TodoListBuilder("0.4");
     const result = builder
       .author("author")
       .addItem("Item 1")
@@ -1715,7 +1715,7 @@ import { VAgendaDocument } from "@vcontext/core";
 
 describe("Round-trip conversion", () => {
   it("JSON -> parse -> JSON preserves data", () => {
-    const original = todo("0.2")
+    const original = todo("0.4")
       .addItem("Task 1", "pending")
       .buildDocument();
 
@@ -1727,7 +1727,7 @@ describe("Round-trip conversion", () => {
   });
 
   it("TRON -> parse -> TRON preserves data", () => {
-    const original = todo("0.2")
+    const original = todo("0.4")
       .addItem("Task 1", "pending")
       .buildDocument();
 
