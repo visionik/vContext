@@ -194,6 +194,7 @@ Markdown is widely used for human-readable documents and might seem like a natur
 - **Parsing ambiguity**: Markdown has no formal schema, leading to inconsistent parsing across tools and making reliable programmatic access difficult
 - **Weak structure**: Lists, headings, and nested content lack semantic meaning (is `- [ ]` a todo item, a checklist, or just formatted text?)
 - **No type system**: Can't distinguish between a priority level, status value, or arbitrary text without custom conventions
+- **No interoperability guarantees**: One implementation can make Markdown unambiguous, but nothing guarantees consistent, non-ambiguous interpretation across implementations
 - **Token inefficiency**: Markdown's human-optimized formatting (repeated `- [ ]`, `**bold**`, etc.) consumes more tokens than structured formats
 - **Inconsistent updates**: Modifying specific items requires regex/heuristics rather than direct field access, increasing error risk
 - **No validation**: Invalid or malformed markdown is still valid markdown, making it easy to corrupt data
