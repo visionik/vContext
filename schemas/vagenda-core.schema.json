@@ -8,16 +8,21 @@
   "properties": {
     "vAgendaInfo": {"$ref": "#/$defs/vAgendaInfo"},
     "todoList": {"$ref": "#/$defs/TodoList"},
-    "plan": {"$ref": "#/$defs/Plan"}
+    "plan": {"$ref": "#/$defs/Plan"},
+    "playbook": {"$ref": "./vagenda-extension-playbooks.schema.json#/$defs/Playbook"}
   },
   "oneOf": [
     {
       "required": ["todoList"],
-      "not": {"required": ["plan"]}
+      "not": {"anyOf": [{"required": ["plan"]}, {"required": ["playbook"]}]}
     },
     {
       "required": ["plan"],
-      "not": {"required": ["todoList"]}
+      "not": {"anyOf": [{"required": ["todoList"]}, {"required": ["playbook"]}]}
+    },
+    {
+      "required": ["playbook"],
+      "not": {"anyOf": [{"required": ["todoList"]}, {"required": ["plan"]}]}
     }
   ],
   "additionalProperties": true,

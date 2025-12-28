@@ -45,7 +45,7 @@ This enables both agentic systems and human-facing tools to share a common repre
 The key words **MUST**, **SHOULD**, and **MAY** in this document are to be interpreted as normative requirements.
 
 A document is **vAgenda Core v0.3 conformant** if:
-- It is a single object containing `vAgendaInfo` and exactly one of `todoList` or `plan`.
+- It is a single object containing `vAgendaInfo` and exactly one of `todoList`, `plan`, or `playbook`.
 - `vAgendaInfo.version` MUST equal `"0.3"`.
 - Any `status` fields MUST use only the enumerated values defined in this spec.
 
@@ -1725,91 +1725,434 @@ See `vAgenda-extension-playbooks.md` for playbooks best practices (e.g. grow-and
 
 ---
 
-# Appendix A: Complete Example with Extensions
+# Appendix A: Complete Examples (All Extensions)
 
-## Plan with Multiple Extensions
+These examples are intentionally "real-world" and include fields from **Core + Extensions 1–12**. Unknown fields are allowed and tools should preserve them.
+
+## A1. TodoList (Operational Execution)
 
 ```json
 {
   "vAgendaInfo": {
     "version": "0.3",
-    "created": "2024-12-27T00:00:00Z",
-    "updated": "2024-12-27T10:00:00Z"
-  },
-  "plan": {
-    "id": "plan-001",
-    "uid": "20241227T000000Z-123456@example.com",
-    "title": "Implement microservices architecture",
-    "description": "Migrate from monolith to microservices",
-    "status": "inProgress",
-    "author": "Architecture Team",
-    "sequence": 5,
-
-    "narratives": {
-      "proposal": {
-        "title": "Proposed Changes",
-        "content": "Split into three services: auth, api, worker"
-      },
-      "problem": {
-        "title": "Problem Statement",
-        "content": "Monolith limits scalability"
-      }
-    },
-
-    "items": [
-      {
-        "id": "item-1",
-        "uid": "item-1-uid",
-        "title": "Foundation",
-        "description": "Set up infrastructure",
-        "status": "completed",
-        "startDate": "2024-12-01T00:00:00Z",
-        "endDate": "2024-12-15T00:00:00Z",
-        "percentComplete": 100,
-        "participants": [
-          {
-            "id": "backend-team",
-            "name": "Backend Team",
-            "role": "owner",
-            "status": "accepted"
-          }
-        ]
-      }
-    ],
-
-    "uris": [
-      {
-        "uri": "file://./microservices-playbook.vagenda.json",
-        "type": "x-vagenda/playbook",
-        "description": "Related playbook (long-term learnings and strategies)"
-      }
-    ],
-
+    "author": "Platform Team",
+    "description": "On-call followups for incident INC-2042",
+    "created": "2025-12-27T17:20:00Z",
+    "updated": "2025-12-28T07:35:00Z",
+    "timezone": "America/Los_Angeles",
     "metadata": {
       "extensions": [
+        "timestamps",
+        "identifiers",
         "rich-metadata",
         "hierarchical",
         "workflow",
         "participants",
+        "resources",
+        "recurring",
+        "security",
         "version-control",
-        "playbooks",
-        "resources"
-      ],
-      "customField": "custom value"
+        "forking",
+        "playbooks"
+      ]
     }
+  },
+  "todoList": {
+    "id": "todo-inc-2042",
+    "uid": "f7d2a4c6-1e3f-4d62-9c9a-3a2e8f4b1f10",
+    "title": "INC-2042: Payment webhook latency regression",
+    "description": "Follow-ups after incident. Goal: prevent recurrence and improve observability.",
+    "tags": ["incident", "payments", "webhooks", "on-call"],
+    "sequence": 12,
+    "agent": {
+      "id": "human-jt",
+      "type": "human",
+      "name": "JT",
+      "email": "visionik@pobox.com"
+    },
+    "lastModifiedBy": {
+      "id": "agent-ops-bot",
+      "type": "system",
+      "name": "ops-bot"
+    },
+    "changeLog": [
+      {
+        "sequence": 10,
+        "timestamp": "2025-12-28T06:50:00Z",
+        "agent": {"id": "agent-ops-bot", "type": "system", "name": "ops-bot"},
+        "operation": "update",
+        "reason": "Auto-imported incident tasks from pager escalation"
+      },
+      {
+        "sequence": 12,
+        "timestamp": "2025-12-28T07:35:00Z",
+        "agent": {"id": "human-jt", "type": "human", "name": "JT"},
+        "operation": "update",
+        "reason": "Added rollback drill and recurring SLA review"
+      }
+    ],
+    "uris": [
+      {
+        "uri": "https://status.example.com/incidents/INC-2042",
+        "type": "x-incident",
+        "title": "Incident timeline",
+        "description": "Primary incident record"
+      },
+      {
+        "uri": "file://./plans/payment-webhooks-plan.vagenda.json",
+        "type": "x-vagenda/plan",
+        "title": "Remediation plan"
+      },
+      {
+        "uri": "file://./playbooks/platform-reliability-playbook.vagenda.json",
+        "type": "x-vagenda/playbook",
+        "title": "Reliability playbook"
+      }
+    ],
+    "items": [
+      {
+        "id": "t1",
+        "uid": "8c0d8b2f-2d08-4e4a-a34f-6a21f8f8a0b1",
+        "title": "Add p95/p99 alert for /webhooks/process",
+        "status": "inProgress",
+        "description": "Alert on sustained p95>2s for 10m. Include saturation + queue depth as signals.",
+        "priority": "critical",
+        "tags": ["observability", "alerts"],
+        "created": "2025-12-28T06:55:00Z",
+        "updated": "2025-12-28T07:30:00Z",
+        "dueDate": "2025-12-29T02:00:00Z",
+        "percentComplete": 40,
+        "timezone": "America/Los_Angeles",
+        "participants": [
+          {"id": "human-jt", "name": "JT", "role": "owner", "status": "accepted"},
+          {"id": "human-alex", "name": "Alex", "email": "alex@example.com", "role": "contributor", "status": "accepted"}
+        ],
+        "relatedComments": ["pr-comment-1842", "pr-comment-1849"],
+        "uris": [
+          {"uri": "https://grafana.example.com/d/webhooks", "type": "text/html", "title": "Webhook dashboard"}
+        ],
+        "classification": "private",
+        "sequence": 3,
+        "lastModifiedBy": {"id": "human-jt", "type": "human", "name": "JT"},
+        "lockedBy": {
+          "agent": {"id": "human-jt", "type": "human", "name": "JT"},
+          "acquiredAt": "2025-12-28T07:10:00Z",
+          "type": "soft",
+          "expiresAt": "2025-12-28T09:10:00Z"
+        }
+      },
+      {
+        "id": "t2",
+        "uid": "b112f9e9-1c84-4b8b-9893-6a0b2a1a40f7",
+        "title": "Run rollback drill for payment-webhooks",
+        "status": "pending",
+        "description": "Practice rollback procedure in staging; capture time-to-recover and gaps.",
+        "priority": "high",
+        "tags": ["runbook", "resilience"],
+        "created": "2025-12-28T07:33:00Z",
+        "updated": "2025-12-28T07:33:00Z",
+        "dueDate": "2025-12-30T18:00:00Z",
+        "reminders": [
+          {"trigger": "-PT1H", "action": "email", "description": "Rollback drill in 1 hour"}
+        ],
+        "dependencies": ["t1"],
+        "uris": [
+          {"uri": "file://./docs/rollback.md", "type": "text/markdown", "title": "Rollback runbook"}
+        ],
+        "classification": "confidential"
+      },
+      {
+        "id": "t3",
+        "uid": "61c0c8c1-1db5-4e4e-b5da-1b7cbb1b2c22",
+        "title": "Weekly: review webhook SLA + alert thresholds",
+        "status": "pending",
+        "description": "Adjust for seasonal traffic. Ensure alert noise is acceptable.",
+        "priority": "medium",
+        "tags": ["recurring", "slo"],
+        "created": "2025-12-28T07:34:00Z",
+        "updated": "2025-12-28T07:34:00Z",
+        "dueDate": "2026-01-05T18:00:00Z",
+        "recurrence": {"frequency": "weekly", "interval": 1, "byDay": ["MO"]},
+        "reminders": [
+          {"trigger": "-PT15M", "action": "display", "description": "SLA review starts in 15 minutes"}
+        ],
+        "classification": "private"
+      }
+    ]
   }
 }
 ```
 
-This example uses:
-- **Core**: Basic structure
-- **Rich Metadata**: title, description, author
-- **Hierarchical**: items array
-- **Workflow**: dates, percentComplete
-- **Participants**: team assignment
-- **Version Control**: uid, sequence
-- **Resources**: `uris` referencing a separate Playbook document
-- **Playbooks**: stored in its own Playbook document (`x-vagenda/playbook`)
+## A2. Plan (Coordination + Documentation)
+
+```json
+{
+  "vAgendaInfo": {
+    "version": "0.3",
+    "author": "Platform Team",
+    "description": "Remediation plan for payment webhooks latency regression",
+    "created": "2025-12-27T18:00:00Z",
+    "updated": "2025-12-28T07:20:00Z",
+    "timezone": "America/Los_Angeles",
+    "metadata": {
+      "extensions": [
+        "timestamps",
+        "identifiers",
+        "rich-metadata",
+        "hierarchical",
+        "workflow",
+        "participants",
+        "resources",
+        "recurring",
+        "security",
+        "version-control",
+        "forking",
+        "playbooks"
+      ]
+    }
+  },
+  "plan": {
+    "id": "plan-payment-webhooks",
+    "uid": "b28c7d9d-22e7-4cd1-8f36-6d2ef2fbf12a",
+    "title": "Payment webhooks: reduce latency + prevent recurrence",
+    "status": "inProgress",
+    "author": "Platform Team",
+    "reviewers": ["SRE Lead", "Payments TL"],
+    "description": "Fix root cause, add guardrails, improve observability, and validate rollback.",
+    "tags": ["payments", "webhooks", "reliability"],
+
+    "created": "2025-12-27T18:00:00Z",
+    "updated": "2025-12-28T07:20:00Z",
+    "timezone": "America/Los_Angeles",
+
+    "sequence": 7,
+    "agent": {"id": "human-jt", "type": "human", "name": "JT"},
+    "lastModifiedBy": {"id": "human-jt", "type": "human", "name": "JT"},
+    "changeLog": [
+      {
+        "sequence": 6,
+        "timestamp": "2025-12-28T06:40:00Z",
+        "agent": {"id": "human-jt", "type": "human", "name": "JT"},
+        "operation": "update",
+        "reason": "Added load-test acceptance criteria and rollout plan"
+      },
+      {
+        "sequence": 7,
+        "timestamp": "2025-12-28T07:20:00Z",
+        "agent": {"id": "human-jt", "type": "human", "name": "JT"},
+        "operation": "update",
+        "reason": "Expanded risks and rollback procedure"
+      }
+    ],
+
+    "fork": {
+      "parentUid": "b28c7d9d-22e7-4cd1-8f36-6d2ef2fbf12a",
+      "parentSequence": 5,
+      "forkedAt": "2025-12-28T06:10:00Z",
+      "forkReason": "Exploring alternative queueing strategy",
+      "mergeStatus": "unmerged"
+    },
+
+    "narratives": {
+      "proposal": {
+        "title": "Proposed Changes",
+        "content": "1) Fix N+1 DB queries in webhook processing.\n2) Add queue-depth based autoscaling.\n3) Add p95/p99 alerts + dashboards.\n4) Add rollback drill + runbook improvements."
+      },
+      "problem": {
+        "title": "Problem Statement",
+        "content": "Production latency regression increased webhook processing time from ~250ms to >2s p95 under load." 
+      },
+      "context": {
+        "title": "Current State",
+        "content": "Webhook handler performs per-event DB lookups (N+1) and competes with background reconciliation jobs." 
+      },
+      "alternatives": {
+        "title": "Alternatives Considered",
+        "content": "- Add more replicas only (insufficient: DB bottleneck)\n- Change DB isolation level (riskier)\n- Move reconciliation to separate worker pool (selected)"
+      },
+      "risks": {
+        "title": "Risks",
+        "content": "- Changing worker pool may affect ordering guarantees\n- Autoscaling could amplify DB load if not bounded\nMitigations: rate limits, circuit breakers, staged rollout." 
+      },
+      "testing": {
+        "title": "Testing / Validation",
+        "content": "- Reproduce regression with load test\n- Confirm p95<400ms at 2x typical throughput\n- Run rollback drill in staging\n- Validate alert noise for 48h" 
+      },
+      "rollout": {
+        "title": "Rollout",
+        "content": "1) Feature flag new worker pool\n2) Canary 5%\n3) Ramp 25% → 100%\n4) Post-deploy review at 24h"
+      }
+    },
+
+    "references": [
+      {"type": "issue", "path": "https://github.com/org/repo/issues/2042", "description": "Incident issue"},
+      {"type": "pr", "path": "https://github.com/org/repo/pull/1842", "description": "Fix N+1 queries"},
+      {"type": "file", "path": "services/webhooks/handler.ts", "description": "Webhook handler"}
+    ],
+
+    "attachments": [
+      {"name": "latency-before-after.png", "type": "image/png", "url": "https://files.example.com/inc-2042/latency.png"}
+    ],
+
+    "uris": [
+      {"uri": "file://./todo/inc-2042-todo.vagenda.json", "type": "x-vagenda/todoList", "title": "Execution checklist"},
+      {"uri": "file://./playbooks/platform-reliability-playbook.vagenda.json", "type": "x-vagenda/playbook", "title": "Reliability playbook"}
+    ],
+
+    "items": [
+      {
+        "id": "p1",
+        "uid": "p1-uid",
+        "title": "Diagnose and fix root cause",
+        "status": "inProgress",
+        "description": "Remove N+1 queries; isolate reconciliation job impact.",
+        "tags": ["root-cause"],
+        "dependencies": [],
+        "startDate": "2025-12-27T18:30:00Z",
+        "percentComplete": 60,
+        "participants": [
+          {"id": "human-jt", "name": "JT", "role": "owner", "status": "accepted"}
+        ],
+        "classification": "private",
+        "todoList": {
+          "items": [
+            {"title": "Add query batching", "status": "inProgress"},
+            {"title": "Write regression load test", "status": "pending"}
+          ]
+        },
+        "subItems": [
+          {
+            "id": "p1-1",
+            "title": "Fix N+1 DB lookups",
+            "status": "inProgress",
+            "dependencies": [],
+            "reminders": [{"trigger": "-PT30M", "action": "display", "description": "PR review in 30 minutes"}]
+          },
+          {
+            "id": "p1-2",
+            "title": "Split reconciliation to separate worker pool",
+            "status": "pending",
+            "dependencies": ["p1-1"],
+            "location": {"name": "Remote", "url": "https://zoom.example.com/room/ops"}
+          }
+        ]
+      },
+      {
+        "id": "p2",
+        "uid": "p2-uid",
+        "title": "Observability + guardrails",
+        "status": "pending",
+        "description": "Dashboards, alerts, SLOs, and bounded autoscaling.",
+        "dependencies": ["p1"],
+        "classification": "private",
+        "participants": [
+          {"id": "human-alex", "name": "Alex", "role": "assignee", "status": "accepted"}
+        ]
+      },
+      {
+        "id": "p3",
+        "uid": "p3-uid",
+        "title": "Rollout + rollback drill",
+        "status": "pending",
+        "description": "Canary rollout, validate rollback, and document runbook.",
+        "dependencies": ["p1", "p2"],
+        "classification": "confidential",
+        "participants": [
+          {"id": "human-jt", "name": "JT", "role": "owner", "status": "accepted"},
+          {"id": "human-sre", "name": "SRE Lead", "role": "reviewer", "status": "needsAction"}
+        ]
+      }
+    ]
+  }
+}
+```
+
+## A3. Playbook (Long-Term Memory)
+
+```json
+{
+  "vAgendaInfo": {
+    "version": "0.3",
+    "author": "Platform Team",
+    "description": "Reliability practices for latency regressions and incident followups",
+    "created": "2025-11-10T18:00:00Z",
+    "updated": "2025-12-28T07:10:00Z",
+    "timezone": "America/Los_Angeles",
+    "metadata": {
+      "extensions": [
+        "timestamps",
+        "identifiers",
+        "rich-metadata",
+        "version-control",
+        "playbooks"
+      ]
+    }
+  },
+  "playbook": {
+    "version": 9,
+    "created": "2025-11-10T18:00:00Z",
+    "updated": "2025-12-28T07:10:00Z",
+    "items": [
+      {
+        "eventId": "evt-0900",
+        "targetId": "pb-latency-regression-triage",
+        "operation": "append",
+        "kind": "strategy",
+        "title": "Triage latency regressions with a 3-signal check",
+        "text": "When p95/p99 regresses, check (1) saturation (CPU/DB/queue), (2) error rate, (3) downstream latency. Avoid only scaling replicas until you confirm bottleneck.",
+        "tags": ["reliability", "latency", "triage"],
+        "evidence": ["INC-1988", "INC-2042"],
+        "confidence": 0.9,
+        "feedbackType": "executionOutcome",
+        "status": "active",
+        "createdAt": "2025-12-10T09:00:00Z",
+        "reason": "Repeated incidents showed scaling alone delayed diagnosis"
+      },
+      {
+        "eventId": "evt-0901",
+        "targetId": "pb-latency-regression-triage",
+        "operation": "update",
+        "prevEventId": "evt-0900",
+        "delta": {"helpfulCount": 2},
+        "createdAt": "2025-12-28T07:05:00Z",
+        "reason": "Applied successfully during INC-2042"
+      },
+      {
+        "eventId": "evt-0910",
+        "targetId": "pb-rollback-drill",
+        "operation": "append",
+        "kind": "rule",
+        "title": "Always run a rollback drill after a risky change",
+        "text": "For changes that alter processing topology (new worker pools, new queues), run a rollback drill in staging and record time-to-recover + missing steps in the runbook.",
+        "tags": ["runbook", "rollback", "change-management"],
+        "confidence": 0.95,
+        "feedbackType": "humanReview",
+        "status": "active",
+        "createdAt": "2025-12-28T07:10:00Z",
+        "reason": "Rollback procedures drift unless practiced"
+      },
+      {
+        "eventId": "evt-0911",
+        "targetId": "pb-scale-first-antipattern",
+        "operation": "append",
+        "kind": "warning",
+        "title": "Anti-pattern: scale-first masking DB bottlenecks",
+        "text": "If you scale replicas without bounding concurrency, you can amplify DB contention and worsen p99. Add queue bounds / rate limits before scaling.",
+        "tags": ["anti-pattern", "database", "latency"],
+        "confidence": 0.85,
+        "status": "active",
+        "createdAt": "2025-12-20T14:00:00Z",
+        "reason": "Observed multiple times in load-related regressions"
+      }
+    ],
+    "metrics": {
+      "totalEntries": 3,
+      "averageConfidence": 0.9,
+      "lastUpdated": "2025-12-28T07:10:00Z"
+    }
+  }
+}
+```
 
 ---
 
