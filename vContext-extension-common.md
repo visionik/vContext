@@ -212,7 +212,7 @@ Adds descriptive and organizational fields.
 TodoList {
   // Core fields...
   title?: string           # Optional list title
-  narrative?: Narrative[]  # Detailed descriptions
+  narrative?: object       # Detailed descriptions (map of title: content)
   tags?: string[]          # Categorical labels
   metadata?: object        # Custom fields
 }
@@ -222,7 +222,7 @@ TodoList {
 ```javascript
 TodoItem {
   // Core fields...
-  narrative?: Narrative[]  # Detailed context
+  narrative?: object       # Detailed context (map of title: content)
   priority?: enum          # "low" | "medium" | "high" | "critical"
   tags?: string[]          # Categorical labels
   metadata?: object        # Custom fields
@@ -260,7 +260,7 @@ Plan {
 ```javascript
 PlanItem {
   // Core fields...
-  narrative?: Narrative[]  # Item descriptions
+  narrative?: object       # Item descriptions (map of title: content)
   tags?: string[]          # Categorical labels
   metadata?: object        # Custom fields
 }
@@ -295,7 +295,7 @@ TodoItem(
   "item-2",
   "Implement JWT authentication",
   "inProgress",
-  [Narrative("Background", "Add JWT token generation and validation for secure API access")],
+  {"Background": "Add JWT token generation and validation for secure API access"},
   "high",
   ["security", "backend", "auth"],
   {"estimatedHours": 8, "complexity": "medium"}
@@ -308,12 +308,9 @@ TodoItem(
   "id": "item-2",
   "title": "Implement JWT authentication",
   "status": "inProgress",
-  "narrative": [
-    {
-      "title": "Background",
-      "content": "Add JWT token generation and validation for secure API access"
-    }
-  ],
+  "narrative": {
+    "Background": "Add JWT token generation and validation for secure API access"
+  },
   "priority": "high",
   "tags": ["security", "backend", "auth"],
   "metadata": {

@@ -1,0 +1,39 @@
+{
+  "vContextInfo": {
+    "version": "0.4"
+  },
+  "todoList": {
+    "items": [
+      {
+        "id": "t1",
+        "title": "Update core spec to use narrative map/object",
+        "status": "completed"
+      },
+      {
+        "id": "t2",
+        "title": "Update Extension 3 to use narrative map",
+        "status": "completed"
+      },
+      {
+        "id": "t3",
+        "title": "Update all examples to use narrative map",
+        "status": "completed"
+      },
+      {
+        "id": "t4",
+        "title": "Update JSON schema for narrative map",
+        "status": "completed"
+      },
+      {
+        "id": "t5",
+        "title": "Update Narrative type documentation",
+        "status": "completed"
+      },
+      {
+        "id": "t6",
+        "title": "Update note about Plan vs item narratives",
+        "status": "completed"
+      }
+    ]
+  }
+}

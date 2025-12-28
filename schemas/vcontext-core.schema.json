@@ -52,7 +52,10 @@
         "id": {"type": "string"},
         "uid": {"type": "string"},
         "title": {"type": "string"},
-        "narrative": {"type": "array", "items": {"$ref": "#/$defs/Narrative"}},
+        "narrative": {
+          "type": "object",
+          "additionalProperties": {"type": "string"}
+        },
         "tags": {"type": "array", "items": {"type": "string"}},
         "metadata": {"type": "object"},
         "uris": {"type": "array", "items": {"$ref": "#/$defs/URI"}},
@@ -75,7 +78,10 @@
         "uid": {"type": "string"},
         "title": {"type": "string", "minLength": 1},
         "status": {"$ref": "#/$defs/TodoStatus"},
-        "narrative": {"type": "array", "items": {"$ref": "#/$defs/Narrative"}},
+        "narrative": {
+          "type": "object",
+          "additionalProperties": {"type": "string"}
+        },
         "priority": {"enum": ["low", "medium", "high", "critical"]},
         "tags": {"type": "array", "items": {"type": "string"}},
         "metadata": {"type": "object"},
@@ -154,7 +160,10 @@
         "uid": {"type": "string"},
         "title": {"type": "string", "minLength": 1},
         "status": {"$ref": "#/$defs/PlanItemStatus"},
-        "narrative": {"type": "array", "items": {"$ref": "#/$defs/Narrative"}},
+        "narrative": {
+          "type": "object",
+          "additionalProperties": {"type": "string"}
+        },
         "tags": {"type": "array", "items": {"type": "string"}},
         "metadata": {"type": "object"},
         "dependencies": {"type": "array", "items": {"type": "string"}},
