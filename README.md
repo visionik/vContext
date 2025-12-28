@@ -377,7 +377,7 @@ Plan {
   title: string           # Plan title
   status: enum            # "draft" | "proposed" | "approved" | "inProgress" | "completed" | "cancelled"
   narratives: {
-    proposal: Narrative   # Proposed changes (required)
+    proposal: Narrative   # Proposed solution (required, uses "Proposal" title)
   }
 }
 ```
@@ -397,7 +397,7 @@ PlanItem {
 
 ### Narrative (Core)
 
-**Purpose**: A named block of documentation within a plan. Narratives organize written content (problem statements, proposals, testing approaches, etc.) using markdown formatting.
+**Purpose**: A named block of documentation. Narratives organize written content using markdown formatting and can be used across TodoLists, TodoItems, Plans, PlanItems, and Playbooks.
 
 ```javascript
 Narrative {
@@ -406,6 +406,27 @@ Narrative {
 }
 ```
 
+**Standard Narrative Titles**: While `title` can be any string, vContext defines standard titles that follow the **understand → design → execute → learn** workflow:
+
+**Understand phase** (gathering context):
+- **Overview** - High-level summary
+- **Context** - Current state / what exists today
+- **Problem** - What needs fixing or addressing
+
+**Design phase** (planning solution):
+- **Proposal** - Proposed solution or approach
+- **Alternative** - Other options considered
+- **Risk** - Potential issues and mitigations
+
+**Execute phase** (taking action):
+- **Test** - Validation approach or testing strategy
+- **Action** - Execution or deployment strategy
+
+**Learn phase** (capturing outcomes):
+- **Result** - Outcomes, learnings, and retrospectives
+
+These titles provide a consistent vocabulary across all vContext entities. Tools MAY use these to provide structured workflows, but custom titles are always permitted.
+
 ### Playbook (Core)
 
 **Purpose**: A collection of accumulated knowledge for **long-term memory**. Used to store lessons learned, best practices, warnings, and strategies that persist across sessions. Playbooks help agents avoid repeating mistakes and apply proven approaches.
@@ -413,7 +434,7 @@ Narrative {
 ```javascript
 Playbook {
   title: string           # Playbook title
-  description?: string    # Optional description
+  narrative?: Narrative   # Optional description
   items: PlaybookItem[]   # Array of playbook entries
 }
 ```
@@ -485,7 +506,7 @@ plan: Plan(
   "draft",
   {
     "proposal": Narrative(
-      "Proposed Changes",
+      "Proposal",
       "Implement JWT-based authentication with refresh tokens"
     )
   },
@@ -507,7 +528,7 @@ plan: Plan(
     "status": "draft",
     "narratives": {
       "proposal": {
-        "title": "Proposed Changes",
+        "title": "Proposal",
         "content": "Implement JWT-based authentication with refresh tokens"
       }
     },
@@ -530,13 +551,14 @@ plan: Plan(
 **TRON:**
 ```tron
 class vContextInfo: version
-class Playbook: title, description, items
+class Playbook: title, narrative, items
 class PlaybookItem: title, status, content
+class Narrative: title, content
 
 vContextInfo: vContextInfo("0.4")
 playbook: Playbook(
   "Backend Development Best Practices",
-  "Accumulated lessons learned from backend development",
+  Narrative("Context", "Accumulated lessons learned from backend development"),
   [
     PlaybookItem(
       "Test database migrations in staging first",
@@ -560,7 +582,10 @@ playbook: Playbook(
   },
   "playbook": {
     "title": "Backend Development Best Practices",
-    "description": "Accumulated lessons learned from backend development",
+    "narrative": {
+      "title": "Context",
+      "content": "Accumulated lessons learned from backend development"
+    },
     "items": [
       {
         "title": "Test database migrations in staging first",
@@ -620,11 +645,12 @@ These examples are intentionally "real-world" and include fields from **Core + E
 **TRON:**
 ```tron
 class vContextInfo: version, author, description, created, updated, timezone, metadata
-class TodoList: id, uid, title, description, tags, sequence, agent, lastModifiedBy, changeLog, uris, items
+class TodoList: id, uid, title, narrative, tags, sequence, agent, lastModifiedBy, changeLog, uris, items
+class Narrative: title, content
 class Agent: id, type, name, email
 class ChangeLogEntry: sequence, timestamp, agent, operation, reason
 class URI: uri, type, title, description
-class TodoItem: id, uid, title, status, description, priority, tags, created, updated, dueDate, percentComplete, timezone, participants, relatedComments, uris, classification, sequence, lastModifiedBy, lockedBy, dependencies, reminders, recurrence
+class TodoItem: id, uid, title, status, narrative, priority, tags, created, updated, dueDate, percentComplete, timezone, participants, relatedComments, uris, classification, sequence, lastModifiedBy, lockedBy, dependencies, reminders, recurrence
 class Participant: id, name, email, role, status
 class Lock: agent, acquiredAt, type, expiresAt
 class Reminder: trigger, action, description
@@ -644,7 +670,7 @@ todoList: TodoList(
   "todo-inc-2042",
   "f7d2a4c6-1e3f-4d62-9c9a-3a2e8f4b1f10",
   "INC-2042: Payment webhook latency regression",
-  "Follow-ups after incident. Goal: prevent recurrence and improve observability.",
+  Narrative("Overview", "Follow-ups after incident. Goal: prevent recurrence and improve observability."),
   ["incident", "payments", "webhooks", "on-call"],
   12,
   Agent("human-jt", "human", "JT", "visionik@pobox.com"),
@@ -664,7 +690,7 @@ todoList: TodoList(
       "8c0d8b2f-2d08-4e4a-a34f-6a21f8f8a0b1",
       "Add p95/p99 alert for /webhooks/process",
       "inProgress",
-      "Alert on sustained p95>2s for 10m. Include saturation + queue depth as signals.",
+      Narrative("Context", "Alert on sustained p95>2s for 10m. Include saturation + queue depth as signals."),
       "critical",
       ["observability", "alerts"],
       "2025-12-28T06:55:00Z",
@@ -691,7 +717,7 @@ todoList: TodoList(
       "b112f9e9-1c84-4b8b-9893-6a0b2a1a40f7",
       "Run rollback drill for payment-webhooks",
       "pending",
-      "Practice rollback procedure in staging; capture time-to-recover and gaps.",
+      Narrative("Context", "Practice rollback procedure in staging; capture time-to-recover and gaps."),
       "high",
       ["runbook", "resilience"],
       "2025-12-28T07:33:00Z",
@@ -715,7 +741,7 @@ todoList: TodoList(
       "61c0c8c1-1db5-4e4e-b5da-1b7cbb1b2c22",
       "Weekly: review webhook SLA + alert thresholds",
       "pending",
-      "Adjust for seasonal traffic. Ensure alert noise is acceptable.",
+      Narrative("Context", "Adjust for seasonal traffic. Ensure alert noise is acceptable."),
       "medium",
       ["recurring", "slo"],
       "2025-12-28T07:34:00Z",
@@ -769,7 +795,10 @@ todoList: TodoList(
     "id": "todo-inc-2042",
     "uid": "f7d2a4c6-1e3f-4d62-9c9a-3a2e8f4b1f10",
     "title": "INC-2042: Payment webhook latency regression",
-    "description": "Follow-ups after incident. Goal: prevent recurrence and improve observability.",
+    "narrative": {
+      "title": "Overview",
+      "content": "Follow-ups after incident. Goal: prevent recurrence and improve observability."
+    },
     "tags": ["incident", "payments", "webhooks", "on-call"],
     "sequence": 12,
     "agent": {
@@ -823,7 +852,10 @@ todoList: TodoList(
         "uid": "8c0d8b2f-2d08-4e4a-a34f-6a21f8f8a0b1",
         "title": "Add p95/p99 alert for /webhooks/process",
         "status": "inProgress",
-        "description": "Alert on sustained p95>2s for 10m. Include saturation + queue depth as signals.",
+        "narrative": {
+          "title": "Context",
+          "content": "Alert on sustained p95>2s for 10m. Include saturation + queue depth as signals."
+        },
         "priority": "critical",
         "tags": ["observability", "alerts"],
         "created": "2025-12-28T06:55:00Z",
@@ -854,7 +886,10 @@ todoList: TodoList(
         "uid": "b112f9e9-1c84-4b8b-9893-6a0b2a1a40f7",
         "title": "Run rollback drill for payment-webhooks",
         "status": "pending",
-        "description": "Practice rollback procedure in staging; capture time-to-recover and gaps.",
+        "narrative": {
+          "title": "Context",
+          "content": "Practice rollback procedure in staging; capture time-to-recover and gaps."
+        },
         "priority": "high",
         "tags": ["runbook", "resilience"],
         "created": "2025-12-28T07:33:00Z",
@@ -874,7 +909,10 @@ todoList: TodoList(
         "uid": "61c0c8c1-1db5-4e4e-b5da-1b7cbb1b2c22",
         "title": "Weekly: review webhook SLA + alert thresholds",
         "status": "pending",
-        "description": "Adjust for seasonal traffic. Ensure alert noise is acceptable.",
+        "narrative": {
+          "title": "Context",
+          "content": "Adjust for seasonal traffic. Ensure alert noise is acceptable."
+        },
         "priority": "medium",
         "tags": ["recurring", "slo"],
         "created": "2025-12-28T07:34:00Z",
@@ -896,13 +934,13 @@ todoList: TodoList(
 **TRON:**
 ```tron
 class vContextInfo: version, author, description, created, updated, timezone, metadata
-class Plan: id, uid, title, status, author, reviewers, description, tags, created, updated, timezone, sequence, agent, lastModifiedBy, changeLog, fork, narratives, references, uris, items
+class Plan: id, uid, title, status, author, reviewers, tags, created, updated, timezone, sequence, agent, lastModifiedBy, changeLog, fork, narratives, references, uris, items
 class Agent: id, type, name
 class ChangeLogEntry: sequence, timestamp, agent, operation, reason
 class Fork: parentUid, parentSequence, forkedAt, forkReason, mergeStatus
 class Narrative: title, content
 class URI: uri, type, title
-class PlanItem: id, uid, title, status, description, tags, dependencies, startDate, percentComplete, participants, classification, todoList, subItems, location
+class PlanItem: id, uid, title, status, narrative, tags, dependencies, startDate, percentComplete, participants, classification, todoList, subItems, location
 class Participant: id, name, role, status
 class TodoList: items
 class TodoItem: title, status
@@ -927,7 +965,6 @@ plan: Plan(
   "inProgress",
   "Platform Team",
   ["SRE Lead", "Payments TL"],
-  "Fix root cause, add guardrails, improve observability, and validate rollback.",
   ["payments", "webhooks", "reliability"],
   "2025-12-27T18:00:00Z",
   "2025-12-28T07:20:00Z",
@@ -941,13 +978,13 @@ plan: Plan(
   ],
   Fork("b28c7d9d-22e7-4cd1-8f36-6d2ef2fbf12a", 5, "2025-12-28T06:10:00Z", "Exploring alternative queueing strategy", "unmerged"),
   {
-    "proposal": Narrative("Proposed Changes", "1) Fix N+1 DB queries in webhook processing.\n2) Add queue-depth based autoscaling.\n3) Add p95/p99 alerts + dashboards.\n4) Add rollback drill + runbook improvements."),
-    "problem": Narrative("Problem Statement", "Production latency regression increased webhook processing time from ~250ms to >2s p95 under load."),
-    "context": Narrative("Current State", "Webhook handler performs per-event DB lookups (N+1) and competes with background reconciliation jobs."),
-    "alternatives": Narrative("Alternatives Considered", "- Add more replicas only (insufficient: DB bottleneck)\n- Change DB isolation level (riskier)\n- Move reconciliation to separate worker pool (selected)"),
-    "risks": Narrative("Risks", "- Changing worker pool may affect ordering guarantees\n- Autoscaling could amplify DB load if not bounded\nMitigations: rate limits, circuit breakers, staged rollout."),
-    "testing": Narrative("Testing / Validation", "- Reproduce regression with load test\n- Confirm p95<400ms at 2x typical throughput\n- Run rollback drill in staging\n- Validate alert noise for 48h"),
-    "rollout": Narrative("Rollout", "1) Feature flag new worker pool\n2) Canary 5%\n3) Ramp 25% → 100%\n4) Post-deploy review at 24h")
+    "proposal": Narrative("Proposal", "1) Fix N+1 DB queries in webhook processing.\n2) Add queue-depth based autoscaling.\n3) Add p95/p99 alerts + dashboards.\n4) Add rollback drill + runbook improvements."),
+    "problem": Narrative("Problem", "Production latency regression increased webhook processing time from ~250ms to >2s p95 under load."),
+    "context": Narrative("Context", "Webhook handler performs per-event DB lookups (N+1) and competes with background reconciliation jobs."),
+    "alternative": Narrative("Alternative", "- Add more replicas only (insufficient: DB bottleneck)\n- Change DB isolation level (riskier)\n- Move reconciliation to separate worker pool (selected)"),
+    "risk": Narrative("Risk", "- Changing worker pool may affect ordering guarantees\n- Autoscaling could amplify DB load if not bounded\nMitigations: rate limits, circuit breakers, staged rollout."),
+    "test": Narrative("Test", "- Reproduce regression with load test\n- Confirm p95<400ms at 2x typical throughput\n- Run rollback drill in staging\n- Validate alert noise for 48h"),
+    "action": Narrative("Action", "1) Feature flag new worker pool\n2) Canary 5%\n3) Ramp 25% → 100%\n4) Post-deploy review at 24h")
   },
   [
     URI("file://./todo/inc-2042-todo.vcontext.json", "x-vcontext/todoList", "Execution checklist"),
@@ -965,7 +1002,7 @@ plan: Plan(
       "p1-uid",
       "Diagnose and fix root cause",
       "inProgress",
-      "Remove N+1 queries; isolate reconciliation job impact.",
+      Narrative("Context", "Remove N+1 queries; isolate reconciliation job impact."),
       ["root-cause"],
       [],
       "2025-12-27T18:30:00Z",
@@ -984,7 +1021,7 @@ plan: Plan(
       "p2-uid",
       "Observability + guardrails",
       "pending",
-      "Dashboards, alerts, SLOs, and bounded autoscaling.",
+      Narrative("Context", "Dashboards, alerts, SLOs, and bounded autoscaling."),
       null,
       ["p1"],
       null,
@@ -1000,7 +1037,7 @@ plan: Plan(
       "p3-uid",
       "Rollout + rollback drill",
       "pending",
-      "Canary rollout, validate rollback, and document runbook.",
+      Narrative("Context", "Canary rollout, validate rollback, and document runbook."),
       null,
       ["p1", "p2"],
       null,
@@ -1052,7 +1089,6 @@ plan: Plan(
     "status": "inProgress",
     "author": "Platform Team",
     "reviewers": ["SRE Lead", "Payments TL"],
-    "description": "Fix root cause, add guardrails, improve observability, and validate rollback.",
     "tags": ["payments", "webhooks", "reliability"],
 
     "created": "2025-12-27T18:00:00Z",
@@ -1089,31 +1125,31 @@ plan: Plan(
 
     "narratives": {
       "proposal": {
-        "title": "Proposed Changes",
+        "title": "Proposal",
         "content": "1) Fix N+1 DB queries in webhook processing.\n2) Add queue-depth based autoscaling.\n3) Add p95/p99 alerts + dashboards.\n4) Add rollback drill + runbook improvements."
       },
       "problem": {
-        "title": "Problem Statement",
+        "title": "Problem",
         "content": "Production latency regression increased webhook processing time from ~250ms to >2s p95 under load." 
       },
       "context": {
-        "title": "Current State",
+        "title": "Context",
         "content": "Webhook handler performs per-event DB lookups (N+1) and competes with background reconciliation jobs." 
       },
-      "alternatives": {
-        "title": "Alternatives Considered",
+      "alternative": {
+        "title": "Alternative",
         "content": "- Add more replicas only (insufficient: DB bottleneck)\n- Change DB isolation level (riskier)\n- Move reconciliation to separate worker pool (selected)"
       },
-      "risks": {
-        "title": "Risks",
+      "risk": {
+        "title": "Risk",
         "content": "- Changing worker pool may affect ordering guarantees\n- Autoscaling could amplify DB load if not bounded\nMitigations: rate limits, circuit breakers, staged rollout." 
       },
-      "testing": {
-        "title": "Testing / Validation",
+      "test": {
+        "title": "Test",
         "content": "- Reproduce regression with load test\n- Confirm p95<400ms at 2x typical throughput\n- Run rollback drill in staging\n- Validate alert noise for 48h" 
       },
-      "rollout": {
-        "title": "Rollout",
+      "action": {
+        "title": "Action",
         "content": "1) Feature flag new worker pool\n2) Canary 5%\n3) Ramp 25% → 100%\n4) Post-deploy review at 24h"
       }
     },
@@ -1136,7 +1172,10 @@ plan: Plan(
         "uid": "p1-uid",
         "title": "Diagnose and fix root cause",
         "status": "inProgress",
-        "description": "Remove N+1 queries; isolate reconciliation job impact.",
+        "narrative": {
+          "title": "Context",
+          "content": "Remove N+1 queries; isolate reconciliation job impact."
+        },
         "tags": ["root-cause"],
         "dependencies": [],
         "startDate": "2025-12-27T18:30:00Z",
@@ -1173,7 +1212,10 @@ plan: Plan(
         "uid": "p2-uid",
         "title": "Observability + guardrails",
         "status": "pending",
-        "description": "Dashboards, alerts, SLOs, and bounded autoscaling.",
+        "narrative": {
+          "title": "Context",
+          "content": "Dashboards, alerts, SLOs, and bounded autoscaling."
+        },
         "dependencies": ["p1"],
         "classification": "private",
         "participants": [
@@ -1185,7 +1227,10 @@ plan: Plan(
         "uid": "p3-uid",
         "title": "Rollout + rollback drill",
         "status": "pending",
-        "description": "Canary rollout, validate rollback, and document runbook.",
+        "narrative": {
+          "title": "Context",
+          "content": "Canary rollout, validate rollback, and document runbook."
+        },
         "dependencies": ["p1", "p2"],
         "classification": "confidential",
         "participants": [

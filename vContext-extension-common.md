@@ -212,7 +212,7 @@ Adds descriptive and organizational fields.
 TodoList {
   // Core fields...
   title?: string           # Optional list title
-  description?: string     # Detailed description
+  narrative?: Narrative    # Detailed description
   tags?: string[]          # Categorical labels
   metadata?: object        # Custom fields
 }
@@ -222,7 +222,7 @@ TodoList {
 ```javascript
 TodoItem {
   // Core fields...
-  description?: string     # Detailed context
+  narrative?: Narrative    # Detailed context
   priority?: enum          # "low" | "medium" | "high" | "critical"
   tags?: string[]          # Categorical labels
   metadata?: object        # Custom fields
@@ -235,16 +235,17 @@ Plan {
   // Core fields...
   author?: string          # Creator
   reviewers?: string[]     # Approvers
-  description?: string     # Plan overview
   tags?: string[]          # Categorical labels
   narratives: {
-    proposal: Narrative,
-    problem?: Narrative,     # Problem statement
-    context?: Narrative,     # Current state
-    alternatives?: Narrative,# Other approaches
-    risks?: Narrative,       # Risks and mitigations
-    testing?: Narrative,     # Validation approach
-    rollout?: Narrative,     # Deployment strategy
+    proposal: Narrative,     # Proposal (required, standard title)
+    overview?: Narrative,    # Overview (standard title)
+    context?: Narrative,     # Context (standard title)
+    problem?: Narrative,     # Problem (standard title)
+    alternative?: Narrative, # Alternative (standard title)
+    risk?: Narrative,        # Risk (standard title)
+    test?: Narrative,        # Test (standard title)
+    action?: Narrative,      # Action (standard title)
+    result?: Narrative,      # Result (standard title)
     custom?: Narrative[]     # User-defined narratives
   }
   metadata?: object        # Custom fields
@@ -255,7 +256,25 @@ Plan {
 ```javascript
 PlanItem {
   // Core fields...
-  description?: string     # Item description
+  narrative?: Narrative    # Item description
+  tags?: string[]          # Categorical labels
+  metadata?: object        # Custom fields
+}
+```
+
+### Playbook Extensions
+```javascript
+Playbook {
+  // Core fields...
+  tags?: string[]          # Categorical labels
+  metadata?: object        # Custom fields
+}
+```
+
+### PlaybookItem Extensions
+```javascript
+PlaybookItem {
+  // Core fields...
   tags?: string[]          # Categorical labels
   metadata?: object        # Custom fields
 }
@@ -265,13 +284,14 @@ PlanItem {
 
 **TRON:**
 ```tron
-class TodoItem: id, title, status, description, priority, tags, metadata
+class TodoItem: id, title, status, narrative, priority, tags, metadata
+class Narrative: title, content
 
 TodoItem(
   "item-2",
   "Implement JWT authentication",
   "inProgress",
-  "Add JWT token generation and validation for secure API access",
+  Narrative("Context", "Add JWT token generation and validation for secure API access"),
   "high",
   ["security", "backend", "auth"],
   {"estimatedHours": 8, "complexity": "medium"}
@@ -284,7 +304,10 @@ TodoItem(
   "id": "item-2",
   "title": "Implement JWT authentication",
   "status": "inProgress",
-  "description": "Add JWT token generation and validation for secure API access",
+  "narrative": {
+    "title": "Context",
+    "content": "Add JWT token generation and validation for secure API access"
+  },
   "priority": "high",
   "tags": ["security", "backend", "auth"],
   "metadata": {
@@ -335,7 +358,7 @@ plan: Plan(
   "inProgress",
   {
     "proposal": Narrative(
-      "Overview",
+      "Proposal",
       "Multi-step authentication implementation"
     )
   },
@@ -359,7 +382,7 @@ plan: Plan(
   "status": "inProgress",
   "narratives": {
     "proposal": {
-      "title": "Overview",
+      "title": "Proposal",
       "content": "Multi-step authentication implementation"
     }
   },
