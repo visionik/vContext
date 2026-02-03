@@ -80,6 +80,25 @@ By standardizing how agentic systems remember and organize their work, vBRIEF en
 
 **Migration**: See `history/spec-v0.3.md` for previous version.
 
+## Changelog: v0.4 → v0.5 (Beta)
+
+**Breaking Changes**:
+- **vContext → vBRIEF**: Complete rebrand from vContext to vBRIEF (Basic Relational Intent Exchange Format)
+- **File extensions**: `.vcontext.json` → `.vbrief.json`, `.vcontext.tron` → `.vbrief.tron`
+- **Schema files**: `vcontext-*.schema.json` → `vbrief-*.schema.json`
+- **Directories**: `vcontext/` → `vbrief/`, `.vcontext/` → `.vbrief/`
+- **Go module path**: `github.com/visionik/vContext` → `github.com/visionik/vBRIEF`
+
+**Rationale**:
+The new name better communicates the format's purpose:
+- **Basic**: Low-friction, minimal-core promise with simple syntax
+- **Relational**: DAG-like dependencies, cross-references, and hierarchies
+- **Intent**: Preserves narrative, provenance, reasoning traces, and goals
+- **Exchange**: Interoperable format for seamless agent/tool communication
+- **Format**: Explicitly a structured file specification
+
+**Migration**: All references to vContext/vcontext should be updated to vBRIEF/vbrief. No structural changes to the format itself.
+
 ## Conformance and normative language
 
 The key words **MUST**, **SHOULD**, and **MAY** in this document are to be interpreted as normative requirements.
