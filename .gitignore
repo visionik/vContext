@@ -12,3 +12,5 @@ api/go/coverage.html
 
 # macOS
 .DS_Store
+deft/
+__pycache__/

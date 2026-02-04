@@ -1,0 +1,119 @@
+{
+  "vBRIEFInfo": {
+    "version": "0.4"
+  },
+  "todoList": {
+    "items": [
+      {
+        "title": "Review project structure and organization",
+        "status": "completed",
+        "description": "Assess overall directory structure, file organization, and whether the current layout (api/, docs/, extensions/, schemas/, etc.) is logical and maintainable"
+      },
+      {
+        "title": "Review README.md for clarity and completeness",
+        "status": "completed",
+        "description": "Check if README clearly explains the project goals, contains accurate examples, has proper navigation, and is at the correct version (v0.4 vs header saying v0.3)"
+      },
+      {
+        "title": "Audit extension documentation for version consistency",
+        "status": "completed",
+        "description": "Per docs/extension-alignment-issues.md, update all extension docs to use version 0.4 instead of 0.2/0.3, and replace Phase→PlanItem terminology throughout"
+      },
+      {
+        "title": "Review Go API implementation quality",
+        "status": "completed",
+        "description": "Examine api/go/pkg/ structure (core, validator, parser, builder, query, updater, convert) for code quality, test coverage, performance, and API design consistency"
+      },
+      {
+        "title": "Review test coverage and quality",
+        "status": "completed",
+        "description": "Run coverage reports, identify gaps, assess test quality (unit vs integration), and ensure critical paths have adequate testing"
+      },
+      {
+        "title": "Consider consolidating 'consider' documents",
+        "status": "completed",
+        "description": "Reviewed all 6 consider docs. Recommendations in docs/exploratory-docs-recommendation.md: Tier 1 (keep 2), Tier 2 (archive 2), Tier 3 (owner decision on 4)."
+      },
+      {
+        "title": "Review alternative format documents",
+        "status": "completed",
+        "description": "Reviewed namespaced and TROY alternatives. Recommendation: archive both to history/proposals/ as valuable reference for architectural decisions already made."
+      },
+      {
+        "title": "Review schema files for correctness",
+        "status": "completed",
+        "description": "Validate schemas/vbrief-*.schema.json files align with v0.4 spec and test against example documents"
+      },
+      {
+        "title": "Assess Taskfile organization and completeness",
+        "status": "completed",
+        "description": "Review Taskfile.yml for missing common tasks, consider splitting into included taskfiles if it grows too large, ensure all tasks have proper descriptions"
+      },
+      {
+        "title": "Review and consolidate docs/ directory",
+        "status": "completed",
+        "description": "Check docs/ for organization (warp.md, extension-alignment-issues.md, and any others), ensure consistent formatting and up-to-date information"
+      },
+      {
+        "title": "Consider refactoring: consolidate extension docs",
+        "status": "completed",
+        "description": "Recommendation: Keep separate (9 docs serve different audiences). Add navigation index and move to extensions/ directory. See docs/extension-docs-analysis.md"
+      },
+      {
+        "title": "Consider refactoring: API consistency across languages",
+        "status": "completed",
+        "description": "Comprehensive analysis completed. Critical issues found: all 3 API docs still reference Phase/PhaseStatus. Recommendations documented in docs/api-consistency-analysis.md. Estimated fix: 1-2 hours."
+      },
+      {
+        "title": "Review performance: Go API bottlenecks",
+        "status": "completed",
+        "description": "Code analysis completed. No O(n²) algorithms or critical bottlenecks found. All operations are O(n) or better. Good practices: pre-allocated slices, streaming JSON, size limits. See docs/go-api-performance-analysis.md. Profiling recommended before v1.0 but not blocking."
+      }
+      {
+        "title": "Review readability: naming conventions",
+        "status": "completed",
+        "description": "Audit naming consistency across codebase - file names, type names, function names, especially around Phase→PlanItem and PlaybookEntry→PlaybookItem transitions. All code uses PlanItem; PlaybookEntry references only in historical/tracking docs. Files use hyphens consistently."
+      },
+      {
+        "title": "Consider refactoring: separate spec from implementation",
+        "status": "completed",
+        "description": "README is well-structured as unified spec. Current organization works - splitting would fragment canonical reference. Consider for v1.0 if it grows significantly."
+      },
+      {
+        "title": "Review git hooks and CI/CD setup",
+        "status": "completed",
+        "description": "Check .github/ workflows, git hooks installation, and ensure quality gates are properly enforced in CI"
+      },
+      {
+        "title": "Consider documentation improvements: visual aids",
+        "status": "completed",
+        "description": "Would be beneficial for v1.0 documentation site. Not critical for current spec document. Recommend Mermaid diagrams for: memory tier relationships, extension dependencies, agentic workflow."
+      },
+      {
+        "title": "Review error messages and validation feedback",
+        "status": "completed",
+        "description": "Check validator implementation for clear, actionable error messages that help users fix invalid documents"
+      },
+      {
+        "title": "Assess example quality and coverage",
+        "status": "completed",
+        "description": "Review examples/ directory - ensure examples cover common use cases, are up to date with v0.4, and demonstrate best practices"
+      },
+      {
+        "title": "Consider API improvements: builder pattern ergonomics",
+        "status": "completed",
+        "description": "Review api/go/pkg/builder for ease of use - consider fluent APIs or convenience methods for common operations"
+      },
+      {
+        "title": "Update examples to use version 0.4",
+        "status": "completed",
+        "description": "All examples updated to use version 0.4 instead of 0.2."
+      },
+      {
+        "title": "Update Go API to use PlanItem instead of Phase",
+        "status": "completed",
+        "description": "Completed full refactoring from Phase/PhaseStatus to PlanItem/PlanItemStatus across core types, builder, validator, updater, tests, and examples. All tests passing."
+      }
+    ]
+  }
+}
