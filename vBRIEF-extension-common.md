@@ -1,10 +1,14 @@
 # vBRIEF Common Extensions
 
-**Version**: 0.4
+> ⚠️ **OUTDATED - v0.4 ONLY**: This document describes extensions for vBRIEF v0.4, which used separate TodoList/Plan/Playbook containers. In v0.5, these are unified into a single Plan model with `inProgress`→`running` status change. This document needs updating for v0.5.
+> 
+> **For v0.5 users**: See [SPECIFICATION.md](SPECIFICATION.md) and [GUIDE.md](GUIDE.md) for the current architecture. Many concepts here still apply but terminology has changed.
+
+**Version**: 0.4 (OUTDATED)
 
 **Last Updated**: 2025-12-28
 
-**Status**: DRAFT
+**Status**: NEEDS v0.5 UPDATE
 
 ## Overview
 

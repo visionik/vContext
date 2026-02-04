@@ -1,10 +1,12 @@
 # vBRIEF Extension: Playbooks
 
-> **DRAFT EXTENSION**: This document is a draft and subject to change.
+> ⚠️ **OUTDATED - v0.4 ONLY**: This document describes the Playbook container from v0.4. In v0.5, Playbook is unified into the Plan model using retrospective narratives (Outcome, Strengths, Weaknesses, Lessons). This extension needs complete redesign for v0.5.
+> 
+> **For v0.5 users**: Use Plan with retrospective narratives instead. See [GUIDE.md](GUIDE.md) for examples.
 
-**Extension Name**: Playbooks
+**Extension Name**: Playbooks (DEPRECATED in v0.5)
 
-**Extension Version**: 0.1
+**Extension Version**: 0.1 (v0.4 only)
 
 **Last Updated**: 2025-12-27
 

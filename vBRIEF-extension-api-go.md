@@ -1,10 +1,12 @@
 # vBRIEF Extension Proposal: Go API Library
 
+> ⚠️ **OUTDATED - v0.4 ONLY**: This API proposal is for vBRIEF v0.4. The implementation in `api/go/` uses the old TodoList/Plan/Playbook model and needs updating for v0.5 unified Plan architecture. See [MIGRATION.md](MIGRATION.md).
+
 > **EARLY DRAFT**: This is an initial proposal and subject to change. Comments, feedback, and suggestions are strongly encouraged. Please provide input via GitHub issues or discussions.
 
-**Extension Name**: Go API Library  
-**Version**: 0.1 (Draft)  
-**Status**: Proposal  
+**Extension Name**: Go API Library (v0.4)  
+**Version**: 0.1 (Draft - OUTDATED)  
+**Status**: Proposal - Needs v0.5 Update
 **Author**: Jonathan Taylor (visionik@pobox.com)  
 **Date**: 2025-12-27
 

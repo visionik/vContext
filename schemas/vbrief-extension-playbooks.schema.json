@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://vbrief.dev/schemas/vbrief-extension-playbooks.schema.json",
-  "title": "vBRIEF Extension Schema: Playbooks",
-  "description": "JSON Schema for vBRIEF Playbooks types (v0.4).",
+  "title": "vBRIEF Extension Schema: Playbooks (DEPRECATED in v0.5)",
+  "description": "JSON Schema for vBRIEF Playbooks types (v0.4 only). DEPRECATED: In v0.5, use Plan with retrospective narratives instead of separate Playbook container.",
   "type": "object",
   "additionalProperties": true,
   "$defs": {
